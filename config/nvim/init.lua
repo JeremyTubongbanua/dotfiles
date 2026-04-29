@@ -1,0 +1,5 @@
+-- doing :h rtp shows that lua/ is a directory that searches for lua modules
+require("config.options")
+require("config.keymaps")
+require("config.lazy")
+

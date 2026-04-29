@@ -1,0 +1,9 @@
+.DS_Store
+AGENTS.md
+.zshrc.local
+.env
+.env.*
+*.pem
+*.key
+id_*
+config/nvim/pack/
