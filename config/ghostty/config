@@ -1,0 +1,19 @@
+# https://www.nerdfonts.com/font-downloads
+# font-family = Lekton Nerd Font
+font-family = JetBrainsMono Nerd Font
+theme = Espresso
+
+font-size = 16
+theme = "light:Flexoki Light,dark:tokyonight-storm"
+
+background-opacity = 0.8
+background-blur-radius = 20
+
+macos-option-as-alt = true
+# keybind="unconsumed:super+c=copy_to_clipboard"
+
+keybind=super+c=copy_to_clipboard
+keybind=super+v=paste_from_clipboard
+
+keybind = shift+enter=text:\n
+
