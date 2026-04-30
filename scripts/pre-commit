@@ -3,6 +3,8 @@ set -eu
 
 repo_dir="$(git rev-parse --show-toplevel)"
 
+"$repo_dir/scripts/check-dotfile-links.sh"
+
 if ! "$repo_dir/scripts/update-readme-dotfiles.sh" --check; then
   "$repo_dir/scripts/update-readme-dotfiles.sh"
   printf '%s\n' 'README dotfiles inventory was stale and has been refreshed.'

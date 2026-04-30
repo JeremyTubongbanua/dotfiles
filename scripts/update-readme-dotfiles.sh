@@ -19,6 +19,7 @@ purpose_for() {
     config/ghostty) printf 'Ghostty terminal configuration directory' ;;
     codex/AGENTS.md) printf 'Codex instructions' ;;
     codex/config.toml) printf 'Codex user configuration' ;;
+    codex/agents) printf 'Codex sub-agent definitions' ;;
     codex/rules/default.rules) printf 'Codex default rules' ;;
     *) printf 'Managed dotfile' ;;
   esac
