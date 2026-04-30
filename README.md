@@ -2,6 +2,43 @@
 
 My personal dotfiles
 
+<!-- DOTFILES_TOC_START -->
+## Dotfiles In Place
+
+Run `scripts/update-readme-dotfiles.sh` to refresh this generated section.
+
+| Home path | Repo path | Purpose |
+| --- | --- | --- |
+| `~/.zshrc` | `zshrc` | Zsh shell configuration |
+| `~/.config/nvim` | `config/nvim` | Neovim configuration directory |
+| `~/.config/ghostty` | `config/ghostty` | Ghostty terminal configuration directory |
+| `~/.codex/AGENTS.md` | `codex/AGENTS.md` | Codex instructions |
+| `~/.codex/config.toml` | `codex/config.toml` | Codex user configuration |
+| `~/.codex/rules/default.rules` | `codex/rules/default.rules` | Codex default rules |
+<!-- DOTFILES_TOC_END -->
+
+## Activation
+
+Run the install script to link tracked home files and folders into this repo:
+
+```sh
+./install.sh
+```
+
+After activation, editing linked paths such as `~/.zshrc`,
+`~/.config/nvim`, `~/.config/ghostty`, `~/.codex/config.toml`,
+`~/.codex/AGENTS.md`, and `~/.codex/rules/default.rules` changes the tracked
+repo files directly. Then review with `git status` and use `git add` and
+`git commit` yourself.
+
+The script only links the tracked Codex config files. It does not link all of
+`~/.codex`, so local auth, logs, caches, memories, sessions, and other runtime
+state stay outside git.
+
+The installer also links `scripts/pre-commit` into `.git/hooks/pre-commit`.
+That hook checks this README inventory before each commit, refreshes it when it
+is stale, and stops the commit so you can review and stage the README yourself.
+
 ## Tracking Future Files
 
 This repo mirrors files from my home directory using paths relative to `$HOME`,
