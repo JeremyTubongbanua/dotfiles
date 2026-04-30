@@ -64,6 +64,7 @@ link_path "$repo_dir/config/nvim" "$HOME/.config/nvim"
 link_path "$repo_dir/config/ghostty" "$HOME/.config/ghostty"
 link_path "$repo_dir/codex/AGENTS.md" "$HOME/.codex/AGENTS.md"
 link_path "$repo_dir/codex/config.toml" "$HOME/.codex/config.toml"
+link_path "$repo_dir/codex/agents" "$HOME/.codex/agents"
 link_path "$repo_dir/codex/rules/default.rules" "$HOME/.codex/rules/default.rules"
 install_hook
 

@@ -14,6 +14,7 @@ Run `scripts/update-readme-dotfiles.sh` to refresh this generated section.
 | `~/.config/ghostty` | `config/ghostty` | Ghostty terminal configuration directory |
 | `~/.codex/AGENTS.md` | `codex/AGENTS.md` | Codex instructions |
 | `~/.codex/config.toml` | `codex/config.toml` | Codex user configuration |
+| `~/.codex/agents` | `codex/agents` | Codex sub-agent definitions |
 | `~/.codex/rules/default.rules` | `codex/rules/default.rules` | Codex default rules |
 <!-- DOTFILES_TOC_END -->
 

@@ -4,5 +4,7 @@
 !.gitignore
 !AGENTS.md
 !config.toml
+!agents/
+!agents/*.toml
 !rules/
 !rules/default.rules
