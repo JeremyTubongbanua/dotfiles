@@ -22,6 +22,7 @@ purpose_for() {
     dot/codex/agents) printf 'Codex sub-agent definitions' ;;
     dot/codex/rules/default.rules) printf 'Codex default rules' ;;
     dot/agents) printf 'Agents skills and lock file' ;;
+    dot/pi/agent/settings.json) printf 'Pi agent settings' ;;
     *) printf 'Managed dotfile' ;;
   esac
 }
