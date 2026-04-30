@@ -17,6 +17,7 @@ Run `scripts/update-readme-dotfiles.sh` to refresh this generated section.
 | `~/.codex/agents` | `dot/codex/agents` | Codex sub-agent definitions |
 | `~/.codex/rules/default.rules` | `dot/codex/rules/default.rules` | Codex default rules |
 | `~/.agents` | `dot/agents` | Agents skills and lock file |
+| `~/.pi/agent/settings.json` | `dot/pi/agent/settings.json` | Pi agent settings |
 <!-- DOTFILES_TOC_END -->
 
 ## Activation

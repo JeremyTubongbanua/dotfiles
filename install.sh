@@ -67,6 +67,7 @@ link_path "$repo_dir/dot/codex/config.toml" "$HOME/.codex/config.toml"
 link_path "$repo_dir/dot/codex/agents" "$HOME/.codex/agents"
 link_path "$repo_dir/dot/codex/rules/default.rules" "$HOME/.codex/rules/default.rules"
 link_path "$repo_dir/dot/agents" "$HOME/.agents"
+link_path "$repo_dir/dot/pi/agent/settings.json" "$HOME/.pi/agent/settings.json"
 install_hook
 
 printf '\nDone. Edits to linked dotfiles now modify this repo directly.\n'
