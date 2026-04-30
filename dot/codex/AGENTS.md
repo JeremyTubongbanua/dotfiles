@@ -13,13 +13,14 @@ even if it is not testing the feature itself. Check quickly for compilation erro
 
 - Do not `git add`, `git commit` or `git push`. I will usually do those myself, unless I explicitly ask you to do so.
 
-## Future Home Folders
+## Future Home Dotfiles
 
-- Track future dot folders as top-level folders without the leading dot. For example, `~/.codex` is tracked in `codex/`, so `~/.claude` should be tracked in `claude/`.
-- Use a symlink from the home directory to this repo when activating a tracked folder. Example:
+- Track future hidden home files and folders under `dot/` without the leading dot. For example, `~/.codex` is tracked in `dot/codex/`, so `~/.claude` should be tracked in `dot/claude/`.
+- Use `./install.sh` to activate tracked paths. If adding a new path, add a matching `link_path` entry there so the README inventory and link checker can detect it automatically.
+- If creating a link manually, point from the home directory to the `dot/` path in this repo. Example:
 
 ```sh
-ln -s "$PWD/claude" "$HOME/.claude"
+ln -s "$PWD/dot/claude" "$HOME/.claude"
 ```
 
 - If the home folder already exists, do not overwrite it blindly. Move or copy the existing files into the repo folder first, review them for secrets, then replace the home folder with the symlink.

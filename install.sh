@@ -59,13 +59,14 @@ install_hook() {
   printf 'Linked: %s -> %s\n' "$hook_target" "$hook_source"
 }
 
-link_path "$repo_dir/zshrc" "$HOME/.zshrc"
-link_path "$repo_dir/config/nvim" "$HOME/.config/nvim"
-link_path "$repo_dir/config/ghostty" "$HOME/.config/ghostty"
-link_path "$repo_dir/codex/AGENTS.md" "$HOME/.codex/AGENTS.md"
-link_path "$repo_dir/codex/config.toml" "$HOME/.codex/config.toml"
-link_path "$repo_dir/codex/agents" "$HOME/.codex/agents"
-link_path "$repo_dir/codex/rules/default.rules" "$HOME/.codex/rules/default.rules"
+link_path "$repo_dir/dot/zshrc" "$HOME/.zshrc"
+link_path "$repo_dir/dot/config/nvim" "$HOME/.config/nvim"
+link_path "$repo_dir/dot/config/ghostty" "$HOME/.config/ghostty"
+link_path "$repo_dir/dot/codex/AGENTS.md" "$HOME/.codex/AGENTS.md"
+link_path "$repo_dir/dot/codex/config.toml" "$HOME/.codex/config.toml"
+link_path "$repo_dir/dot/codex/agents" "$HOME/.codex/agents"
+link_path "$repo_dir/dot/codex/rules/default.rules" "$HOME/.codex/rules/default.rules"
+link_path "$repo_dir/dot/agents" "$HOME/.agents"
 install_hook
 
 printf '\nDone. Edits to linked dotfiles now modify this repo directly.\n'

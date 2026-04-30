@@ -14,13 +14,14 @@ trap cleanup EXIT
 
 purpose_for() {
   case "$1" in
-    zshrc) printf 'Zsh shell configuration' ;;
-    config/nvim) printf 'Neovim configuration directory' ;;
-    config/ghostty) printf 'Ghostty terminal configuration directory' ;;
-    codex/AGENTS.md) printf 'Codex instructions' ;;
-    codex/config.toml) printf 'Codex user configuration' ;;
-    codex/agents) printf 'Codex sub-agent definitions' ;;
-    codex/rules/default.rules) printf 'Codex default rules' ;;
+    dot/zshrc) printf 'Zsh shell configuration' ;;
+    dot/config/nvim) printf 'Neovim configuration directory' ;;
+    dot/config/ghostty) printf 'Ghostty terminal configuration directory' ;;
+    dot/codex/AGENTS.md) printf 'Codex instructions' ;;
+    dot/codex/config.toml) printf 'Codex user configuration' ;;
+    dot/codex/agents) printf 'Codex sub-agent definitions' ;;
+    dot/codex/rules/default.rules) printf 'Codex default rules' ;;
+    dot/agents) printf 'Agents skills and lock file' ;;
     *) printf 'Managed dotfile' ;;
   esac
 }
