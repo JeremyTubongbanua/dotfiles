@@ -6,4 +6,4 @@ AGENTS.md
 *.pem
 *.key
 id_*
-config/nvim/pack/
+dot/config/nvim/pack/
