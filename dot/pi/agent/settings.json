@@ -2,12 +2,11 @@
   "lastChangelogVersion": "0.70.6",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.5",
-  "defaultThinkingLevel": "minimal",
+  "defaultThinkingLevel": "medium",
   "packages": [
     "npm:context-mode",
     "npm:@ollama/pi-web-search",
     "npm:pi-mcp-adapter",
-    "npm:pi-web-access",
     "npm:taskplane",
     "npm:pi-subagents",
     "npm:@plannotator/pi-extension",
