@@ -1,0 +1,97 @@
+model = "gpt-5.5"
+personality = "pragmatic"
+model_reasoning_effort = "medium"
+[projects."/Users/jeremytubongbanua/GitHub/jeremytubongbanua.github.io"]
+trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua/GitHub/noports"]
+trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua/GitHub/WolverineRobotics.github.io"]
+trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua/.config/nvim"]
+trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua/.config/nvim/lua/plugins"]
+trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua/GitHub/at_services"]
+trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua/GitHub/at_client_sdk"]
+trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua/GitHub"]
+trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua/GitHub/nasa_space_apps_2025"]
+trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua"]
+trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua/GitHub/dart_playground/atrpc3"]
+trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua/GitHub/at_tools"]
+trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua/GitHub/at_mcp"]
+trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua/GitHub/at_java"]
+trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua/GitHub/noports/trunk"]
+trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua/GitHub/ws_submission"]
+trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua/GitHub/test_flutter_app"]
+trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua/GitHub/at_client_sdk/trunk"]
+trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua/GitHub/at_activate_web"]
+trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua/GitHub/website"]
+trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua/GitHub/opencv_python"]
+trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua/GitHub/open_cv_api"]
+trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua/GitHub/website-api"]
+trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua/GitHub/policy_temp"]
+trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua/GitHub/dotfiles"]
+trust_level = "trusted"
+
+[notice]
+fast_default_opt_out = true
+
+[notice.model_migrations]
+gpt-5-codex = "gpt-5.3-codex"
+"gpt-5.3-codex" = "gpt-5.4"
+
+[tui]
+status_line = ["model-with-reasoning", "current-dir", "git-branch"]
+
+[tui.model_availability_nux]
+"gpt-5.5" = 4
+
+[plugins."figma@openai-curated"]
+enabled = true
+
+[features]
+js_repl = true
+prevent_idle_sleep = true
