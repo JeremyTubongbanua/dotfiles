@@ -2,70 +2,84 @@
 
 Operational instructions for AI agents working in this dotfiles repo. Humans should read `README.md` first.
 
-## Repo Convention
+## Convention
 
-This repo mirrors files from `$HOME` using paths relative to `$HOME` with leading dots stripped. Hidden files and folders live under `dot/`.
+This repo uses [GNU stow](https://www.gnu.org/software/stow/) to install dotfiles. Each top-level directory in the repo is a *stow package* whose contents mirror a subtree of `$HOME` with leading dots preserved.
 
-| Source in `$HOME`              | Path in repo                       |
-| ------------------------------ | ---------------------------------- |
-| `~/.zshrc`                     | `dot/zshrc`                        |
-| `~/.codex/AGENTS.md`           | `dot/codex/AGENTS.md`              |
-| `~/.config/nvim/init.lua`      | `dot/config/nvim/init.lua`         |
+```
+zsh/.zshrc                  →  ~/.zshrc
+nvim/.config/nvim/init.lua  →  ~/.config/nvim/init.lua
+codex/.codex/config.toml    →  ~/.codex/config.toml
+```
 
-## Activation Mechanism
+Files inside a package are *real files in the repo*. After `stow`, the matching paths in `$HOME` are symlinks pointing back into the repo. Editing through either path edits the same inode.
 
-`install.sh` symlinks each tracked path from `$HOME` to its repo location using a shell function called `link_path`. Once activated, editing the file in either location edits the same inode — there is no copy or sync step.
+## Activation
 
-**Critical invariant:** `install.sh` must use `link_path` (which calls `ln -s`). Two helper scripts grep `install.sh` for the literal token `link_path "$repo_dir/`:
+`install.sh` is a one-line wrapper:
 
-- `scripts/update-readme-dotfiles.sh` — generates the README inventory table
-- `scripts/check-dotfile-links.sh` — verifies each `$HOME` path is a symlink to the expected repo path
+```sh
+stow --target "$HOME" --restow zsh nvim ghostty codex agents claude
+```
 
-If you rename `link_path` or switch to copy semantics (`cp`, `rsync`), both helpers silently break and the next run overwrites live symlinks with stale copies, severing the home→repo connection. Don't do this.
+`--restow` is idempotent: re-running with no changes prints nothing and modifies nothing. If a target path is already occupied by something other than the expected symlink, stow refuses to clobber and prints a conflict.
 
-When `install.sh` finds an existing non-symlink at a target path, it backs it up to `~/.dotfiles-backup/<timestamp>/` before linking.
+`.stow-global-ignore` at the repo root tells stow which files to skip in every package (`README.md`, `AGENTS.md`, `LICENSE`, `install.sh`, `.git`, etc.).
 
-## Adding a New Tracked File or Folder
+## Tree Folding
 
-1. Determine the repo path. Strip leading dots from any segment that has one. `~/.foo/bar.toml` → `dot/foo/bar.toml`.
-2. Review the source for secrets, credentials, machine-specific paths, and runtime state. If you find any, do not track it — document the recreation steps instead.
-3. Copy the source into the repo path: `mkdir -p dot/foo && cp -p ~/.foo/bar.toml dot/foo/bar.toml`.
-4. Add a `link_path` line to `install.sh` (alongside the others, before `install_hook`):
-   ```sh
-   link_path "$repo_dir/dot/foo/bar.toml" "$HOME/.foo/bar.toml"
+By default, stow makes a single directory symlink when nothing in `$HOME` is in the way. For example, `~/.config/nvim` is a single symlink to `nvim/.config/nvim/` because nothing else owns files under that path. New files dropped into the repo dir appear immediately under `~/.config/nvim` without re-stowing.
+
+Folding is automatically *prevented* when the destination directory already contains files (e.g. `~/.codex/auth.json`, `~/.claude/sessions/`). In that case stow falls back to per-file linking, which is what we want for tools that write runtime state alongside their config.
+
+## Adding a Tracked File
+
+1. Identify the package (or create a new one — see below).
+2. Place the file inside the package at the path it would have under `$HOME`, **with leading dots preserved**:
    ```
-5. Add a `purpose_for` case to `scripts/update-readme-dotfiles.sh` so the README table gets a meaningful description instead of "Managed dotfile".
-6. Run `./install.sh`. The original file in `$HOME` gets backed up; the new symlink replaces it.
-7. Run `./scripts/check-dotfile-links.sh` to verify, then `./scripts/update-readme-dotfiles.sh` to refresh the inventory.
-8. `git status`, review the diff, stage and commit.
+   ~/.foo/bar.toml  →  <package>/.foo/bar.toml
+   ```
+3. Review for secrets, credentials, machine-specific paths.
+4. From the repo root, run `./install.sh` (or `stow -R <package>` for just one).
+5. `git status`, review, stage, commit.
 
-## Removing a Tracked Path
+## Adding a New Package
 
-1. Remove its `link_path` line from `install.sh`.
-2. Remove its `purpose_for` case from `scripts/update-readme-dotfiles.sh`.
-3. Delete the symlink in `$HOME` (`rm ~/.foo/bar.toml`) and restore a real file there if the user still needs it.
-4. `git rm` the repo path and refresh the README.
+1. Create the package directory at the repo root: `mkdir <pkg>`.
+2. Populate it with files mirroring the `$HOME` subtree (leading dots preserved).
+3. Add the package name to the `stow` invocation in `install.sh`.
+4. Run `./install.sh`.
+
+## Removing a Tracked File
+
+1. `git rm <pkg>/<path>`.
+2. `stow -R <pkg>` from the repo root. `--restow` re-evaluates the package and removes the now-orphaned symlink in `$HOME`.
+
+## Removing a Package
+
+1. `stow -D <pkg>` to delete its symlinks from `$HOME`.
+2. Remove the package name from `install.sh`.
+3. `git rm -r <pkg>`.
+
+## Conflict Resolution
+
+If stow refuses to install with a "conflict" message, the target path in `$HOME` is a real file (not a symlink, or the wrong symlink). Move it aside (`mv ~/.foo ~/.foo.bak`) and rerun. Never let stow clobber unknown content.
+
+`stow -nv <pkg>` performs a dry run and shows what would change without touching anything.
 
 ## What Not to Track
 
-- Generated caches, local state, package installs (e.g. `dot/config/nvim/pack/` is gitignored).
-- Auth files, session files, binaries (e.g. `dot/pi/**/auth.json`, `dot/pi/**/sessions/`, `dot/pi/**/bin/`).
-- Anything matching `*.pem`, `*.key`, `id_*`, `.env*`, `.zshrc.local` (already gitignored).
-- Top-level `AGENTS.md` from tools that auto-write to it (gitignored except this file at the repo root and `dot/pi/agent/AGENTS.md`, which are explicitly whitelisted).
-- Per-machine settings that diverge between hosts. Use `*.local` overlay files instead.
+- Auth files, session files, sqlite databases, plugin binaries, caches, logs.
+- `*.pem`, `*.key`, `id_*`, `.env*`, `.zshrc.local` (already gitignored).
+- The top-level `AGENTS.md` written by tools (`AGENTS.md` is gitignored except `!/AGENTS.md`, which whitelists the human-authored one at the repo root).
+- Per-machine settings that diverge between hosts.
 
-Always review for secrets before staging. The repo is public.
-
-## Pre-Commit Hook
-
-`install.sh` symlinks `scripts/pre-commit` into `.git/hooks/pre-commit`. The hook runs `check-dotfile-links.sh` (verifies live symlinks match `install.sh`) and `update-readme-dotfiles.sh --check` (verifies the README inventory is current). If the README is stale, it refreshes it and aborts the commit so the human can review and stage the change.
+The codex package keeps its own `.codex/.gitignore` with an *allowlist* pattern — runtime files dropped into the repo by tools are excluded by default.
 
 ## Quick Verification
 
-After any change to `install.sh`, the scripts, or tracked content:
-
 ```sh
-./scripts/check-dotfile-links.sh   # all symlinks correct
-./scripts/update-readme-dotfiles.sh --check && echo "README in sync"
-git status
+./install.sh                        # idempotent — should print nothing surprising
+stow -nv -R zsh nvim ghostty codex agents claude   # dry-run preview
+git status                          # any unexpected dirty state?
 ```

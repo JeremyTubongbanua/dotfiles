@@ -5,7 +5,7 @@
     ],
     "deny": [],
     "ask": [],
-    "defaultMode": "default"
+    "defaultMode": "auto"
   },
   "model": "opus[1m]",
   "enabledPlugins": {
@@ -15,5 +15,6 @@
   "effortLevel": "xhigh",
   "theme": "dark",
   "editorMode": "normal",
-  "fileCheckpointingEnabled": true
+  "fileCheckpointingEnabled": true,
+  "skipAutoPermissionPrompt": true
 }

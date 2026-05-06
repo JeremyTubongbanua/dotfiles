@@ -1,7 +1,6 @@
 .DS_Store
 AGENTS.md
 !/AGENTS.md
-!dot/pi/agent/AGENTS.md
 .zshrc.local
 .env
 .env.*
@@ -9,7 +8,4 @@ AGENTS.md
 *.key
 id_*
 .pi-lens/
-dot/config/nvim/pack/
-dot/pi/**/auth.json
-dot/pi/**/sessions/
-dot/pi/**/bin/
+nvim/.config/nvim/pack/

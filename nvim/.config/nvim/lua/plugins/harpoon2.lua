@@ -19,7 +19,6 @@ return {
           end,
         },
       })
-
       -- Configure UI window size
       -- harpoon:extend({
       --   UI_CREATE = function(cx)
