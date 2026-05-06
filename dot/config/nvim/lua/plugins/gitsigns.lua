@@ -1,63 +1,40 @@
 return {
   'lewis6991/gitsigns.nvim',
-  config = function()
-    require('gitsigns').setup({
-      -- signs = {
-      --   add          = { text = '┃' },
-      --   change       = { text = '┃' },
-      --   delete       = { text = '_' },
-      --   topdelete    = { text = '‾' },
-      --   changedelete = { text = '~' },
-      --   untracked    = { text = '┆' },
-      -- },
-      -- signs_staged = {
-      --   add          = { text = '┃' },
-      --   change       = { text = '┃' },
-      --   delete       = { text = '_' },
-      --   topdelete    = { text = '‾' },
-      --   changedelete = { text = '~' },
-      --   untracked    = { text = '┆' },
-      -- },
-      -- signs_staged_enable = true,
-      -- signcolumn = true,  -- Toggle with `:Gitsigns toggle_signs`
-      -- numhl      = false, -- Toggle with `:Gitsigns toggle_numhl`
-      -- linehl     = false, -- Toggle with `:Gitsigns toggle_linehl`
-      -- word_diff  = false, -- Toggle with `:Gitsigns toggle_word_diff`
-      -- watch_gitdir = {
-      --   follow_files = true
-      -- },
-      -- auto_attach = true,
-      -- attach_to_untracked = false,
-      -- current_line_blame = false, -- Toggle with `:Gitsigns toggle_current_line_blame`
-      -- current_line_blame_opts = {
-      --   virt_text = true,
-      --   virt_text_pos = 'eol', -- 'eol' | 'overlay' | 'right_align'
-      --   delay = 1000,
-      --   ignore_whitespace = false,
-      --   virt_text_priority = 100,
-      --   use_focus = true,
-      -- },
-      -- current_line_blame_formatter = '<author>, <author_time:%R> - <summary>',
-      -- sign_priority = 6,
-      -- update_debounce = 100,
-      -- status_formatter = nil, -- Use default
-      -- max_file_length = 40000, -- Disable if file is longer than this (in lines)
-      -- preview_config = {
-      --   -- Options passed to nvim_open_win
-      --   style = 'minimal',
-      --   relative = 'cursor',
-      --   row = 0,
-      --   col = 1
-      -- },
-      numhl = true,
-      on_attach = function(bufnr)
-        local gitsigns = require('gitsigns')
+  event = { 'BufReadPre', 'BufNewFile' },
+  opts = {
+    signcolumn = true,
+    numhl = true,
+    on_attach = function(bufnr)
+      local gitsigns = require('gitsigns')
 
-        -- Keymaps
-        vim.keymap.set('n', '<leader>gph', gitsigns.preview_hunk_inline, { buffer = bufnr, desc = "Preview Git Hunk" })
-        vim.keymap.set('n', '<leader>gsh', gitsigns.stage_hunk, { buffer = bufnr, desc = "Stage Git Hunk" })
-      end,
-    })
-  end
+      local function map(mode, lhs, rhs, desc)
+        vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
+      end
+
+      map('n', ']c', function()
+        if vim.wo.diff then
+          vim.cmd.normal({ ']c', bang = true })
+        else
+          gitsigns.nav_hunk('next')
+        end
+      end, 'Next Git Hunk')
+
+      map('n', '[c', function()
+        if vim.wo.diff then
+          vim.cmd.normal({ '[c', bang = true })
+        else
+          gitsigns.nav_hunk('prev')
+        end
+      end, 'Previous Git Hunk')
+
+      map('n', '<leader>gph', gitsigns.preview_hunk_inline, 'Preview Git Hunk')
+      map('n', '<leader>gsh', gitsigns.stage_hunk, 'Stage Git Hunk')
+      map({ 'n', 'v' }, '<leader>grh', gitsigns.reset_hunk, 'Reset Git Hunk')
+      map('n', '<leader>guh', gitsigns.undo_stage_hunk, 'Undo Stage Git Hunk')
+      map('n', '<leader>gb', gitsigns.blame_line, 'Git Blame Line')
+      map('n', '<leader>gB', gitsigns.toggle_current_line_blame, 'Toggle Git Blame')
+      map('n', '<leader>gD', gitsigns.diffthis, 'Git Diff This')
+      map({ 'o', 'x' }, 'ih', gitsigns.select_hunk, 'Git Hunk')
+    end,
+  },
 }
-

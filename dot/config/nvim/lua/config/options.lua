@@ -18,6 +18,7 @@ vim.opt.clipboard = 'unnamedplus' -- synchronize with system clipboard
 
 vim.opt.relativenumber = true -- use relative line numbers
 vim.opt.number = true -- set line numbers
+vim.opt.signcolumn = 'yes' -- keep the git/lsp sign column visible
 
 -- set tab size to 2 spaces
 -- vim.api.nvim_create_autocmd("FileType", {
@@ -32,7 +33,8 @@ vim.opt.number = true -- set line numbers
 -- vim.opt.expandtab = true -- tabs are a series of spaces
 vim.opt.smartindent = true -- nvim will intelligently indent lines based on context
 
-vim.opt.wrap = false -- don't wrap lines
+-- vim.opt.wrap = false -- don't wrap lines
+vim.opt.wrap = true -- wrap lines
 
 vim.opt.termguicolors = true -- enable 24-bit colors, uses colours from terminal (Ghostty)
 
@@ -45,4 +47,3 @@ vim.opt.inccommand = 'split' -- show effects of substitution incrementally in a 
 vim.opt.ignorecase = true -- case insensitive searching
 
 vim.cmd('set colorcolumn=80') -- highlight column 80
-
