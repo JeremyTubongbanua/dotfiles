@@ -7,6 +7,7 @@ AGENTS.md
 *.pem
 *.key
 id_*
+.pi-lens/
 dot/config/nvim/pack/
 dot/pi/**/auth.json
 dot/pi/**/sessions/
