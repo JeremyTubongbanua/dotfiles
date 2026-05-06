@@ -9,6 +9,22 @@ Run `scripts/update-readme-dotfiles.sh` to refresh this generated section.
 
 | Home path | Repo path | Purpose |
 | --- | --- | --- |
+| `~/.zshrc` | `dot/zshrc` | Zsh shell configuration |
+| `~/.config/nvim` | `dot/config/nvim` | Neovim configuration directory |
+| `~/.config/ghostty` | `dot/config/ghostty` | Ghostty terminal configuration directory |
+| `~/.codex/AGENTS.md` | `dot/codex/AGENTS.md` | Codex instructions |
+| `~/.codex/config.toml` | `dot/codex/config.toml` | Codex user configuration |
+| `~/.codex/agents` | `dot/codex/agents` | Codex sub-agent definitions |
+| `~/.codex/rules/default.rules` | `dot/codex/rules/default.rules` | Codex default rules |
+| `~/.agents` | `dot/agents` | Agents skills and lock file |
+| `~/.pi/agent/AGENTS.md` | `dot/pi/agent/AGENTS.md` | Pi agent instructions |
+| `~/.pi/agent/settings.json` | `dot/pi/agent/settings.json` | Pi agent settings |
+| `~/.pi/agent/agents` | `dot/pi/agent/agents` | Pi agent sub-agent definitions |
+| `~/.pi/agent/skills` | `dot/pi/agent/skills` | Pi agent skills |
+| `~/.pi/agent/extensions` | `dot/pi/agent/extensions` | Pi agent extensions |
+| `~/.claude/CLAUDE.md` | `dot/claude/CLAUDE.md` | Claude Code global instructions |
+| `~/.claude/settings.json` | `dot/claude/settings.json` | Claude Code user settings |
+| `~/.claude/agents` | `dot/claude/agents` | Claude Code custom subagents |
 <!-- DOTFILES_TOC_END -->
 
 ## Activation
@@ -19,15 +35,14 @@ Run the install script to link tracked home files and folders into this repo:
 ./install.sh
 ```
 
-After activation, editing linked paths such as `~/.zshrc`,
-`~/.config/nvim`, `~/.config/ghostty`, `~/.codex/config.toml`,
-`~/.codex/AGENTS.md`, `~/.codex/rules/default.rules`, and `~/.agents` changes
-the tracked repo files directly. Then review with `git status` and use
-`git add` and `git commit` yourself.
+After activation, editing any linked path in `$HOME` (see the table above)
+changes the tracked repo file directly through the symlink. Then review with
+`git status` and use `git add` and `git commit` yourself.
 
-The script only links the tracked Codex config files. It does not link all of
-`~/.codex`, so local auth, logs, caches, memories, sessions, and other runtime
-state stay outside git.
+The script only links the specific files and folders listed in the table. It
+does not link entire parent directories such as `~/.codex` or `~/.pi/agent`,
+so local auth, logs, caches, memories, sessions, and other runtime state stay
+outside git.
 
 The installer also links `scripts/pre-commit` into `.git/hooks/pre-commit`.
 That hook checks this README inventory before each commit, refreshes it when it
