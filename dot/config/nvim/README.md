@@ -80,8 +80,16 @@ GitHub Copilot in Neovim
 
 Git integration - shows git changes in sign column
 
+- Default left gutter signs show added, changed, and deleted lines
 - `<leader>gph` - git preview hunk
 - `<leader>gsh` - git stage hunk
+- `<leader>grh` - git reset hunk
+- `<leader>guh` - undo stage hunk
+- `<leader>gb` - git blame current line
+- `<leader>gB` - toggle current line blame
+- `<leader>gD` - git diff current file
+- `]c` - next git hunk
+- `[c` - previous git hunk
 
 ### harpoon2.lua
 
@@ -195,6 +203,9 @@ Git integration plugin
 
 - `:G` or `:Git` - opens git status
 - `<leader>gg` - opens git status
+- `<leader>gd` - opens three-way git diff split
+- `<leader>gh` - diff get left, available in normal and visual mode
+- `<leader>gl` - diff get right, available in normal and visual mode
 
 - `s` - stage
 - `u` - unstage
@@ -229,4 +240,3 @@ Upon opening nvim, use `s` to restore last session (on Dashboard)
 A nice motion is
 
 - `vs{char}{selection}S{char}` - visual mode, flash to {char}, selection to {selection}, surround with {char}
-
