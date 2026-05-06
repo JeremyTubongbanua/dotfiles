@@ -9,18 +9,6 @@ Run `scripts/update-readme-dotfiles.sh` to refresh this generated section.
 
 | Home path | Repo path | Purpose |
 | --- | --- | --- |
-| `~/.zshrc` | `dot/zshrc` | Zsh shell configuration |
-| `~/.config/nvim` | `dot/config/nvim` | Neovim configuration directory |
-| `~/.config/ghostty` | `dot/config/ghostty` | Ghostty terminal configuration directory |
-| `~/.codex/AGENTS.md` | `dot/codex/AGENTS.md` | Codex instructions |
-| `~/.codex/config.toml` | `dot/codex/config.toml` | Codex user configuration |
-| `~/.codex/agents` | `dot/codex/agents` | Codex sub-agent definitions |
-| `~/.codex/rules/default.rules` | `dot/codex/rules/default.rules` | Codex default rules |
-| `~/.agents` | `dot/agents` | Agents skills and lock file |
-| `~/.pi/agent/AGENTS.md` | `dot/pi/agent/AGENTS.md` | Managed dotfile |
-| `~/.pi/agent/settings.json` | `dot/pi/agent/settings.json` | Pi agent settings |
-| `~/.pi/agent/agents` | `dot/pi/agent/agents` | Managed dotfile |
-| `~/.pi/agent/skills` | `dot/pi/agent/skills` | Managed dotfile |
 <!-- DOTFILES_TOC_END -->
 
 ## Activation
