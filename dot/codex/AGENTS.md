@@ -8,10 +8,12 @@ This document outlines how codex should be used.
 
 - Do a smoke test everytime you implement something. This means that you should test the general functionality of the system,
 even if it is not testing the feature itself. Check quickly for compilation errors.
+- After doing a feature, tell the user (developer) how to run it. In the command, ensure that you provide two options: 1. clear tear down then the command, and 2. just the command itself. The goal here is to give me a quick copy and paste command so I can test it myself. For example, you might need to tear down docker containers, delete directories, then I can run it fresh. But also give me the command to run it fresh.
 
 ## Git
 
 - Do not `git add`, `git commit` or `git push`. I will usually do those myself, unless I explicitly ask you to do so.
+- When git cloning, use the SSH url.
 
 ## Future Home Dotfiles
 
