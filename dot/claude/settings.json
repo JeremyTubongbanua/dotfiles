@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dart analyze:*)"
+    ],
+    "deny": [],
+    "ask": [],
+    "defaultMode": "default"
+  },
+  "model": "opus[1m]",
+  "enabledPlugins": {
+    "claude-mem@thedotmack": true
+  },
+  "alwaysThinkingEnabled": false,
+  "effortLevel": "xhigh",
+  "theme": "dark",
+  "editorMode": "normal",
+  "fileCheckpointingEnabled": true
+}
