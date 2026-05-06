@@ -22,7 +22,14 @@ purpose_for() {
     dot/codex/agents) printf 'Codex sub-agent definitions' ;;
     dot/codex/rules/default.rules) printf 'Codex default rules' ;;
     dot/agents) printf 'Agents skills and lock file' ;;
+    dot/pi/agent/AGENTS.md) printf 'Pi agent instructions' ;;
     dot/pi/agent/settings.json) printf 'Pi agent settings' ;;
+    dot/pi/agent/agents) printf 'Pi agent sub-agent definitions' ;;
+    dot/pi/agent/skills) printf 'Pi agent skills' ;;
+    dot/pi/agent/extensions) printf 'Pi agent extensions' ;;
+    dot/claude/CLAUDE.md) printf 'Claude Code global instructions' ;;
+    dot/claude/settings.json) printf 'Claude Code user settings' ;;
+    dot/claude/agents) printf 'Claude Code custom subagents' ;;
     *) printf 'Managed dotfile' ;;
   esac
 }

@@ -12,45 +12,24 @@ backup_target() {
 	printf 'Backed up %s to %s\n' "$target" "$backup_dir"
 }
 
-copy_file() {
+link_path() {
 	source="$1"
 	target="$2"
 
 	if [ -L "$target" ]; then
+		current="$(readlink "$target")"
+		if [ "$current" = "$source" ]; then
+			printf 'Already linked: %s -> %s\n' "$target" "$source"
+			return
+		fi
 		rm "$target"
-	elif [ -e "$target" ] && ! cmp -s "$source" "$target"; then
+	elif [ -e "$target" ]; then
 		backup_target "$target"
 	fi
 
 	mkdir -p "$(dirname -- "$target")"
-	cp -p "$source" "$target"
-	printf 'Copied: %s -> %s\n' "$source" "$target"
-}
-
-copy_dir() {
-	source="$1"
-	target="$2"
-
-	if [ -L "$target" ]; then
-		rm "$target"
-	elif [ -e "$target" ] && [ ! -d "$target" ]; then
-		backup_target "$target"
-	fi
-
-	mkdir -p "$target"
-	rsync -a --delete --exclude '.git/' "$source/" "$target/"
-	printf 'Synced: %s/ -> %s/\n' "$source" "$target"
-}
-
-copy_path() {
-	source="$1"
-	target="$2"
-
-	if [ -d "$source" ]; then
-		copy_dir "$source" "$target"
-	else
-		copy_file "$source" "$target"
-	fi
+	ln -s "$source" "$target"
+	printf 'Linked: %s -> %s\n' "$target" "$source"
 }
 
 install_hook() {
@@ -76,19 +55,22 @@ install_hook() {
 	printf 'Linked: %s -> %s\n' "$hook_target" "$hook_source"
 }
 
-copy_path "$repo_dir/dot/zshrc" "$HOME/.zshrc"
-copy_path "$repo_dir/dot/config/nvim" "$HOME/.config/nvim"
-copy_path "$repo_dir/dot/config/ghostty" "$HOME/.config/ghostty"
-copy_path "$repo_dir/dot/codex/AGENTS.md" "$HOME/.codex/AGENTS.md"
-copy_path "$repo_dir/dot/codex/config.toml" "$HOME/.codex/config.toml"
-copy_path "$repo_dir/dot/codex/agents" "$HOME/.codex/agents"
-copy_path "$repo_dir/dot/codex/rules/default.rules" "$HOME/.codex/rules/default.rules"
-copy_path "$repo_dir/dot/agents" "$HOME/.agents"
-copy_path "$repo_dir/dot/pi/agent/AGENTS.md" "$HOME/.pi/agent/AGENTS.md"
-copy_path "$repo_dir/dot/pi/agent/settings.json" "$HOME/.pi/agent/settings.json"
-copy_path "$repo_dir/dot/pi/agent/agents" "$HOME/.pi/agent/agents"
-copy_path "$repo_dir/dot/pi/agent/skills" "$HOME/.pi/agent/skills"
-copy_path "$repo_dir/dot/pi/agent/extensions" "$HOME/.pi/agent/extensions"
+link_path "$repo_dir/dot/zshrc" "$HOME/.zshrc"
+link_path "$repo_dir/dot/config/nvim" "$HOME/.config/nvim"
+link_path "$repo_dir/dot/config/ghostty" "$HOME/.config/ghostty"
+link_path "$repo_dir/dot/codex/AGENTS.md" "$HOME/.codex/AGENTS.md"
+link_path "$repo_dir/dot/codex/config.toml" "$HOME/.codex/config.toml"
+link_path "$repo_dir/dot/codex/agents" "$HOME/.codex/agents"
+link_path "$repo_dir/dot/codex/rules/default.rules" "$HOME/.codex/rules/default.rules"
+link_path "$repo_dir/dot/agents" "$HOME/.agents"
+link_path "$repo_dir/dot/pi/agent/AGENTS.md" "$HOME/.pi/agent/AGENTS.md"
+link_path "$repo_dir/dot/pi/agent/settings.json" "$HOME/.pi/agent/settings.json"
+link_path "$repo_dir/dot/pi/agent/agents" "$HOME/.pi/agent/agents"
+link_path "$repo_dir/dot/pi/agent/skills" "$HOME/.pi/agent/skills"
+link_path "$repo_dir/dot/pi/agent/extensions" "$HOME/.pi/agent/extensions"
+link_path "$repo_dir/dot/claude/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
+link_path "$repo_dir/dot/claude/settings.json" "$HOME/.claude/settings.json"
+link_path "$repo_dir/dot/claude/agents" "$HOME/.claude/agents"
 install_hook
 
-printf '\nDone. Managed dotfiles are real files in $HOME. Run scripts/sync-home-to-repo.sh to capture local changes.\n'
+printf '\nDone. Linked dotfiles point into the repo, so editing them edits the repo.\n'
