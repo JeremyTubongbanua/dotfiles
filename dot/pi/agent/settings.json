@@ -1,16 +1,17 @@
 {
-  "lastChangelogVersion": "0.70.6",
+  "lastChangelogVersion": "0.72.1",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.5",
   "defaultThinkingLevel": "medium",
   "packages": [
     "npm:context-mode",
-    "npm:@ollama/pi-web-search",
     "npm:pi-mcp-adapter",
-    "npm:taskplane",
-    "npm:pi-subagents",
-    "npm:@plannotator/pi-extension",
-    "npm:pi-markdown-preview",
-    "npm:pi-lens"
-  ]
+    "npm:pi-web-access",
+    "npm:pi-codex"
+  ],
+  "enableSkillCommands": false,
+  "hideThinkingBlock": true,
+  "theme": "ansi-dark",
+  "treeFilterMode": "default",
+  "permissionLevel": "auto"
 }

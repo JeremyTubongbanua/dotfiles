@@ -21,6 +21,7 @@ even if it is not testing the feature itself. Check quickly for compilation erro
 ## Git
 
 - Do not `git add`, `git commit` or `git push`. I will usually do those myself, unless I explicitly ask you to do so.
+- Everytime you make changes to any dotfiles in my home directory, ensure you update ~/GitHub/dotfiles which is where I like to keep track and persist my dotfiles setup. Read the documentation in that repo to ensure you are modifying it correctly. I will commit/push things myself in the dotfiles repo, you just have to make sure that the changes are properly tracked so it is easy for me to decide if I should push.
 
 ## Future Home Dotfiles
 
