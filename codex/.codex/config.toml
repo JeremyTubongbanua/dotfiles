@@ -1,6 +1,6 @@
 model = "gpt-5.5"
 personality = "pragmatic"
-model_reasoning_effort = "high"
+model_reasoning_effort = "medium"
 [projects."/Users/jeremytubongbanua/GitHub/jeremytubongbanua.github.io"]
 trust_level = "trusted"
 
