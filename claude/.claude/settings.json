@@ -4,8 +4,7 @@
       "Bash(dart analyze:*)"
     ],
     "deny": [],
-    "ask": [],
-    "defaultMode": "auto"
+    "ask": []
   },
   "model": "opus[1m]",
   "enabledPlugins": {
@@ -16,5 +15,4 @@
   "theme": "dark",
   "editorMode": "normal",
   "fileCheckpointingEnabled": true,
-  "skipAutoPermissionPrompt": true
 }
