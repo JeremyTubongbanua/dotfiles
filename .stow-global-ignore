@@ -1,7 +1,3 @@
-\.DS_Store
-\.git
-README\.md
-AGENTS\.md
+.git
+.DS_Store
 LICENSE
-install\.sh
-scripts
