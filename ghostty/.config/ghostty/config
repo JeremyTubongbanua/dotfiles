@@ -1,11 +1,15 @@
 # https://www.nerdfonts.com/font-downloads
+
+# Font
 # font-family = Lekton Nerd Font
 font-family = JetBrainsMono Nerd Font
-theme = Espresso
-
 font-size = 16
+
+# Theme
+theme = Espresso
 theme = "light:Flexoki Light,dark:tokyonight-storm"
 
+# Background
 background-opacity = 0.8
 background-blur-radius = 20
 
@@ -14,6 +18,9 @@ macos-option-as-alt = true
 
 keybind=super+c=copy_to_clipboard
 keybind=super+v=paste_from_clipboard
+#
+# fixes shift+enter new line
+keybind = shift+enter=text:\n 
 
-keybind = shift+enter=text:\n
+# keybind = cmd+shift+t=prompt_tab_title # Cmd+Shift+T = change Ghostty tab
 
