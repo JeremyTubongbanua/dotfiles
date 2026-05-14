@@ -6,13 +6,13 @@
     "deny": [],
     "ask": []
   },
-  "model": "opus[1m]",
   "enabledPlugins": {
     "claude-mem@thedotmack": true
   },
   "alwaysThinkingEnabled": false,
-  "effortLevel": "xhigh",
-  "theme": "dark",
+  "effortLevel": "high",
+  "theme": "auto",
   "editorMode": "normal",
   "fileCheckpointingEnabled": true,
+  "useAutoModeDuringPlan": false
 }
