@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+docker run --rm -it "$@" \
+  -v "/Users/jeremytubongbanua/GitHub/noports/trunk/":"/atsign/noports" \
+  -v "/Users/jeremytubongbanua/.atsign/keys/":"/atsign/.atsign/keys" \
+  dev-ubuntu
