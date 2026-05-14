@@ -1,6 +1,5 @@
 # Keep Codex dotfiles portable. Runtime state, credentials, logs, and caches stay local.
 *
-
 !.gitignore
 !AGENTS.md
 !config.toml
