@@ -17,5 +17,6 @@
   "theme": "auto",
   "editorMode": "normal",
   "fileCheckpointingEnabled": true,
+  "skipAutoPermissionPrompt": true,
   "useAutoModeDuringPlan": false
 }
