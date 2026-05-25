@@ -24,3 +24,24 @@
   git reset --hard upstream/trunk
   git worktree add -b jt-<feature> ../jt-<feature>
 - Branch naming: jt-<short-description> (e.g. jt-fix-barrett, jt-add-mlkem-1024).
+
+## Current Project
+
+Currently, I'm working on adding PQC (Post-Quantum Cryptography) in ~/GitHub/at_client_sdk. The fisrt step is to add the cryptographic algorithms to to at_chops (Cryptographic and hashing operations) package. Dart has limited support for PQC. However, we have X25519 in pub.dev/cryptography and ML-KEM-768 in pub.dev/pqcrypto, but this package is not yet mature. I am working on maturing it and fixing bugs in ~/GitHub/pqcrypto which contains a remote to my fork repo. In ~/GitHub/at_client_sdk/pq-docs/plans/pq/demos/3_openssl_ffi_and_pqcrypto_package_comparison/ , we have an interoperability test where the source of truth (OpenSSL X25519 and ML-KEM algo) is tested against pqcrypto . The goal here is to make modifications to my fork of pqcrypto so that it is interoperable with OpenSSL's algorithm, then we can safely say that the package is ready to be used in use cases (at least it is functional, but maybe not guaranteed secure).
+
+Places
+
+- ~/GitHub/at_client_sdk/pq-docs/plans/pq/demos/3_openssl_ffi_and_pqcrypto_package_comparison/ - interoperabiliy test
+- ~/GitHub/pqcrypto - fork of pub.dev package
+
+## Dart
+
+In dart types, I like to be explicit.
+
+```dart
+// Works, but don't really like...
+(x, y) = getValues();
+
+// I like
+final(int x, double y) = getValues();
+```
