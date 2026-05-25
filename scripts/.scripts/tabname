@@ -1,0 +1,26 @@
+#!/bin/sh
+set -eu
+
+tab_tty="$(tty 2>/dev/null || true)"
+if [ -z "$tab_tty" ] || [ "$tab_tty" = "not a tty" ]; then
+    echo "tabname: no tty found" >&2
+    exit 1
+fi
+
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/tabname"
+state_file="$state_dir/$(basename "$tab_tty")"
+mkdir -p "$state_dir"
+
+if [ "${1:-}" = "--reset" ]; then
+    rm -f "$state_file"
+    title="$(basename "$PWD")"
+elif [ "$#" -eq 0 ]; then
+    echo "usage: tabname <title>" >&2
+    echo "       tabname --reset" >&2
+    exit 2
+else
+    title="$*"
+    printf '%s\n' "$title" > "$state_file"
+fi
+
+printf '\033]0;%s\007' "$title"

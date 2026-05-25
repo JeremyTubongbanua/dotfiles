@@ -14,6 +14,7 @@ background-opacity = 0.8
 background-blur-radius = 20
 
 macos-option-as-alt = true
+shell-integration-features = cursor,no-sudo,no-title
 # keybind="unconsumed:super+c=copy_to_clipboard"
 
 keybind=super+c=copy_to_clipboard
@@ -23,4 +24,3 @@ keybind=super+v=paste_from_clipboard
 keybind = shift+enter=text:\n 
 
 # keybind = cmd+shift+t=prompt_tab_title # Cmd+Shift+T = change Ghostty tab
-
