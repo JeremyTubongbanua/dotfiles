@@ -1,0 +1,15 @@
+[user]
+	name = JeremyTubongbanua
+	email = jeremy.tubongbanua@gmail.com
+	signingkey = /Users/jeremytubongbanua/.ssh/id_ed25519.pub
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[commit]
+	gpgsign = true
+[init]
+	defaultBranch = trunk
+[gpg]
+	format = ssh
