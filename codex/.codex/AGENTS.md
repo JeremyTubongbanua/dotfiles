@@ -14,6 +14,8 @@ even if it is not testing the feature itself. Check quickly for compilation erro
 
 - Do not `git add`, `git commit` or `git push`. I will usually do those myself, unless I explicitly ask you to do so.
 - When git cloning, use the SSH url.
+- My git repos are in ~/GitHub . Every directory is a root repo (e.g. `~/GitHub/<dir>/.git`) with some exceptions which are collections of worktrees. Typically, ~/GitHub/<dir>/trunk is the upstream trunk, then I usually do `cd ~/GitHub/<dir>/trunk && git fetch && git reset --hard upstream/trunk && git worktree add -b ../jt-feature-1`
+- Branch naming convention is `jt-<text>`. E.g. `jt-feature` .
 
 ## Future Home Dotfiles
 
