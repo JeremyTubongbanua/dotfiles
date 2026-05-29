@@ -16,15 +16,15 @@ Files inside a package are *real files in the repo*. After `stow`, the matching 
 
 ## Activation
 
-`install.sh` is a one-line wrapper:
+Run GNU stow directly from the repo root for one or more packages:
 
 ```sh
-stow --target "$HOME" --restow zsh nvim ghostty codex agents claude
+stow --target "$HOME" --restow <package>
 ```
 
 `--restow` is idempotent: re-running with no changes prints nothing and modifies nothing. If a target path is already occupied by something other than the expected symlink, stow refuses to clobber and prints a conflict.
 
-`.stow-global-ignore` at the repo root tells stow which files to skip in every package (`README.md`, `AGENTS.md`, `LICENSE`, `install.sh`, `.git`, etc.).
+`.stow-global-ignore` at the repo root tells stow which files to skip in every package (`LICENSE`, `.git`, `.DS_Store`, etc.).
 
 ## Tree Folding
 
@@ -40,15 +40,15 @@ Folding is automatically *prevented* when the destination directory already cont
    ~/.foo/bar.toml  →  <package>/.foo/bar.toml
    ```
 3. Review for secrets, credentials, machine-specific paths.
-4. From the repo root, run `./install.sh` (or `stow -R <package>` for just one).
+4. From the repo root, run `stow --target "$HOME" --restow <package>`.
 5. `git status`, review, stage, commit.
 
 ## Adding a New Package
 
 1. Create the package directory at the repo root: `mkdir <pkg>`.
 2. Populate it with files mirroring the `$HOME` subtree (leading dots preserved).
-3. Add the package name to the `stow` invocation in `install.sh`.
-4. Run `./install.sh`.
+3. Add the package to the README package list.
+4. Run `stow --target "$HOME" --restow <pkg>`.
 
 ## Removing a Tracked File
 
@@ -58,7 +58,7 @@ Folding is automatically *prevented* when the destination directory already cont
 ## Removing a Package
 
 1. `stow -D <pkg>` to delete its symlinks from `$HOME`.
-2. Remove the package name from `install.sh`.
+2. Remove the package from the README package list.
 3. `git rm -r <pkg>`.
 
 ## Conflict Resolution
@@ -79,7 +79,7 @@ The codex package keeps its own `.codex/.gitignore` with an *allowlist* pattern 
 ## Quick Verification
 
 ```sh
-./install.sh                        # idempotent — should print nothing surprising
-stow -nv -R zsh nvim ghostty codex agents claude   # dry-run preview
-git status                          # any unexpected dirty state?
+stow --target "$HOME" --simulate --verbose --restow zsh nvim ghostty codex agents claude pi scripts dockerfiles linearmouse ssh docker git gh
+stow --target "$HOME" --restow <package>
+git status
 ```
