@@ -24,3 +24,15 @@ trust_level = "trusted"
 
 [projects."/Users/jeremytubongbanua/Desktop"]
 trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua/GitHub/at_client_sdk/trunk"]
+trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua/GitHub/snippets"]
+trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua/GitHub/jeremytubongbanua.github.io"]
+trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua/GitHub/noports/trunk"]
+trust_level = "trusted"
