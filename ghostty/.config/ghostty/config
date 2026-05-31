@@ -14,7 +14,7 @@ background-opacity = 0.8
 background-blur-radius = 20
 
 macos-option-as-alt = true
-shell-integration-features = cursor,no-sudo,no-title
+shell-integration-features = cursor,no-sudo
 # keybind="unconsumed:super+c=copy_to_clipboard"
 
 keybind=super+c=copy_to_clipboard
