@@ -6,7 +6,7 @@ font-family = JetBrainsMono Nerd Font
 font-size = 16
 
 # Theme
-theme = Espresso
+# theme = Espresso
 theme = "light:Flexoki Light,dark:tokyonight-storm"
 
 # Background
