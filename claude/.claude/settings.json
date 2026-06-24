@@ -5,7 +5,7 @@
       "Bash(grep *)",
       "Bash(cat *)",
       "Bash(dart *)",
-      "Bash(find *)",
+      "Bash(find*)",
       "Bash(which *)",
       "Bash(echo *)",
       "Bash(git status*)",
