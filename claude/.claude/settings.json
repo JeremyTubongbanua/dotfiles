@@ -2,7 +2,7 @@
   "permissions": {
     "allow": [
       "Bash(ls*)",
-      "Bash(grep *)",
+      "Bash(grep*)",
       "Bash(cat *)",
       "Bash(dart *)",
       "Bash(find*)",
