@@ -24,3 +24,10 @@ keybind=super+v=paste_from_clipboard
 keybind = shift+enter=text:\n 
 
 # keybind = cmd+shift+t=prompt_tab_title # Cmd+Shift+T = change Ghostty tab
+
+# Cmd+D: new split right, then shrink it down to ~1/3 of the window
+keybind = cmd+d=new_split:right
+keybind = chain=resize_split:right,10
+keybind = chain=resize_split:right,10
+keybind = chain=resize_split:right,10
+keybind = chain=resize_split:right,10
