@@ -7,7 +7,7 @@ font-size = 16
 
 # Theme
 # theme = Espresso
-theme = "light:Flexoki Light,dark:tokyonight-storm"
+theme = "light:Flexoki Light,dark:TokyoNight Storm"
 
 # Background
 background-opacity = 0.8
@@ -19,15 +19,18 @@ shell-integration-features = cursor,no-sudo
 
 keybind=super+c=copy_to_clipboard
 keybind=super+v=paste_from_clipboard
-#
+
 # fixes shift+enter new line
 keybind = shift+enter=text:\n 
 
-# keybind = cmd+shift+t=prompt_tab_title # Cmd+Shift+T = change Ghostty tab
-
-# Cmd+D: new split right, then shrink it down to ~1/3 of the window
+# keybind = cmd+d=new_split:right
+# keybind = ctrl+w>period=resize_split:right,1000
+resize-overlay = always
 keybind = cmd+d=new_split:right
-keybind = chain=resize_split:right,10
-keybind = chain=resize_split:right,10
-keybind = chain=resize_split:right,10
-keybind = chain=resize_split:right,10
+keybind = ctrl+w>period=resize_split:right,200
+keybind = ctrl+w>comma=resize_split:left,200
+
+# Cmd+[ / Cmd+]: directional split nav — stops at edges instead of wrapping
+# (default is goto_split:previous/next, which cycles back around)
+keybind = super+[=goto_split:left
+keybind = super+]=goto_split:right
