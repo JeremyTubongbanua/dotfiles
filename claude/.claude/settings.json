@@ -25,7 +25,6 @@
     "deny": [],
     "ask": []
   },
-  "model": "sonnet",
   "statusLine": {
     "type": "command",
     "command": "bash /Users/jeremytubongbanua/.claude/statusline-command.sh"
@@ -36,7 +35,7 @@
     "discord@claude-plugins-official": true
   },
   "alwaysThinkingEnabled": false,
-  "effortLevel": "xhigh",
+  "effortLevel": "medium",
   "theme": "auto",
   "editorMode": "normal",
   "fileCheckpointingEnabled": true,
