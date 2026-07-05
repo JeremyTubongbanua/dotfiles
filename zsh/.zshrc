@@ -4,13 +4,13 @@ set keyseq-timeout 0 # no key delays
 
 export ZSH="$HOME/.oh-my-zsh"
 
-# export TERMINAL="ghostty"
-# export EDITOR="nvim"
-# export VISUAL="nvim"
+export TERMINAL="ghostty"
+export EDITOR="nvim"
+export VISUAL="nvim"
 
-ZSH_THEME="robbyrussell"
-plugins=(git)
-source $ZSH/oh-my-zsh.sh
+# ZSH_THEME="robbyrussell"
+# plugins=(git)
+# source $ZSH/oh-my-zsh.sh
 
 # Aliases
 alias python='python3'
