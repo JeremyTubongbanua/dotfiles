@@ -36,9 +36,11 @@
   },
   "alwaysThinkingEnabled": false,
   "effortLevel": "medium",
+  "advisorModel": "opus",
   "theme": "auto",
   "editorMode": "normal",
   "fileCheckpointingEnabled": true,
   "skipAutoPermissionPrompt": true,
-  "useAutoModeDuringPlan": false
+  "useAutoModeDuringPlan": false,
+  "skipWorkflowUsageWarning": true
 }
