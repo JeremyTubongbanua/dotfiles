@@ -1,0 +1,27 @@
+{
+  "version": 2,
+  "plugins": {
+    "frontend-design@claude-plugins-official": [
+      {
+        "scope": "project",
+        "installPath": "/Users/jeremytubongbanua/.claude-work/plugins/cache/claude-plugins-official/frontend-design/26db21ae4fa1",
+        "version": "26db21ae4fa1",
+        "installedAt": "2026-07-05T01:21:54.586Z",
+        "lastUpdated": "2026-07-05T01:21:54.586Z",
+        "gitCommitSha": "26db21ae4fa1748aaa74fc4c01d340aaac92f4f1",
+        "projectPath": "/Users/jeremytubongbanua"
+      }
+    ],
+    "discord@claude-plugins-official": [
+      {
+        "scope": "project",
+        "installPath": "/Users/jeremytubongbanua/.claude-work/plugins/cache/claude-plugins-official/discord/0.0.4",
+        "version": "0.0.4",
+        "installedAt": "2026-07-05T01:21:54.586Z",
+        "lastUpdated": "2026-07-05T01:21:54.586Z",
+        "gitCommitSha": "26db21ae4fa1748aaa74fc4c01d340aaac92f4f1",
+        "projectPath": "/Users/jeremytubongbanua"
+      }
+    ]
+  }
+}
