@@ -35,12 +35,12 @@
     "discord@claude-plugins-official": false
   },
   "alwaysThinkingEnabled": false,
-  "effortLevel": "medium",
+  "effortLevel": "high",
   "advisorModel": "opus",
+  "skipWorkflowUsageWarning": true,
   "theme": "auto",
   "editorMode": "normal",
   "fileCheckpointingEnabled": true,
   "skipAutoPermissionPrompt": true,
-  "useAutoModeDuringPlan": false,
-  "skipWorkflowUsageWarning": true
+  "useAutoModeDuringPlan": false
 }
