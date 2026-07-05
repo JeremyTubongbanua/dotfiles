@@ -1,0 +1,13 @@
+# Sensitive
+.claude.json
+
+# Runtime / cache
+backups/
+cache/
+history.jsonl
+mcp-needs-auth-cache.json
+plugins/cache/
+plugins/.last_inuse_sweep
+projects/
+todos/
+statsig/
