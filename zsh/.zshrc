@@ -55,5 +55,9 @@ alias claude-mem='/Users/jeremytubongbanua/.bun/bin/bun "/Users/jeremytubongbanu
 # Claude multi-account: claude = personal, claude-work = work
 claude() { CLAUDE_CONFIG_DIR="$HOME/.claude" command claude "$@"; }
 claude-work() { CLAUDE_CONFIG_DIR="$HOME/.claude-work" command claude "$@"; }
+# ccusage reads CLAUDE_CONFIG_DIR as a comma-separated list, so point it at BOTH
+# account dirs to track usage across personal + work. Scoped to ccusage only,
+# leaving Claude Code's own CLAUDE_CONFIG_DIR untouched.
+alias ccusage='CLAUDE_CONFIG_DIR="$HOME/.claude,$HOME/.claude-work" ccusage'
 
 export PATH="$HOME/.scripts:$PATH"
