@@ -21,20 +21,20 @@ if [ -n "$cwd" ] && [ -d "$cwd" ]; then
   git_branch=$(GIT_OPTIONAL_LOCKS=0 git -C "$cwd" symbolic-ref --short HEAD 2>/dev/null)
 fi
 
-# Directory (cyan)
-parts=$(printf '\033[36m%s\033[0m' "$short_cwd")
+parts=""
 
 # Git branch (green with branch symbol)
 if [ -n "$git_branch" ]; then
-  parts=$(printf '%s \033[32m\xef\x9c\xa8 %s\033[0m' "$parts" "$git_branch")
+  parts=$(printf '\033[32m\xef\x9c\xa8 %s\033[0m' "$git_branch")
 fi
-
-# Separator
-parts=$(printf '%s \033[90m|\033[0m' "$parts")
 
 # Logged-in email (yellow)
 if [ -n "$email" ]; then
-  parts=$(printf '%s \033[33m%s\033[0m' "$parts" "$email")
+  if [ -n "$parts" ]; then
+    parts=$(printf '%s \033[90m|\033[0m \033[33m%s\033[0m' "$parts" "$email")
+  else
+    parts=$(printf '\033[33m%s\033[0m' "$email")
+  fi
 fi
 
 # Model
@@ -75,4 +75,4 @@ if [ -n "$rate_used" ]; then
   parts=$(printf '%s %busage:%d%% left\033[0m' "$parts" "$rate_color" "$rate_left")
 fi
 
-printf '%s' "$parts"
+printf '%s\n\033[36m%s\033[0m' "$parts" "$short_cwd"
