@@ -1,0 +1,1 @@
+- [Wire protocol details](wire_protocol_details.md) — exact root lookup/secondary connect/verb framing/terminator/TLS framing verified from source with file:line refs
