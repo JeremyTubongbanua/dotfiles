@@ -2,8 +2,9 @@
 
 # Font
 # font-family = Lekton Nerd Font
-font-family = JetBrainsMono Nerd Font
-font-size = 16
+# font-family = JetBrainsMono Nerd Font
+font-family = "Paper Mono"
+font-size = 18
 
 # Theme
 # theme = Espresso
