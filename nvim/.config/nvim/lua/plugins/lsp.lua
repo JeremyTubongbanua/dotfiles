@@ -6,6 +6,7 @@ return {
         "lua_ls",
         "bashls",
         "eslint",
+        "ts_ls",
         "gopls",
         "jsonls",
         "marksman",
@@ -26,6 +27,7 @@ return {
       root_markers = { '.git', '.bashrc', '.bash_profile', '.zshrc' },
     }
     vim.lsp.config.eslint = {}
+    vim.lsp.config.ts_ls = {}
     vim.lsp.config.gopls = {
       root_markers = { 'go.work', 'go.mod', '.git' },
     }
@@ -61,6 +63,7 @@ return {
       'lua_ls',
       'bashls',
       'eslint',
+      'ts_ls',
       'gopls',
       'jsonls',
       'marksman',
