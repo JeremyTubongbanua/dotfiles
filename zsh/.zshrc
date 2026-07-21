@@ -70,3 +70,5 @@ case ":$PATH:" in
 esac
 # pnpm end
 #
+
+alias cls="clear && ls -la"
