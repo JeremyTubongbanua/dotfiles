@@ -61,3 +61,12 @@ claude-work() { CLAUDE_CONFIG_DIR="$HOME/.claude-work" command claude "$@"; }
 alias ccusage='CLAUDE_CONFIG_DIR="$HOME/.claude,$HOME/.claude-work" ccusage'
 
 export PATH="$HOME/.scripts:$PATH"
+
+# pnpm
+export PNPM_HOME="/Users/jeremytubongbanua/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME/bin:"*) ;;
+  *) export PATH="$PNPM_HOME/bin:$PATH" ;;
+esac
+# pnpm end
+#
