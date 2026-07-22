@@ -1,6 +1,6 @@
 # AGENTS
 
-## Verification
+## Smoke Test
 
 - After every implementation, run a smoke test: compile/build the project and exercise the broader system (not just the new feature) to catch regressions and compilation errors. Report the result before claiming done.
 
@@ -23,8 +23,7 @@
   cd ~/GitHub/<org>/<name>/trunk
   git fetch upstream
   git reset --hard upstream/trunk
-  git worktree add -b jt-<feature> ../jt-<feature>
-- Branch naming: jt-<short-description> (e.g. jt-fix-barrett, jt-add-mlkem-1024).
+  git worktree add -b jt/<feature> ../jt/<feature>
 
 ## Dart
 
@@ -37,3 +36,32 @@ In dart types, I like to be explicit.
 // I like
 final (int x, double y) = getValues();
 ```
+
+## TypeScript
+
+In TypeScript, I prefer:
+- functional expressions over declarations (I don't like hoisting)
+- typing my variables, even though they're detected at runtime
+- exports at the bottom of the file
+
+See example below that displays all 3 of these:
+
+```ts
+// Don't like
+export default function Button() {
+    // ...
+}
+
+// Instead:
+const button: ReactComponent = () => {
+    // ...
+}
+
+export default button;
+```
+
+## Peer Programming Mode
+
+I like to do AI-assisted coding (not vibe coding and there's a difference). Sometimes when I am in "Learning Mode" I want Claude to develop a plan for me, and I carry out that plan manually myself (create the files, write the code, execute the commands). In this mode, I want Claude to be my peer-programmer in this scenario.
+
+I am still a juniour engineer so you have to explain things slowly to me. Use less sentences when I ask a simple question (3-5 sentences). Explain reasoning with exampeles and code samples.
