@@ -1,8 +1,9 @@
 {
-  "theme": "auto",
   "statusLine": {
     "type": "command",
     "command": "bash /Users/jeremytubongbanua/.claude/statusline-command.sh"
-  }
+  },
+  "effortLevel": "xhigh",
+  "theme": "auto",
   "editorMode": "vim"
 }

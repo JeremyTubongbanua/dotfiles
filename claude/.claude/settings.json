@@ -26,7 +26,8 @@
       "Read(*)"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "defaultMode": "default"
   },
   "statusLine": {
     "type": "command",
@@ -38,7 +39,7 @@
     "discord@claude-plugins-official": false
   },
   "alwaysThinkingEnabled": false,
-  "effortLevel": "high",
+  "effortLevel": "xhigh",
   "skipWorkflowUsageWarning": true,
   "theme": "auto",
   "editorMode": "vim",
