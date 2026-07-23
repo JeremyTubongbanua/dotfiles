@@ -11,6 +11,9 @@
   2. **Quick:** run only, assuming current state is clean.
   Use fenced code blocks, one command per block, no placeholders the user has to fill in.
 
+- Give me two versions: first version is one-by-one and the second one uses `;` and `&&`
+- Don't forget to include things like `cd packages/dart_package && dart pub get` in the instructions to ensure packages are installed.
+
 ## Git
 
 - I like my default branch as `trunk` and remote named `upstream`.
