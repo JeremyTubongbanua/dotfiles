@@ -41,7 +41,7 @@
   "effortLevel": "high",
   "skipWorkflowUsageWarning": true,
   "theme": "auto",
-  "editorMode": "normal",
+  "editorMode": "vim",
   "fileCheckpointingEnabled": true,
   "skipAutoPermissionPrompt": true,
   "useAutoModeDuringPlan": false
