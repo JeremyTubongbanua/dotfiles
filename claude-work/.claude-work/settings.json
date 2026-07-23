@@ -4,4 +4,5 @@
     "type": "command",
     "command": "bash /Users/jeremytubongbanua/.claude/statusline-command.sh"
   }
+  "editorMode": "vim"
 }
