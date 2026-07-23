@@ -6,7 +6,7 @@
 
 # https://github.com/paper-design/paper-mono
 font-family = "Paper Mono Light"
-font-size = 18
+font-size = 16
 
 # Theme
 # theme = Espresso
