@@ -16,7 +16,6 @@ vim.opt.inccommand = 'split' -- show effects of substitution incrementally in a 
 vim.opt.smartindent = true -- nvim will intelligently indent lines based on context
 
 -- split documentation below instead of top
-vim.opt.splitbelow = true
 vim.opt.splitright = true
 
 vim.opt.shiftround = true
