@@ -16,8 +16,8 @@ vim.opt.expandtab = true
 -- Contains all of the vim option stuff
 vim.opt.clipboard = 'unnamedplus' -- synchronize with system clipboard
 
-vim.opt.relativenumber = true -- use relative line numbers
 vim.opt.number = true -- set line numbers
+vim.opt.relativenumber = true -- use relative line numbers
 vim.opt.signcolumn = 'yes' -- keep the git/lsp sign column visible
 
 -- set tab size to 2 spaces
