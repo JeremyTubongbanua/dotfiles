@@ -9,8 +9,12 @@ vim.opt.autowrite = true
 vim.opt.cursorline = true
 vim.opt.autoread = true
 
+-- makes tab spaces to 2
 vim.opt.tabstop = 2
+vim.opt.softtabstop = 2
 vim.opt.shiftwidth = 2
+
+
 vim.opt.shiftround = true
 vim.opt.expandtab = true
 -- Contains all of the vim option stuff
@@ -46,4 +50,4 @@ vim.opt.inccommand = 'split' -- show effects of substitution incrementally in a 
 
 vim.opt.ignorecase = true -- case insensitive searching
 
-vim.cmd('set colorcolumn=80') -- highlight column 80
+-- vim.cmd('set colorcolumn=80') -- highlight column 80
