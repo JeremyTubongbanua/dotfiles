@@ -11,6 +11,10 @@
 
 When explaining things back to the user, be simple. Not too wordy and no more than 1-2 paragraphs. I prefer bullet points and ordered lists (1, 2, 3, ...) and examples whenever you reference something.
 
+I also like it when you only give one step at a time. Instead of giving multiple major steps at once, just give the first major step (sometimes broken into sub minor steps), and I usually want to ask a question or give some feedback like "I ran it" once I've done it. Then you can give the next step.
+
+I don't like to add code file-by-file. I instead like to add code that makes sense at each stage. For example, I don't want to add `include: ["functions/**/*"]` to my `tsconfig.json `when `functions/` is a non-existent file. I would instead want to first make `functions/` and whatever files in there, and THEN add that `include:` to my `tsconfig.json`. The reason for this is so I can do atomic commits.
+
 ## Quick Test
 
 - After every implementation, run a smoke test: compile/build the project and exercise the broader system (not just the new feature) to catch regressions and compilation errors. Report the result before claiming done.
