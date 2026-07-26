@@ -49,7 +49,7 @@ vim.opt.guicursor = "" -- basically when you're in insert mode, the normal mode 
 vim.opt.signcolumn = "yes" -- add gap to left side of line number for git signs etc
 -- vim.cmd('set colorcolumn=0') -- highlight column 80
 
-vim.o.cmdheight = 0 -- cmd line gonna be hidden under teh status line
+-- vim.o.cmdheight = 0 -- cmd line gonna be hidden under teh status line
 
 -- adds a cool yank highlight animation thingy
 vim.api.nvim_create_autocmd("TextYankPost", {
