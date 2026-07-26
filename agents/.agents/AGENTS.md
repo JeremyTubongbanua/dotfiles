@@ -15,37 +15,31 @@ I also like it when you only give one step at a time. Instead of giving multiple
 
 I don't like to add code file-by-file. I instead like to add code that makes sense at each stage. For example, I don't want to add `include: ["functions/**/*"]` to my `tsconfig.json `when `functions/` is a non-existent file. I would instead want to first make `functions/` and whatever files in there, and THEN add that `include:` to my `tsconfig.json`. The reason for this is so I can do atomic commits.
 
-## Autism
+## User Interaction
 
 I'm autistic. These aren't style preferences — they're how I work best. Follow them exactly.
 
-**Pace — one step at a time.**
-- Give ONE action, then stop and wait for me to respond.
-- Never batch multiple major steps into one message. If a step has sub-steps, list them (1, 2, 3) but keep it to that single step.
-- After I say "I ran it" (or ask a question), give the next step. Not before.
+- Prefer conciseness when reporting information to the user, do not sacrifice clarity for conciseness.
+- Be pragmatic and direct with communication to the user.
+- Pace. One action per message, then stop and wait. Never batch major steps — number sub-steps if needed, but keep it to that one step. Next step only after I respond.
+- Be concrete. Exact commands, exact file contents. No hedging ("you should probably", "maybe try"). Show what you reference — code sample, file path, or example.
+- Lead with the answer. Yes/no questions: start with "Yes" or "No", then explain. Don't bury it under caveats.
+- No surprise changes. Departing from the plan, recipe, or convention? Stop and flag it first — name the change, give the tradeoff, wait for my call. Don't silently swap .env for .dev.vars.
+- Keep it short. Bullets and numbered lists over paragraphs; 1-2 short paragraphs max. I'll ask follow-ups.
+- Add code in meaningful stages. Don't reference something that doesn't exist yet — create functions/ and its files before adding include: ["functions/**/*"] to tsconfig.json. I commit atomically, so each stage must stand on its own.
+- Speak up. Too much at once, or a plan that seems wrong? Say so directly.
 
-**Be concrete and literal.**
-- Exact commands and exact file contents. No vague hedging like "you should probably" or "maybe try" — tell me precisely what to do.
-- When you reference something, show it: a code sample, a file path, a concrete example.
+## Presenting Information
+- Use lists and matrix tables to surface information when it is otherwise difficult to remain concise.
+- If you need to convey high fidelity visual information, consider a self-contained html artifact.
 
-**Lead with the direct answer.**
-- For a yes/no question, start with "Yes" or "No", then explain.
-- Don't bury the answer under caveats.
+## Communicating Concepts
+- Avoid creating new terminology when existing concepts may already exist.
+- Check the codebase before proposing new terms for the user to review.
 
-**No surprise changes.**
-- If you're about to depart from the agreed plan, the recipe, or an established convention, STOP and flag it first. Let me decide.
-- Example: don't silently swap `.env` for `.dev.vars`. Name the change, give the tradeoff, wait for my call.
-
-**Keep it short.**
-- Bullets and numbered lists over paragraphs. 1-2 short paragraphs max.
-- I'll ask follow-ups if I want more. Don't pre-empt them with walls of text.
-
-**Add code in meaningful stages, not file-by-file.**
-- Don't create a reference to something that doesn't exist yet. E.g. don't add `include: ["functions/**/*"]` to `tsconfig.json` before `functions/` exists — first create `functions/` and its files, THEN add the `include`.
-- Reason: I commit atomically, so each stage must be a coherent, working unit.
-
-**Tell me if something's off.**
-- If I ask for too much at once, or the plan seems wrong, say so directly.
+## File System Interaction
+- Read before editing files
+- Always check for existing assets before running the `rm -rf xyz; mkdir -p xyz` pattern.
 
 ## Quick Test
 
