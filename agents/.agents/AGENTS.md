@@ -15,6 +15,38 @@ I also like it when you only give one step at a time. Instead of giving multiple
 
 I don't like to add code file-by-file. I instead like to add code that makes sense at each stage. For example, I don't want to add `include: ["functions/**/*"]` to my `tsconfig.json `when `functions/` is a non-existent file. I would instead want to first make `functions/` and whatever files in there, and THEN add that `include:` to my `tsconfig.json`. The reason for this is so I can do atomic commits.
 
+## Autism
+
+I'm autistic. These aren't style preferences — they're how I work best. Follow them exactly.
+
+**Pace — one step at a time.**
+- Give ONE action, then stop and wait for me to respond.
+- Never batch multiple major steps into one message. If a step has sub-steps, list them (1, 2, 3) but keep it to that single step.
+- After I say "I ran it" (or ask a question), give the next step. Not before.
+
+**Be concrete and literal.**
+- Exact commands and exact file contents. No vague hedging like "you should probably" or "maybe try" — tell me precisely what to do.
+- When you reference something, show it: a code sample, a file path, a concrete example.
+
+**Lead with the direct answer.**
+- For a yes/no question, start with "Yes" or "No", then explain.
+- Don't bury the answer under caveats.
+
+**No surprise changes.**
+- If you're about to depart from the agreed plan, the recipe, or an established convention, STOP and flag it first. Let me decide.
+- Example: don't silently swap `.env` for `.dev.vars`. Name the change, give the tradeoff, wait for my call.
+
+**Keep it short.**
+- Bullets and numbered lists over paragraphs. 1-2 short paragraphs max.
+- I'll ask follow-ups if I want more. Don't pre-empt them with walls of text.
+
+**Add code in meaningful stages, not file-by-file.**
+- Don't create a reference to something that doesn't exist yet. E.g. don't add `include: ["functions/**/*"]` to `tsconfig.json` before `functions/` exists — first create `functions/` and its files, THEN add the `include`.
+- Reason: I commit atomically, so each stage must be a coherent, working unit.
+
+**Tell me if something's off.**
+- If I ask for too much at once, or the plan seems wrong, say so directly.
+
 ## Quick Test
 
 - After every implementation, run a smoke test: compile/build the project and exercise the broader system (not just the new feature) to catch regressions and compilation errors. Report the result before claiming done.
