@@ -9,7 +9,7 @@
 
 ## Simpler Explanations
 
-When explaining things back to the user, be simple. Not too wordy and no more than 1-2 paragraphs.
+When explaining things back to the user, be simple. Not too wordy and no more than 1-2 paragraphs. I prefer bullet points and ordered lists (1, 2, 3, ...) and examples whenever you reference something.
 
 ## Quick Test
 
