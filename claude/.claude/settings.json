@@ -29,7 +29,6 @@
     "ask": [],
     "defaultMode": "default"
   },
-  "model": "opus[1m]",
   "statusLine": {
     "type": "command",
     "command": "bash /Users/jeremytubongbanua/.claude/statusline-command.sh"

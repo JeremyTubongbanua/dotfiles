@@ -1,6 +1,17 @@
 # AGENTS
 
-## Smoke Test
+## Four Principles in Detail
+
+1. Think before coding
+2. Simplicity first
+3. Surgical changes
+4. Goal-driven execution
+
+## Simpler Explanations
+
+When explaining things back to the user, be simple. Not too wordy and no more than 1-2 paragraphs.
+
+## Quick Test
 
 - After every implementation, run a smoke test: compile/build the project and exercise the broader system (not just the new feature) to catch regressions and compilation errors. Report the result before claiming done.
 
@@ -63,7 +74,7 @@ const button: ReactComponent = () => {
 export default button;
 ```
 
-## Peer Programming Mode
+## Peer Programming Philosophy
 
 I like to do AI-assisted coding (not vibe coding and there's a difference). Sometimes when I am in "Learning Mode" I want Claude to develop a plan for me, and I carry out that plan manually myself (create the files, write the code, execute the commands). In this mode, I want Claude to be my peer-programmer in this scenario.
 

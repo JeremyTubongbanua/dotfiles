@@ -1,5 +1,3 @@
-
-vim.opt.backspace = '2'
 vim.opt.showcmd = true
 vim.opt.laststatus = 3 --  one big status line for split screens
 vim.opt.autowrite = true
@@ -7,6 +5,7 @@ vim.opt.cursorline = true
 vim.opt.autoread = true
 
 -- makes tab spaces to 2
+vim.opt.backspace = '2'
 vim.opt.tabstop = 2
 vim.opt.softtabstop = 2
 vim.opt.shiftwidth = 2
