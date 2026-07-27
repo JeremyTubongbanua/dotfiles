@@ -17,8 +17,6 @@ ssh() {
 }
 
 export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
-
-# Environment Variables
 export PATH="/Applications/Docker.app/Contents/Resources/bin:$PATH"
 export PATH="/opt/homebrew/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
@@ -28,19 +26,7 @@ export PATH="/opt/homebrew/sbin:$PATH"
 
 export PATH="$PATH":"$HOME/.pub-cache/bin"
 
-# Use a unique history file per terminal
-# export HISTFILE=~/.zsh_history_$$
-# setopt INC_APPEND_HISTORY
-# setopt HIST_IGNORE_SPACE
-
 eval "$(starship init zsh)"
-
-# bun completions
-[ -s "/Users/jeremytubongbanua/.bun/_bun" ] && source "/Users/jeremytubongbanua/.bun/_bun"
-
-# bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
 
 # Claude multi-account: claude = personal, claude-work = work
 claude() { CLAUDE_CONFIG_DIR="$HOME/.claude" command claude "$@"; }
