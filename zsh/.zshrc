@@ -1,16 +1,9 @@
-# Oh My Zsh Configuration
 set keyseq-timeout 0 # no key delays
 # setopt COMBINING_CHARS # better paste for emojis
-
-export ZSH="$HOME/.oh-my-zsh"
 
 export TERMINAL="ghostty"
 export EDITOR="nvim"
 export VISUAL="nvim"
-
-# ZSH_THEME="robbyrussell"
-# plugins=(git)
-# source $ZSH/oh-my-zsh.sh
 
 # Aliases
 alias python='python3'
@@ -27,7 +20,6 @@ export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
 
 # Environment Variables
 export PATH="/Applications/Docker.app/Contents/Resources/bin:$PATH"
-export PATH="/opt/homebrew/opt/dart@3.7.2/bin:$PATH"
 export PATH="/opt/homebrew/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="/opt/homebrew/sbin:$PATH"
