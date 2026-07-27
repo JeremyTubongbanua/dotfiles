@@ -42,8 +42,6 @@ eval "$(starship init zsh)"
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
-alias claude-mem='/Users/jeremytubongbanua/.bun/bin/bun "/Users/jeremytubongbanua/.claude/plugins/marketplaces/thedotmack/plugin/scripts/worker-service.cjs"'
-
 # Claude multi-account: claude = personal, claude-work = work
 claude() { CLAUDE_CONFIG_DIR="$HOME/.claude" command claude "$@"; }
 claude-work() { CLAUDE_CONFIG_DIR="$HOME/.claude-work" command claude "$@"; }
