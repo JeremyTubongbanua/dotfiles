@@ -8,11 +8,16 @@ window_size=$(echo "$input" | jq -r '.context_window.context_window_size // empt
 rate_used=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty')
 cost=$(echo "$input" | jq -r '.cost.total_cost_usd // empty')
 session_id=$(echo "$input" | jq -r '.session_id // empty')
+# Effort comes from LIVE stdin (.effort.level), not settings.json: the file
+# lags UI changes and never reflects "max"/"ultracode", so reading it left the
+# statusline stuck. Empty for models with no effort tier (e.g. Haiku).
+effort=$(echo "$input" | jq -r '.effort.level // ""')
+# 5-hour rate-limit reset timestamp (Unix epoch), for the countdown.
+resets_at=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty')
 
 # Resolve active config dir (set by claude/claude-work shell functions)
 config_dir="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 email=$(jq -r '.oauthAccount.emailAddress // ""' "$config_dir/.claude.json" 2>/dev/null)
-effort=$(jq -r '.effortLevel // ""' "$config_dir/settings.json" 2>/dev/null)
 
 # Daily cost via ccusage, scoped to the ACTIVE account dir ($config_dir).
 # ccusage is slow (cold Node + log parsing), so we never call it inline: a
@@ -73,7 +78,8 @@ if [ -n "$email" ]; then
   fi
 fi
 
-# Model (with effort level in parens, e.g. "Opus 4.8 (xhigh)")
+# Model (with effort level in parens, e.g. "Opus 4.8 (xhigh)").
+# No parens when effort is empty (models without an effort tier, e.g. Haiku).
 if [ -n "$model" ]; then
   if [ -n "$effort" ]; then
     parts=$(printf '%s \033[90m|\033[0m \033[35m%s (%s)\033[0m' "$parts" "$model" "$effort")
@@ -82,7 +88,7 @@ if [ -n "$model" ]; then
   fi
 fi
 
-# Context window usage + remaining tokens
+# Context window usage + remaining tokens (line 1, appended after the model)
 if [ -n "$used" ]; then
   used_int=$(printf '%.0f' "$used")
   if [ "$used_int" -ge 80 ]; then
@@ -94,20 +100,38 @@ if [ -n "$used" ]; then
   fi
 
   ctx_left=$(( 100 - used_int ))
-  line2=$(printf '%bctx:%d%% left\033[0m' "$ctx_color" "$ctx_left")
+  parts=$(printf '%s \033[90m|\033[0m %bctx:%d%% left\033[0m' "$parts" "$ctx_color" "$ctx_left")
 fi
 
-# 5-hour rate limit — show remaining (blue)
+# 5-hour rate limit — show remaining (blue). First item on line 2, so it
+# initializes line2 with no leading separator.
 if [ -n "$rate_used" ]; then
   rate_int=$(printf '%.0f' "$rate_used")
   rate_left=$(( 100 - rate_int ))
   rate_color='\033[34m'
-  line2=$(printf '%s \033[90m|\033[0m %busage:%d%% left\033[0m' "$line2" "$rate_color" "$rate_left")
+  line2=$(printf '%busage:%d%% left\033[0m' "$rate_color" "$rate_left")
 fi
 
-# Session cost in USD (cyan)
+# 5-hour limit reset countdown, e.g. "Resets in 3hr 4min" (dim gray).
+# resets_at is a Unix epoch; show hours/minutes until then. Appends after
+# usage, but guards for an empty line2 in case usage was absent.
+if [ -n "$resets_at" ]; then
+  secs_left=$(( resets_at - $(date +%s) ))
+  if [ "$secs_left" -gt 0 ]; then
+    hrs=$(( secs_left / 3600 ))
+    mins=$(( (secs_left % 3600) / 60 ))
+    if [ -n "$line2" ]; then
+      line2=$(printf '%s \033[90m|\033[0m \033[90mResets in %dhr %dmin\033[0m' "$line2" "$hrs" "$mins")
+    else
+      line2=$(printf '\033[90mResets in %dhr %dmin\033[0m' "$hrs" "$mins")
+    fi
+  fi
+fi
+
+# Session cost in USD (cyan). Precision: 4 decimals under $1, 2 decimals at/above.
 if [ -n "$cost" ]; then
-  line2=$(printf '%s \033[90m|\033[0m \033[36m$%.4f (session)\033[0m' "$line2" "$cost")
+  cost_fmt=$(awk -v c="$cost" 'BEGIN { printf (c < 1 ? "%.4f" : "%.2f"), c }')
+  line2=$(printf '%s \033[90m|\033[0m \033[36m$%s USD (session)\033[0m' "$line2" "$cost_fmt")
 fi
 
 # Today's cost for the active account, via ccusage cache (cyan).
