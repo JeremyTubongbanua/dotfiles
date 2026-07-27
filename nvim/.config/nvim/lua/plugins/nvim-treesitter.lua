@@ -1,43 +1,61 @@
--- highlighting plugin
--- :InspectTree
--- :TSInstall <language>
+-- highlighting plugin -- nvim-treesitter `main` branch (requires Neovim 0.12+)
+-- :InspectTree   :TSInstall <language>   :TSUpdate
+-- `main` is a full, incompatible rewrite of the old `master` API:
+-- no `require("nvim-treesitter.configs").setup{}`, no highlight/indent modules.
 return {
   "nvim-treesitter/nvim-treesitter",
+  branch = "main",
+  lazy = false, -- main branch does not support lazy-loading
   build = ":TSUpdate",
-  lazy = false,
   config = function()
-    -- This version of treesitter has a simplified API
-    -- Highlighting is enabled by default via ftplugin
-    -- To install parsers, use: :TSInstall <language>
-    require("nvim-treesitter.configs").setup({
-      ensure_installed = {
-        'c',
-        'lua',
-        'vim',
-        'vimdoc',
-        'query',
-        'astro',
-        'javascript',
-        'typescript',
-        'tsx',
-        'dart',
-      }, -- parsers to install, even though auto_install will install other parsers as needed, these are recommended
-      auto_install = true, -- when entering a buffer, if a parser is missing, install it
-      highlight = {
-        enable = true, -- enable each parser's highlights
-      },
-      indent = {
-        enable = true, -- enable tree-sitter based indentation
-      },
-      -- incremental_selection = { -- when we select some text, it will select other things based on the syntax tree
-      --   enable = true,
-      --   keymaps = { -- some keys to control the selection
-          -- init_selection = "<leader>ss", -- start selection (normal mode)
-          -- node_incremental = "<leader>si", -- increment to the upper named parent (visual mode)
-          -- scope_incremental = "<leader>sc", -- increment to the upper scope (as defined in locals.scm) (visual mode)
-          -- node_decremental = "<leader>sd", -- decrement to the previous node (visual mode)
-      --   },
-      -- },
+    local ts = require("nvim-treesitter")
+
+    ts.setup({
+      -- prepended to runtimepath so these parsers/queries take priority
+      install_dir = vim.fn.stdpath("data") .. "/site",
+    })
+
+    -- parsers to install up front (async; no-op if already installed)
+    ts.install({
+      "c",
+      "lua",
+      "vim",
+      "vimdoc",
+      "query",
+      "astro",
+      "javascript",
+      "typescript",
+      "tsx",
+      "dart",
+    })
+
+    -- per-buffer: start highlighting + treesitter indent, auto-installing the
+    -- parser if missing. Replaces the old highlight/indent/auto_install modules.
+    vim.api.nvim_create_autocmd("FileType", {
+      callback = function(args)
+        local buf = args.buf
+        local lang = vim.treesitter.language.get_lang(vim.bo[buf].filetype)
+        if not lang then
+          return
+        end
+
+        local enable = vim.schedule_wrap(function()
+          if not vim.api.nvim_buf_is_valid(buf) then
+            return
+          end
+          if not pcall(vim.treesitter.start, buf, lang) then
+            return -- no parser / not a treesitter buffer
+          end
+          vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        end)
+
+        local ok, added = pcall(vim.treesitter.language.add, lang)
+        if ok and added then
+          enable()
+        else
+          ts.install({ lang }):await(enable) -- auto_install, then enable
+        end
+      end,
     })
   end,
 }
