@@ -10,10 +10,8 @@ Each top-level directory is a stow *package* whose contents mirror a subtree of 
 zsh/         →  ~/.zshrc
 nvim/        →  ~/.config/nvim/
 ghostty/     →  ~/.config/ghostty/
-codex/       →  ~/.codex/{AGENTS.md, config.toml, agents/, rules/default.rules}
 agents/      →  ~/.agents/
 claude/      →  ~/.claude/{CLAUDE.md, settings.json, agents/}
-pi/          →  ~/.pi/agent/{settings.json, extensions/}
 scripts/     →  ~/.scripts/
 dockerfiles/ →  ~/.dockerfiles/
 linearmouse/ →  ~/.config/linearmouse/linearmouse.json
@@ -49,7 +47,7 @@ stow --target "$HOME" --restow git gh ssh
 stow --target "$HOME" --delete git
 
 # Preview every package before attempting a full restow.
-stow --target "$HOME" --simulate --verbose --restow zsh nvim ghostty codex agents claude pi scripts dockerfiles linearmouse ssh docker git gh
+stow --target "$HOME" --simulate --verbose --restow zsh nvim ghostty agents claude scripts dockerfiles linearmouse ssh docker git gh
 ```
 
 If a target path is already a real file, stow refuses to clobber it. Compare it with the repo copy, move the real file aside, then restow the package:
