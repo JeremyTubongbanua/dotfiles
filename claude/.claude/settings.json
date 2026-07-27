@@ -33,11 +33,6 @@
     "type": "command",
     "command": "bash /Users/jeremytubongbanua/.claude/statusline-command.sh"
   },
-  "enabledPlugins": {
-    "claude-mem@thedotmack": true,
-    "frontend-design@claude-plugins-official": false,
-    "discord@claude-plugins-official": false
-  },
   "alwaysThinkingEnabled": false,
   "effortLevel": "high",
   "skipWorkflowUsageWarning": true,
