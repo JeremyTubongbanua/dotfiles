@@ -29,13 +29,21 @@ return {
       "dart",
     })
 
+    -- set of languages that actually have a parser (computed once). guards the
+    -- auto-install below so non-code filetypes (oil, lazy, mason, ...) don't warn
+    -- "skipping unsupported language".
+    local available = {}
+    for _, l in ipairs(ts.get_available()) do
+      available[l] = true
+    end
+
     -- per-buffer: start highlighting + treesitter indent, auto-installing the
     -- parser if missing. Replaces the old highlight/indent/auto_install modules.
     vim.api.nvim_create_autocmd("FileType", {
       callback = function(args)
         local buf = args.buf
         local lang = vim.treesitter.language.get_lang(vim.bo[buf].filetype)
-        if not lang then
+        if not lang or not available[lang] then
           return
         end
 
