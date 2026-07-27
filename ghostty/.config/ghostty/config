@@ -3,10 +3,11 @@
 # Font
 # font-family = Lekton Nerd Font
 # font-family = JetBrainsMono Nerd Font
+font-family = "Fira Code Regular"
 
 # https://github.com/paper-design/paper-mono
-font-family = "Paper Mono Light"
-font-size = 16
+# font-family = "Paper Mono"
+font-size = 18
 
 # Theme
 # theme = Espresso
