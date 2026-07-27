@@ -1,4 +1,0 @@
-prefix_rule(pattern=["flutter", "analyze"], decision="allow")
-prefix_rule(pattern=["dart", "analyze"], decision="allow")
-prefix_rule(pattern=["docker", "ps"], decision="allow")
-prefix_rule(pattern=["docker", "images"], decision="allow")
