@@ -3,15 +3,49 @@ input=$(cat)
 
 cwd=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // ""')
 model=$(echo "$input" | jq -r '.model.display_name // ""')
-used=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
+used=$(echo "$input" | jq -r '.context_window.used_percentage // 0')
 window_size=$(echo "$input" | jq -r '.context_window.context_window_size // empty')
 rate_used=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty')
 cost=$(echo "$input" | jq -r '.cost.total_cost_usd // empty')
+session_id=$(echo "$input" | jq -r '.session_id // empty')
 
 # Resolve active config dir (set by claude/claude-work shell functions)
 config_dir="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 email=$(jq -r '.oauthAccount.emailAddress // ""' "$config_dir/.claude.json" 2>/dev/null)
 effort=$(jq -r '.effortLevel // ""' "$config_dir/settings.json" 2>/dev/null)
+
+# Daily cost via ccusage, scoped to the ACTIVE account dir ($config_dir).
+# ccusage is slow (cold Node + log parsing), so we never call it inline: a
+# cached number is read instantly and refreshed in the background when stale
+# (stale-while-revalidate). The cache is keyed per account dir so claude and
+# claude-work never mix. We deliberately pass CLAUDE_CONFIG_DIR as a single
+# path here, overriding any comma-joined shell alias, to isolate one account.
+cost_today=""
+today=$(date +%Y-%m-%d)
+cache_dir="$HOME/.claude/ccusage-cache"
+mkdir -p "$cache_dir" 2>/dev/null
+# Key the cache by the active config dir (hashed to a safe filename).
+cache_key=$(printf '%s' "$config_dir" | shasum | cut -d' ' -f1)
+cache_file="$cache_dir/$cache_key.txt"
+
+# Refresh cache in the background if missing or older than 30s.
+refresh_ttl=30
+now_epoch=$(date +%s)
+mtime_epoch=$(stat -f %m "$cache_file" 2>/dev/null || echo 0)
+if [ "$(( now_epoch - mtime_epoch ))" -ge "$refresh_ttl" ]; then
+  # Detached background refresh; current render does not wait on it.
+  (
+    tmp="$cache_file.$$"
+    val=$(CLAUDE_CONFIG_DIR="$config_dir" npx ccusage@latest daily --json 2>/dev/null \
+      | jq -r --arg day "$today" '.daily[] | select(.period == $day) | .totalCost' 2>/dev/null)
+    [ -n "$val" ] && printf '%s' "$val" > "$tmp" && mv "$tmp" "$cache_file"
+  ) >/dev/null 2>&1 &
+fi
+
+# Read whatever the cache currently holds (may be last render's value).
+if [ -f "$cache_file" ]; then
+  cost_today=$(cat "$cache_file" 2>/dev/null)
+fi
 
 # Shorten home directory to ~
 home="$HOME"
@@ -73,9 +107,16 @@ fi
 
 # Session cost in USD (cyan)
 if [ -n "$cost" ]; then
-  line2=$(printf '%s \033[90m|\033[0m \033[36m$%.4f USD\033[0m' "$line2" "$cost")
+  line2=$(printf '%s \033[90m|\033[0m \033[36m$%.4f (session)\033[0m' "$line2" "$cost")
+fi
+
+# Today's cost for the active account, via ccusage cache (cyan).
+# Precision: 4 decimals when under $1, 2 decimals at/above $1.
+if [ -n "$cost_today" ]; then
+  cost_today_fmt=$(awk -v c="$cost_today" 'BEGIN { printf (c < 1 ? "%.4f" : "%.2f"), c }')
+  line2=$(printf '%s \033[90m|\033[0m \033[36m$%s USD (today)\033[0m' "$line2" "$cost_today_fmt")
 fi
 
 # Line 1: branch | email | model | effort
-# Line 2: cwd | ctx | usage | cost
+# Line 2: cwd | ctx | usage | cost (session) | cost (today)
 printf '%s\n\033[36m%s\033[0m \033[90m|\033[0m %s' "$parts" "$short_cwd" "$line2"
