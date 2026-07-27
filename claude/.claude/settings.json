@@ -29,7 +29,6 @@
     "ask": [],
     "defaultMode": "default"
   },
-  "model": "opus[1m]",
   "statusLine": {
     "type": "command",
     "command": "bash /Users/jeremytubongbanua/.claude/statusline-command.sh"
@@ -40,7 +39,7 @@
     "discord@claude-plugins-official": false
   },
   "alwaysThinkingEnabled": false,
-  "effortLevel": "xhigh",
+  "effortLevel": "high",
   "skipWorkflowUsageWarning": true,
   "theme": "auto",
   "editorMode": "normal",
