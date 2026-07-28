@@ -4,7 +4,6 @@ return {
     'nvim-tree/nvim-web-devicons'
   },
   config = function()
-    vim.o.laststatus = 0  -- no per-window bottom statusline; tabline + winbar cover it
 
     require('lualine').setup({
       options = {
@@ -22,7 +21,11 @@ return {
         lualine_c = {
           {
             'filename',
-            path = 1,  -- 0 = just filename, 1 = relative path, 2 = absolute path, 3 = absolute path with ~ for home
+            -- 0 == just file name
+            -- 1 == relative path
+            -- 2 == absolute path
+            -- 3 == abosulte path with ~ for home
+            path = 1, 
             cond = function()
               return vim.fn.expand('%:t') ~= ''
             end,

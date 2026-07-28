@@ -1,51 +1,46 @@
-vim.opt.showcmd = true
-vim.opt.laststatus = 3 --  one big status line for split screens
+vim.opt.showcmd = true -- shows commands while typing (like 14j) on the bottom right
+vim.opt.cursorline = true -- highlights line that cursor is on
+vim.opt.termguicolors = true -- enable 24-bit colors, uses colours from terminal (Ghostty)
+vim.opt.scrolloff = 999 -- always keep cursor in middle of screen, screen scrolls instead
+vim.opt.signcolumn = 'yes' -- keep the git/lsp sign column visible, no layout jump
+vim.opt.wrap = true -- true => wrap lines | false => don't wrap lines
+vim.opt.virtualedit = 'block' -- allow cursor to move where there is no text in visual block mode
+vim.opt.isfname:append("@-@") -- treats `@` as a valid filename character
+-- vim.opt.guicursor = "" -- basically when you're in insert mode, the normal mode cursor will remain. Cursor will always be in block mode
+
+-- Editing feel
 vim.opt.autowrite = true
-vim.opt.cursorline = true
 vim.opt.autoread = true
 
--- makes tab spaces to 2
-vim.opt.backspace = '2'
-vim.opt.tabstop = 2
-vim.opt.softtabstop = 2
-vim.opt.shiftwidth = 2
-
-vim.opt.expandtab = true -- any tab keys into spaces
-vim.opt.inccommand = 'split' -- show effects of substitution incrementally in a split
+-- tab stuff
+vim.opt.backspace = '2' -- backspace works over 2 space indents
+vim.opt.tabstop = 2 -- make tabwidth 2
+vim.opt.softtabstop = 2 -- make tabwidth 2
+vim.opt.shiftwidth = 2 -- make tabwidth 2
+vim.opt.expandtab = true -- any tab keys into spaces, not literal tab characters
 vim.opt.smartindent = true -- nvim will intelligently indent lines based on context
+vim.opt.shiftround = true -- >> and << shift will snap to multiples of `shiftwidth`
 
--- split documentation below instead of top
-vim.opt.splitright = true
+-- Split documentation below instead of top
+vim.opt.splitright = true -- vertical splits will now open to the right
 
-vim.opt.shiftround = true
--- Contains all of the vim option stuff
 vim.opt.clipboard = 'unnamedplus' -- synchronize with system clipboard
+vim.opt.inccommand = 'split' -- show effects of substitution incrementally in a split
 
+-- Line numbers
 vim.opt.number = true -- set line numbers
 vim.opt.relativenumber = true -- use relative line numbers
-vim.opt.signcolumn = 'yes' -- keep the git/lsp sign column visible
 
--- vim.opt.wrap = false -- don't wrap lines
-vim.opt.wrap = true -- wrap lines
+-- Case insensitivity | searches become case insensitive unless typing a capital letter
+vim.opt.ignorecase = true
+vim.opt.smartcase = true
 
-vim.opt.termguicolors = true -- enable 24-bit colors, uses colours from terminal (Ghostty)
+-- Editing safety
+vim.opt.backup = false -- no file~ backups | vim/nvim saves a file, it keeps a file~ version as a backup copy alongside it. Setting this to false gets rid of that clutter
+vim.opt.undofile = true -- enables storing
+vim.opt.undodir = vim.fn.stdpath('data') .. "/undodir" -- ~/.local/share/nvim | creates an undo directory so that undos are persistent between sessions. Normally only exists in memory so it does not persist when you close a file.
 
-vim.opt.scrolloff = 999 -- always keep cursor in middle of screen
-
-vim.opt.virtualedit = 'block' -- allow cursor to move where there is no text in visual block mode
-
--- searches become case sensitive
-vim.opt.ignorecase = true -- case insensitive searching
-vim.opt.smartcase = true -- 
-
-vim.opt.backup = false
-vim.opt.undodir = vim.fn.stdpath('data') .. "/undodir" -- ~/.local/share/nvim
-vim.opt.undofile = true
-
-vim.opt.isfname:append("@-@") -- adds `@` to file names , good for ts
-vim.opt.guicursor = "" -- basically when you're in insert mode, the normal mode cursor will remain
-
--- adds a cool yank highlight animation thingy
+-- Adds a cool highlight animation flash when you yank
 vim.api.nvim_create_autocmd(
   "TextYankPost",
   {
