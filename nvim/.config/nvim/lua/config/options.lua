@@ -59,5 +59,5 @@ vim.api.nvim_create_autocmd(
     callback = function()
       vim.hl.on_yank()
     end,
-  },
+  }
 )
