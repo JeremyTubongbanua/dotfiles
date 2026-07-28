@@ -5,7 +5,9 @@ return {
   priority = 1000,
   opts = {},
   config = function()
-    require('tokyonight').setup({})
-    vim.cmd.colorscheme('tokyonight-moon')
+    require('tokyonight').setup({
+      flavour = "moon",
+    })
+    vim.cmd.colorscheme('tokyonight')
   end,
 }
