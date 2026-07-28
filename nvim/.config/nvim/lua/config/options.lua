@@ -38,7 +38,6 @@ vim.opt.virtualedit = 'block' -- allow cursor to move where there is no text in 
 vim.opt.ignorecase = true -- case insensitive searching
 vim.opt.smartcase = true -- 
 
--- vim.opt.swapfile = false
 vim.opt.backup = false
 vim.opt.undodir = vim.fn.stdpath('data') .. "/undodir" -- ~/.local/share/nvim
 vim.opt.undofile = true
