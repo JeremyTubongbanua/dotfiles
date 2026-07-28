@@ -37,12 +37,6 @@
     "type": "command",
     "command": "bash /Users/jeremytubongbanua/.claude/statusline-command.sh"
   },
-  "alwaysThinkingEnabled": false,
-  "effortLevel": "xhigh",
-  "skipWorkflowUsageWarning": true,
   "theme": "auto",
-  "editorMode": "normal",
-  "fileCheckpointingEnabled": true,
-  "skipAutoPermissionPrompt": true,
-  "useAutoModeDuringPlan": false
+  "editorMode": "normal"
 }
