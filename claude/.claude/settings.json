@@ -1,16 +1,20 @@
 {
   "permissions": {
     "allow": [
-      "Bash(ls*)",
+      "Bash(ls *)",
+      "Bash(ls)",
       "Bash(head*)",
       "Bash(tail*)",
       "Bash(grep:*)",
       "Grep",
       "Bash(cat *)",
+      "Bash(cat)",
       "Bash(dart *)",
-      "Bash(find*)",
+      "Bash(find *)",
+      "Bash(find)",
       "Bash(which *)",
       "Bash(echo *)",
+      "Bash(echo)",
       "Bash(git status*)",
       "Bash(git log*)",
       "Bash(git diff*)",
