@@ -1,79 +1,58 @@
 # AGENTS
 
-## Four Principles in Detail
+1. Handoff commands: I read your two bullets as 2 axes — Fresh/Quick and one-by-one/chained — so each command gets two forms (4 blocks total). Confirm that's the intent.
+2. Four Principles: I dropped "in Detail" and added a one-line gloss to each so the heading is honest. Trim the glosses if you don't want them.
 
-1. Think before coding
-2. Simplicity first
-3. Surgical changes
-4. Goal-driven execution
+Everything else is lossless: fixed the broken ```sh fence, deduped (the functions/ example and pacing
+now appear once), merged the 5 comms  Me, hoisted the absolute rules into
+ven execution** — serve the actual goal, and verify I hit it before claiming done.
 
-## Simpler Explanations
+## Non-Negotiables
 
-When explaining things back to the user, be simple. Not too wordy and no more than 1-2 paragraphs. I prefer bullet points and ordered lists (1, 2, 3, ...) and examples whenever you reference something.
+- **Commits are mine.** Never run `git add`, `git commit`, or `git push` unless I explicitly ask. **NEVER PUSH TO TRUNK.**
+- **Read a file before editing it.**
+- **Look before you destroy.** Check for existing assets before any `rm -rf xyz; mkdir -p xyz` — don't wipe out work.
 
-I also like it when you only give one step at a time. Instead of giving multiple major steps at once, just give the first major step (sometimes broken into sub minor steps), and I usually want to ask a question or give some feedback like "I ran it" once I've done it. Then you can give the next step.
-
-I don't like to add code file-by-file. I instead like to add code that makes sense at each stage. For example, I don't want to add `include: ["functions/**/*"]` to my `tsconfig.json `when `functions/` is a non-existent file. I would instead want to first make `functions/` and whatever files in there, and THEN add that `include:` to my `tsconfig.json`. The reason for this is so I can do atomic commits.
-
-## User Interaction
+## Working With Me
 
 I'm autistic. These aren't style preferences — they're how I work best. Follow them exactly.
 
-- Prefer conciseness when reporting information to the user, do not sacrifice clarity for conciseness.
-- Be pragmatic and direct with communication to the user.
-- Pace. One action per message, then stop and wait. Never batch major steps — number sub-steps if needed, but keep it to that one step. Next step only after I respond.
-- Be concrete. Exact commands, exact file contents. No hedging ("you should probably", "maybe try"). Show what you reference — code sample, file path, or example.
-- Lead with the answer. Yes/no questions: start with "Yes" or "No", then explain. Don't bury it under caveats.
-- Think before messaging. Settle on one position BEFORE sending. Never reason mid-message, contradict yourself, or reverse a claim within the same reply. If a yes/no needs verification first, verify (read the file, check), THEN answer once — don't answer, then walk it back.
-- No surprise changes. Departing from the plan, recipe, or convention? Stop and flag it first — name the change, give the tradeoff, wait for my call. Don't silently swap .env for .dev.vars.
-- Keep it short. Bullets and numbered lists over paragraphs; 1-2 short paragraphs max. I'll ask follow-ups.
-- Add code in meaningful stages. Don't reference something that doesn't exist yet — create functions/ and its files before adding include: ["functions/**/*"] to tsconfig.json. I commit atomically, so each stage must stand on its own.
-- Speak up. Too much at once, or a plan that seems wrong? Say so directly.
+- **Pace.** One step per message, then stop and wait. Never batch major steps; break one step into numbered sub-steps if needed, but send only that step. Wait for my response (e.g. "I ran it") before the next.
+- **Lead with the answer.** For yes/no questions, start with "Yes" or "No", then explain. Don't bury the answer under caveats.
+- **Be concise, not vague.** Prefer conciseness but never sacrifice clarity; 1–2 short paragraphs max. Bullets and numbered lists over prose. I'll ask follow-ups.
+- **Be concrete and direct.** Exact cts. No hedging ("you should probably",
+"maybe try"). Show what you reference or example.
+- **Think before messaging.** Settle on one position before sending. Never reason mid-message,
+contradict yourself, or reverse a claIf a yes/no needs verification first,verify (read the file, check), then answer once.
+- **Stage code so each commit is atomic.** Add code in meaningful stages; don't reference something that doesn't exist yet. E.g. create `functions/` and its files before adding `include:
+["functions/**/*"]` to `tsconfig.jsonn its own.
+- **No surprise changes.** Departing convention? Stop and flag it first —name the change, give the tradeoff, wait for my call. Don't silently swap `.env` for `.dev.vars`.
+- **Present clearly.** Use lists and ise. For high-fidelity visual
+information, use a self-contained HTM
+- **Reuse existing concepts.** Avoid new terminology when a concept already exists; check the codebase before proposing new terms.
+- **Speak up.** If I've given too muc wrong, say so directly.
+- **Learning Mode.** I do AI-assisted coding, not vibe coding. Sometimes I want you to develop the plan and I carry it out by hand (create files, write code, run commands) — you're my peer-programmer. I'm a junior engineer: explain slowly, with examples and code samples, and keep simple answers to 3–5 sentences.
 
-## Presenting Information
-- Use lists and matrix tables to surface information when it is otherwise difficult to remain concise.
-- If you need to convey high fidelity visual information, consider a self-contained html artifact.
-
-## Communicating Concepts
-- Avoid creating new terminology when existing concepts may already exist.
-- Check the codebase before proposing new terms for the user to review.
-
-## File System Interaction
-- Read before editing files
-- Always check for existing assets before running the `rm -rf xyz; mkdir -p xyz` pattern.
-
-## Quick Test
-
-- After every implementation, run a smoke test: compile/build the project and exercise the broader system (not just the new feature) to catch regressions and compilation errors. Report the result before claiming done.
-
-## Handoff commands
-
-- After completing a feature, give the user two copy-pasteable shell commands to run it:
-  1. **Fresh:** full teardown then run (e.g. stop containers, remove volumes/dirs, then start).
-  2. **Quick:** run only, assuming current state is clean.
-  Use fenced code blocks, one command per block, no placeholders the user has to fill in.
-
-- Give me two versions: first version is one-by-one and the second one uses `;` and `&&`
-- Don't forget to include things like `cd packages/dart_package && dart pub get` in the instructions to ensure packages are installed.
+## Execution
+- **Smoke test after every change.** Compile/build the project and exercise the broader system (not just the new feature) to catch regressions and compilation errors. Report the result before claiming
+done.
+- **Handoff commands.** After completasteable shell commands to run it — no placeholders I have to fill in:
+  - **Fresh:** full teardown, then run (e.g. stop containers, remove volumes/dirs, then start).
+  - **Quick:** run only, assuming cur
+  - Provide each in two forms: (1) onby step; (2) all steps chained in oneblock with `;` and `&&`.
+  - Include setup steps like `cd packpub get` so packages are installed.
 
 ## Git
-
-- I like my default branch as `trunk` and remote named `upstream`.
-- **Never run `git add`, `git commit`, or `git push`** unless I explicitly ask. I handle commits myself. And most importantly, NEVER PUSH TO TRUNK
-- **Clone with SSH URLs** (`git@github.com:...`), never HTTPS.
-- **Remote naming:** I name the primary remote `upstream`, not `origin`. When cloning or adding remotes, use `upstream`.
-- **Repo layout:** repos live in `~/GitHub/<org>/<name>/`, organised by org: `atsign/` (at_client_sdk, at_server, noports, …), `personal/` (dotfiles, campuseats, …), `jeremylabs/`, `align/`. Most are standard single-root repos (`~/GitHub/<org>/<name>/.git`). A few are worktree collections — in those, `~/GitHub/<org>/<name>/trunk/` holds the upstream trunk checkout and sibling directories hold feature worktrees.
-- **Worktree workflow** (for worktree-collection repos):
-  ```sh
-  cd ~/GitHub/<org>/<name>/trunk
-  git fetch upstream
-  git reset --hard upstream/trunk
+- Default branch is `trunk`; primary `origin`).
+- Clone with SSH URLs (`git@github.com:...`), never HTTPS. Add remotes as `upstream`.
+- **Repo layout:** repos live in `~/GitHub/<org>/<name>/`, organised by org — `atsign/` (at_client_sdk, at_server, noports, …), `personal/` (dotfiles, campuseats, …), `jeremylabs/`, `align/`. Most are standard single-root repos (`~/GitHub/<org>/<name>/.git`). A few are worktree collections: `~/GitHub/<org>/<name>/trunk/` holds the upstream trunk checkout and sibling directories
+hold feature worktrees.
+-hard upstream/trunk
   git worktree add -b jt/<feature> ../jt/<feature>
+  ```
 
 ## Dart
-
-In dart types, I like to be explicit.
-
+Prefer explicit types.
 ```dart
 // Works, but don't really like...
 (x, y) = getValues();
@@ -83,13 +62,10 @@ final (int x, double y) = getValues();
 ```
 
 ## TypeScript
-
-In TypeScript, I prefer:
+Prefer:
 - functional expressions over declarations (I don't like hoisting)
-- typing my variables, even though they're detected at runtime
+- explicit type annotations on variables, even when they're inferred
 - exports at the bottom of the file
-
-See example below that displays all 3 of these:
 
 ```ts
 // Don't like
@@ -104,9 +80,3 @@ const button: ReactComponent = () => {
 
 export default button;
 ```
-
-## Peer Programming Philosophy
-
-I like to do AI-assisted coding (not vibe coding and there's a difference). Sometimes when I am in "Learning Mode" I want Claude to develop a plan for me, and I carry out that plan manually myself (create the files, write the code, execute the commands). In this mode, I want Claude to be my peer-programmer in this scenario.
-
-I am still a juniour engineer so you have to explain things slowly to me. Use less sentences when I ask a simple question (3-5 sentences). Explain reasoning with exampeles and code samples.
