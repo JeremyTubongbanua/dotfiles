@@ -27,7 +27,8 @@
       "Bash(gh pr list *)",
       "Bash(gh pr checks *)",
       "Bash(gh pr diff *)",
-      "Fetch(*)",
+      "WebFetch",
+      "WebSearch",
       "Read(*)"
     ],
     "deny": [],
