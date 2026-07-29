@@ -8,8 +8,7 @@ export VISUAL="nvim"
 # Aliases
 alias python='python3'
 alias pip='pip3'
-# alias cc='npx ccusage@latest'
-# alias cmcp='~/scripts/cmcp'
+alias h='herdr'
 
 # Functions
 ssh() {
@@ -45,13 +44,3 @@ case ":$PATH:" in
   *) export PATH="$PNPM_HOME/bin:$PATH" ;;
 esac
 # pnpm end
-#
-
-alias cls="clear && ls -la"
-
-# bun completions
-[ -s "/Users/jeremytubongbanua/.bun/_bun" ] && source "/Users/jeremytubongbanua/.bun/_bun"
-
-# bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
