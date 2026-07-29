@@ -81,3 +81,7 @@ const button: ReactComponent = () => {
 
 export default button;
 ```
+
+## Symlinks
+
+Before editing a file, quickly check if it's a symlink. It may even be a symlink pointing to a symlink. Be sure to propose edits to the source of truth.
