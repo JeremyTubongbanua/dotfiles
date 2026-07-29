@@ -48,3 +48,10 @@ esac
 #
 
 alias cls="clear && ls -la"
+
+# bun completions
+[ -s "/Users/jeremytubongbanua/.bun/_bun" ] && source "/Users/jeremytubongbanua/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
