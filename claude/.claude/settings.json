@@ -31,7 +31,7 @@
       "Bash(ls *)",
       "Bash(head *)",
       "Bash(tail *)",
-      "Bash(grep:*)",
+      "Bash(grep *)",
       "Grep",
       "Glob",
       "Bash(cat *)",
