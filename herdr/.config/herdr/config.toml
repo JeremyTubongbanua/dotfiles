@@ -1,0 +1,12 @@
+# herdr configuration
+# Place this file at ~/.config/herdr/config.toml
+
+[keys]
+# switch_tab intentionally unset: reset to herdr's default (prefix+1..9, i.e. Ctrl+b then 1/2)
+
+# Spaces (workspace) navigation with j/k, arrows still work too
+navigate_workspace_up = ["up", "k"]
+navigate_workspace_down = ["down", "j"]
+
+# Ctrl+Tab also cycles to the next tab (right, wraps at the end), same as ctrl+b n
+# next_tab = ["prefix+n", "ctrl+tab"]
