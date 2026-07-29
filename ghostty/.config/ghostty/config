@@ -7,7 +7,7 @@ font-family = "Fira Code Regular"
 
 # https://github.com/paper-design/paper-mono
 # font-family = "Paper Mono"
-font-size = 18
+font-size = 16
 
 # Theme
 # theme = Espresso
