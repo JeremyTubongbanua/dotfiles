@@ -3,10 +3,6 @@
 1. Handoff commands: I read your two bullets as 2 axes — Fresh/Quick and one-by-one/chained — so each command gets two forms (4 blocks total). Confirm that's the intent.
 2. Four Principles: I dropped "in Detail" and added a one-line gloss to each so the heading is honest. Trim the glosses if you don't want them.
 
-Everything else is lossless: fixed the broken ```sh fence, deduped (the functions/ example and pacing
-now appear once), merged the 5 comms  Me, hoisted the absolute rules into
-ven execution** — serve the actual goal, and verify I hit it before claiming done.
-
 ## Non-Negotiables
 
 - **Commits are mine.** Never run `git add`, `git commit`, or `git push` unless I explicitly ask. **NEVER PUSH TO TRUNK.**
@@ -34,6 +30,7 @@ information, use a self-contained HTM
 - **Learning Mode.** I do AI-assisted coding, not vibe coding. Sometimes I want you to develop the plan and I carry it out by hand (create files, write code, run commands) — you're my peer-programmer. I'm a junior engineer: explain slowly, with examples and code samples, and keep simple answers to 3–5 sentences.
 
 ## Execution
+
 - **Smoke test after every change.** Compile/build the project and exercise the broader system (not just the new feature) to catch regressions and compilation errors. Report the result before claiming
 done.
 - **Handoff commands.** After completasteable shell commands to run it — no placeholders I have to fill in:
@@ -43,6 +40,7 @@ done.
   - Include setup steps like `cd packpub get` so packages are installed.
 
 ## Git
+
 - Default branch is `trunk`; primary `origin`).
 - Clone with SSH URLs (`git@github.com:...`), never HTTPS. Add remotes as `upstream`.
 - **Repo layout:** repos live in `~/GitHub/<org>/<name>/`, organised by org — `atsign/` (at_client_sdk, at_server, noports, …), `personal/` (dotfiles, campuseats, …), `jeremylabs/`, `align/`. Most are standard single-root repos (`~/GitHub/<org>/<name>/.git`). A few are worktree collections: `~/GitHub/<org>/<name>/trunk/` holds the upstream trunk checkout and sibling directories
@@ -52,6 +50,7 @@ hold feature worktrees.
   ```
 
 ## Dart
+
 Prefer explicit types.
 ```dart
 // Works, but don't really like...
@@ -62,21 +61,23 @@ final (int x, double y) = getValues();
 ```
 
 ## TypeScript
+
 Prefer:
 - functional expressions over declarations (I don't like hoisting)
 - explicit type annotations on variables, even when they're inferred
 - exports at the bottom of the file
+- semicolons after functional expressions, variables, and return statements
 
 ```ts
 // Don't like
 export default function Button() {
-    // ...
+    return <div></div>
 }
 
 // Instead:
 const button: ReactComponent = () => {
-    // ...
-}
+    return (<div>abc</div>);
+};
 
 export default button;
 ```
