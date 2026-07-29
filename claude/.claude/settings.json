@@ -1,4 +1,31 @@
 {
+  "editorMode": "normal",
+  "effortLevel": "xhigh",
+  "enabledPlugins": {
+    "claude-mem@thedotmack": true
+  },
+  "extraKnownMarketplaces": {
+    "thedotmack": {
+      "source": {
+        "repo": "thedotmack/claude-mem",
+        "source": "github"
+      }
+    }
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "bash '/Users/jeremytubongbanua/.claude/hooks/herdr-agent-state.sh' session",
+            "timeout": 10,
+            "type": "command"
+          }
+        ],
+        "matcher": "*"
+      }
+    ]
+  },
   "permissions": {
     "allow": [
       "Bash(ls *)",
@@ -31,26 +58,13 @@
       "WebSearch",
       "Read(*)"
     ],
-    "deny": [],
     "ask": [],
-    "defaultMode": "default"
+    "defaultMode": "default",
+    "deny": []
   },
   "statusLine": {
-    "type": "command",
-    "command": "bash /Users/jeremytubongbanua/.claude/statusline-command.sh"
+    "command": "bash /Users/jeremytubongbanua/.claude/statusline-command.sh",
+    "type": "command"
   },
-  "extraKnownMarketplaces": {
-    "thedotmack": {
-      "source": {
-        "source": "github",
-        "repo": "thedotmack/claude-mem"
-      }
-    }
-  },
-  "effortLevel": "xhigh",
-  "theme": "auto",
-  "editorMode": "normal",
-  "enabledPlugins": {
-    "claude-mem@thedotmack": true
-  }
+  "theme": "auto"
 }
