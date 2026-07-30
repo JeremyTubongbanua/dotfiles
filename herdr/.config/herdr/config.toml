@@ -13,3 +13,11 @@ show_agent_labels_on_pane_borders = true
 [theme]
 name = "catppuccin"
 auto_switch = false
+
+# `Ctrl+b` then `Shift+m`: prompt for a directory + name, then build a 3-tab
+[[keys.command]]
+key = "prefix+shift+m"
+type = "popup"
+command = "/Users/jeremytubongbanua/.config/herdr/new-workspace.zsh"
+width = "70%"
+height = "40%"
