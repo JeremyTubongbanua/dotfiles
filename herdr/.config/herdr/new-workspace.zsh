@@ -42,18 +42,25 @@ label="${dir:t}"
 vared -p 'workspace name: ' label
 [[ -n $label ]] || die 'no workspace name given'
 
-[[ -d $dir ]] || mkdir -p -- "$dir" || die "could not create: $dir"
+if [[ -d $dir ]]; then
+  fresh=0
+else
+  fresh=1
+  mkdir -p -- "$dir" || die "could not create: $dir"
+fi
 dir="${dir:A}"
 
 # --- worktree collection? --------------------------------------------------
 
 trunk=
-for cand in "${dir:h}/trunk" "${dir:h:h}/trunk"; do
-  if [[ $cand != $dir && -e $cand/.git ]]; then
-    trunk="$cand"
-    break
-  fi
-done
+if (( fresh )); then
+  for cand in "${dir:h}/trunk" "${dir:h:h}/trunk"; do
+    if [[ $cand != $dir && -e $cand/.git ]]; then
+      trunk="$cand"
+      break
+    fi
+  done
+fi
 
 if [[ -n $trunk ]]; then
   root="${trunk:h}"
