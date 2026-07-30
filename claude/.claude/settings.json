@@ -35,6 +35,7 @@
     "ask": [],
     "defaultMode": "default"
   },
+  "model": "opus[1m]",
   "hooks": {
     "SessionStart": [
       {
@@ -64,7 +65,7 @@
       }
     }
   },
-  "effortLevel": "xhigh",
+  "effortLevel": "high",
   "theme": "auto",
   "editorMode": "normal"
 }
