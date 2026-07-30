@@ -6,12 +6,13 @@
 #   tab 2  "nvim"    shell in <dir>, runs nvim
 #   tab 3  "claude"  shell in <dir>, left idle for `claude` / `claude-work`
 #
-# <dir> is created if missing. If it sits inside a worktree collection -- i.e.
-# ../trunk or ../../trunk is a checkout -- that trunk is pruned, fetched and
-# reset --hard to upstream/trunk, then <dir> is added as a worktree before the
-# tabs are built. The branch name is <dir> relative to the collection root, so
-# ~/GitHub/atsign/noports/jt/feature -> jt/feature and .../jt-feature ->
-# jt-feature.
+# If <dir> already exists, no git work happens at all -- the tabs are just
+# opened there. Otherwise <dir> is created, and if it lands inside a worktree
+# collection -- i.e. ../trunk or ../../trunk is a checkout -- that trunk is
+# pruned, fetched and reset --hard to upstream/trunk, then <dir> is added as a
+# worktree before the tabs are built. The branch name is <dir> relative to the
+# collection root, so ~/GitHub/atsign/noports/jt/feature -> jt/feature and
+# .../jt-feature -> jt-feature.
 #
 # Bound in config.toml as a [[keys.command]] popup. Tab completes directories,
 # Ctrl+C cancels.
@@ -76,9 +77,7 @@ if [[ -n $trunk ]]; then
   git -C "$trunk" fetch --all --prune || die 'git fetch failed'
   git -C "$trunk" reset --hard "$remote/trunk" || die "git reset --hard $remote/trunk failed"
 
-  if [[ -e $dir/.git ]]; then
-    print -- "existing worktree, skipping add"
-  elif git -C "$trunk" show-ref --verify --quiet "refs/heads/$branch"; then
+  if git -C "$trunk" show-ref --verify --quiet "refs/heads/$branch"; then
     git -C "$trunk" worktree add "../$branch" "$branch" \
       || die "git worktree add ../$branch $branch failed"
   elif git -C "$trunk" show-ref --verify --quiet "refs/remotes/$remote/$branch"; then
