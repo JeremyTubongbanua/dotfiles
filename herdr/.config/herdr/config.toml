@@ -1,4 +1,5 @@
 onboarding = false
+show_agent_labels_on_pane_borders = true
 
 [keys]
 # when you do `Ctrl+b+w` you can navigate using `k` and `j`
@@ -9,7 +10,6 @@ navigate_workspace_down = ["down", "j"]
 # when you create a new workspace (via `Ctrl+b+N`) will prompt the workspace name
 prompt_new_workspace_name = true
 
-show_agent_labels_on_pane_borders = true
 [theme]
 name = "tokyo-night"
 auto_switch = false
