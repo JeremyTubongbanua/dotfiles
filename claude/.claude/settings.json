@@ -1,31 +1,4 @@
 {
-  "editorMode": "normal",
-  "effortLevel": "xhigh",
-  "enabledPlugins": {
-    "claude-mem@thedotmack": true
-  },
-  "extraKnownMarketplaces": {
-    "thedotmack": {
-      "source": {
-        "repo": "thedotmack/claude-mem",
-        "source": "github"
-      }
-    }
-  },
-  "hooks": {
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "command": "bash '/Users/jeremytubongbanua/.claude/hooks/herdr-agent-state.sh' session",
-            "timeout": 10,
-            "type": "command"
-          }
-        ],
-        "matcher": "*"
-      }
-    ]
-  },
   "permissions": {
     "allow": [
       "Bash(ls *)",
@@ -58,13 +31,40 @@
       "WebSearch",
       "Read(*)"
     ],
+    "deny": [],
     "ask": [],
-    "defaultMode": "default",
-    "deny": []
+    "defaultMode": "default"
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/Users/jeremytubongbanua/.claude/hooks/herdr-agent-state.sh' session",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
   },
   "statusLine": {
-    "command": "bash /Users/jeremytubongbanua/.claude/statusline-command.sh",
-    "type": "command"
+    "type": "command",
+    "command": "bash /Users/jeremytubongbanua/.claude/statusline-command.sh"
   },
-  "theme": "auto"
+  "enabledPlugins": {
+    "claude-mem@thedotmack": true
+  },
+  "extraKnownMarketplaces": {
+    "thedotmack": {
+      "source": {
+        "source": "github",
+        "repo": "thedotmack/claude-mem"
+      }
+    }
+  },
+  "effortLevel": "xhigh",
+  "theme": "auto",
+  "editorMode": "normal"
 }
