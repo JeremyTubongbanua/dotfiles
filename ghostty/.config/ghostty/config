@@ -29,12 +29,12 @@ keybind = shift+enter=text:\n
 
 # keybind = cmd+d=new_split:right
 # keybind = ctrl+w>period=resize_split:right,1000
-resize-overlay = always
-keybind = cmd+d=new_split:right
-keybind = ctrl+w>period=resize_split:right,200
-keybind = ctrl+w>comma=resize_split:left,200
+# keybind = ctrl+w>period=resize_split:right,200
+# keybind = ctrl+w>comma=resize_split:left,200
 
 # Cmd+[ / Cmd+]: directional split nav — stops at edges instead of wrapping
 # (default is goto_split:previous/next, which cycles back around)
+resize-overlay = always
+keybind = cmd+d=new_split:right
 keybind = super+[=goto_split:left
 keybind = super+]=goto_split:right
