@@ -31,6 +31,7 @@ information, use a self-contained HTM
 
 ## Execution
 
+- **One command per Bash call.** This applies only to commands *you* execute — not to handoff commands, which I run myself and want chained. Never bundle unrelated steps with `;` or `&&`; issue them as separate tool calls (in parallel when they don't depend on each other). `|` is fine when the pipe *is* the command (`grep foo src/ | head -20`), not when it's stapling steps together. Chaining defeats the permission allowlist, which matches the whole command string — `ls *` won't match `ls -la . ; cat foo`.
 - **Smoke test after every change.** Compile/build the project and exercise the broader system (not just the new feature) to catch regressions and compilation errors. Report the result before claiming
 done.
 - **Handoff commands.** After completasteable shell commands to run it — no placeholders I have to fill in:
