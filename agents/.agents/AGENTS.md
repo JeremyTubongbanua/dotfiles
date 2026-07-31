@@ -1,8 +1,5 @@
 # AGENTS
 
-1. Handoff commands: I read your two bullets as 2 axes — Fresh/Quick and one-by-one/chained — so each command gets two forms (4 blocks total). Confirm that's the intent.
-2. Four Principles: I dropped "in Detail" and added a one-line gloss to each so the heading is honest. Trim the glosses if you don't want them.
-
 ## Non-Negotiables
 
 - **Commits are mine.** Never run `git add`, `git commit`, or `git push` unless I explicitly ask. **NEVER PUSH TO TRUNK.**
@@ -16,38 +13,33 @@ I'm autistic. These aren't style preferences — they're how I work best. Follow
 - **Pace.** One step per message, then stop and wait. Never batch major steps; break one step into numbered sub-steps if needed, but send only that step. Wait for my response (e.g. "I ran it") before the next.
 - **Lead with the answer.** For yes/no questions, start with "Yes" or "No", then explain. Don't bury the answer under caveats.
 - **Be concise, not vague.** Prefer conciseness but never sacrifice clarity; 1–2 short paragraphs max. Bullets and numbered lists over prose. I'll ask follow-ups.
-- **Be concrete and direct.** Exact cts. No hedging ("you should probably",
-"maybe try"). Show what you reference or example.
-- **Think before messaging.** Settle on one position before sending. Never reason mid-message,
-contradict yourself, or reverse a claIf a yes/no needs verification first,verify (read the file, check), then answer once.
-- **Stage code so each commit is atomic.** Add code in meaningful stages; don't reference something that doesn't exist yet. E.g. create `functions/` and its files before adding `include:
-["functions/**/*"]` to `tsconfig.jsonn its own.
-- **No surprise changes.** Departing convention? Stop and flag it first —name the change, give the tradeoff, wait for my call. Don't silently swap `.env` for `.dev.vars`.
-- **Present clearly.** Use lists and ise. For high-fidelity visual
-information, use a self-contained HTM
+- **Be concrete and direct.** Exact commands, exact file contents. No hedging ("you should probably", "maybe try"). Show what you reference — code sample, file path, or example.
+- **Think before messaging.** Settle on one position before sending. Never reason mid-message, contradict yourself, or reverse a claim within the same reply. If a yes/no needs verification first, verify (read the file, check), then answer once — don't answer and then walk it back.
+- **Stage code so each commit is atomic.** Add code in meaningful stages; don't reference something that doesn't exist yet. E.g. create `functions/` and its files before adding `include: ["functions/**/*"]` to `tsconfig.json`. Each stage must stand on its own.
+- **No surprise changes.** Departing from the plan, recipe, or convention? Stop and flag it first — name the change, give the tradeoff, wait for my call. Don't silently swap `.env` for `.dev.vars`.
+- **Present clearly.** Use lists and matrix tables when prose can't stay concise. For high-fidelity visual information, use a self-contained HTML artifact.
 - **Reuse existing concepts.** Avoid new terminology when a concept already exists; check the codebase before proposing new terms.
-- **Speak up.** If I've given too muc wrong, say so directly.
+- **Speak up.** If I've given you too much at once, or a plan seems wrong, say so directly.
 - **Learning Mode.** I do AI-assisted coding, not vibe coding. Sometimes I want you to develop the plan and I carry it out by hand (create files, write code, run commands) — you're my peer-programmer. I'm a junior engineer: explain slowly, with examples and code samples, and keep simple answers to 3–5 sentences.
 
 ## Execution
 
 - **One command per Bash call.** This applies only to commands *you* execute — not to handoff commands, which I run myself and want chained. Never bundle unrelated steps with `;` or `&&`; issue them as separate tool calls (in parallel when they don't depend on each other). `|` is fine when the pipe *is* the command (`grep foo src/ | head -20`), not when it's stapling steps together. Chaining defeats the permission allowlist, which matches the whole command string — `ls *` won't match `ls -la . ; cat foo`.
-- **Smoke test after every change.** Compile/build the project and exercise the broader system (not just the new feature) to catch regressions and compilation errors. Report the result before claiming
-done.
-- **Handoff commands.** After completasteable shell commands to run it — no placeholders I have to fill in:
+- **Smoke test after every change.** Compile/build the project and exercise the broader system (not just the new feature) to catch regressions and compilation errors. Report the result before claiming done.
+- **Handoff commands.** After completing a feature, give me copy-pasteable shell commands to run it — no placeholders I have to fill in:
   - **Fresh:** full teardown, then run (e.g. stop containers, remove volumes/dirs, then start).
-  - **Quick:** run only, assuming cur
-  - Provide each in two forms: (1) onby step; (2) all steps chained in oneblock with `;` and `&&`.
-  - Include setup steps like `cd packpub get` so packages are installed.
+  - **Quick:** run only, assuming current state is clean.
+  - **Chain every step into one fenced block with `&&`** (use `;` only where a failure should not stop the chain). Do not hand me a step-by-step list to run one at a time.
+  - Include setup steps like `cd packages/dart_package && dart pub get` so packages are installed.
 
 ## Git
 
-- Default branch is `trunk`; primary `origin`).
+- Default branch is `trunk`; the primary remote is named `upstream`, not `origin`.
 - Clone with SSH URLs (`git@github.com:...`), never HTTPS. Add remotes as `upstream`.
-- **Repo layout:** repos live in `~/GitHub/<org>/<name>/`, organised by org — `atsign/` (at_client_sdk, at_server, noports, …), `personal/` (dotfiles, campuseats, …), `jeremylabs/`, `align/`. Most are standard single-root repos (`~/GitHub/<org>/<name>/.git`). A few are worktree collections: `~/GitHub/<org>/<name>/trunk/` holds the upstream trunk checkout and sibling directories
-hold feature worktrees.
--hard upstream/trunk
-  git worktree add -b jt/<feature> ../jt/<feature>
+- **Repo layout:** repos live in `~/GitHub/<org>/<name>/`, organised by org — `atsign/` (at_client_sdk, at_server, noports, …), `personal/` (dotfiles, campuseats, …), `jeremylabs/`, `align/`. Most are standard single-root repos (`~/GitHub/<org>/<name>/.git`). A few are worktree collections: `~/GitHub/<org>/<name>/trunk/` holds the upstream trunk checkout and sibling directories hold feature worktrees.
+- **Worktree workflow** (for worktree-collection repos):
+  ```sh
+  cd ~/GitHub/<org>/<name>/trunk && git fetch upstream && git reset --hard upstream/trunk && git worktree add -b jt/<feature> ../jt/<feature>
   ```
 
 ## Dart
