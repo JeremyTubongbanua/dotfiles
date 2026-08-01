@@ -6,6 +6,7 @@
 - bufferline -> nothing
 - nvim-tree -> oil
 - snacks.picker
+- gitsigns -> mini.diff
 - persistence
 - mini.ai
 - mini.surround
@@ -75,20 +76,25 @@ GitHub Copilot in Neovim
 - `:Copilot disable`
 - `:Copilot status`
 
-### gitsigns.lua
+### mini-diff.lua
 
-Git integration - shows git changes in sign column
+Inline git diff signs (replaced gitsigns.nvim)
 
-- Default left gutter signs show added, changed, and deleted lines
-- `<leader>gph` - git preview hunk
-- `<leader>gsh` - git stage hunk
-- `<leader>grh` - git reset hunk
-- `<leader>guh` - undo stage hunk
-- `<leader>gb` - git blame current line
-- `<leader>gB` - toggle current line blame
-- `<leader>gD` - git diff current file
+- Left gutter signs show added, changed, and deleted lines
+- `<leader>gph` - toggle the inline diff overlay (shows the old lines in place)
+- `<leader>gsh` - git stage hunk (normal: hunk under cursor, visual: selection)
+- `<leader>grh` - git reset hunk (normal: hunk under cursor, visual: selection)
 - `]c` - next git hunk
 - `[c` - previous git hunk
+- `ih` - hunk textobject, e.g. `dih` to delete a hunk
+
+mini.diff has no blame, unstage-hunk, or diffthis, so these hand off to fugitive:
+
+- `<leader>guh` - opens `:Git` status, where `u` unstages
+- `<leader>gb` - `:Git blame` split
+- `<leader>gD` - `:Gvdiffsplit` against the index
+
+`<leader>gB` (toggle inline line blame) is gone - nothing equivalent exists.
 
 ### harpoon2.lua
 
