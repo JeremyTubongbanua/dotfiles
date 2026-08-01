@@ -1,3 +1,4 @@
+vim.opt.swapfile = false
 vim.opt.showcmd = true -- shows commands while typing (like 14j) on the bottom right
 vim.opt.cursorline = true -- highlights line that cursor is on
 vim.opt.termguicolors = true -- enable 24-bit colors, uses colours from terminal (Ghostty)
