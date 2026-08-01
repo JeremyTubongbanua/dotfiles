@@ -18,6 +18,3 @@ vim.opt.rtp:prepend(lazypath) -- add lazy.nvim to runtime path
 
 -- 'require' will look at the runtime path to find a directory (module) called 'lazy'
 require("lazy").setup('plugins') -- load plugins from 'plugins' directory
-
-vim.keymap.set('n', '<leader>l', ':Lazy<CR>', { desc = 'Lazy' })
-
