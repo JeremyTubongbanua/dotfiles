@@ -15,9 +15,14 @@ ssh() {
     TERM=xterm-256color command ssh "$@"
 }
 
-darkmode() { osascript -e 'tell app "System Events" to tell appearance preferences to set dark mode to true'; }
-lightmode() { osascript -e 'tell app "System Events" to tell appearance preferences to set dark mode to false'; }
-togglemode() { osascript -e 'tell app "System Events" to tell appearance preferences to set dark mode to not dark mode'; }
+darkmode() { osascript -e 'tell app "System Events" to tell appearance preferences to set dark mode to true'; _nvim_background dark; }
+lightmode() { osascript -e 'tell app "System Events" to tell appearance preferences to set dark mode to false'; _nvim_background light; }
+togglemode() {
+  local target=dark
+  [[ $(defaults read -g AppleInterfaceStyle 2>/dev/null) == Dark ]] && target=light
+  osascript -e 'tell app "System Events" to tell appearance preferences to set dark mode to not dark mode'
+  _nvim_background $target
+}
 
 export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
 export PATH="/Applications/Docker.app/Contents/Resources/bin:$PATH"
