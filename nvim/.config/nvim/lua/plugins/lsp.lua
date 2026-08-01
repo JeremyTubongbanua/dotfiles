@@ -40,24 +40,12 @@ return {
     })
 
     vim.lsp.config.lua_ls = {
-      settings = {
-        Lua = {
-          runtime = { version = 'LuaJIT' },
-          diagnostics = { globals = { 'vim' } },
-          workspace = {
-            library = vim.api.nvim_get_runtime_file('', true),
-            checkThirdParty = false,
-          },
-          telemetry = { enable = false },
-        },
-      },
+      settings = { Lua = { diagnostics = { globals = { 'vim' } } } },
     }
+    -- lspconfig ships bash and sh; zsh is the only addition
     vim.lsp.config.bashls = {
-      cmd = { 'bash-language-server', 'start' },
-      filetypes = { 'sh', 'bash', 'zsh' },
-      root_markers = { '.git', '.bashrc', '.bash_profile', '.zshrc' },
+      filetypes = { 'bash', 'sh', 'zsh' },
     }
-    vim.lsp.config.eslint = {}
 
     -- typescript-language-server takes the same shape under `typescript` and
     -- `javascript`, so build it once and reuse. Hints are served but not shown
@@ -94,16 +82,6 @@ return {
         },
       },
     }
-    vim.lsp.config.gopls = {
-      root_markers = { 'go.work', 'go.mod', '.git' },
-    }
-    vim.lsp.config.jsonls = {}
-    vim.lsp.config.marksman = {}
-    vim.lsp.config.yamlls = {}
-    vim.lsp.config.astro = {
-      root_markers = { 'astro.config.mjs', 'astro.config.js', 'package.json', '.git' },
-    }
-
     vim.lsp.config.tailwindcss = {
       settings = {
         tailwindCSS = {
@@ -148,25 +126,10 @@ return {
       end,
     }
 
+    -- lspconfig ships the rest; these two differ from its defaults
     vim.lsp.config.dartls = {
-      cmd = { 'dart', 'language-server', '--protocol=lsp' },
-      root_markers = { 'pubspec.yaml' },
-      init_options = {
-        onlyAnalyzeProjectsWithOpenFiles = false,
-        suggestFromUnimportedLibraries = true,
-        closingLabels = true,
-        outline = true,
-        flutterOutline = true,
-      },
-      settings = {
-        dart = {
-          analysisExcludedFolders = {},
-          completeFunctionCalls = true,
-          showTodos = true,
-          updateImportsOnRename = true,
-          includeDependenciesInWorkspaceSymblols = true,
-        }
-      }
+      init_options = { onlyAnalyzeProjectsWithOpenFiles = false },
+      settings = { dart = { updateImportsOnRename = true } },
     }
 
     vim.lsp.enable({
