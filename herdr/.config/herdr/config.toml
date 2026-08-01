@@ -12,7 +12,7 @@ show_agent_labels_on_pane_borders = true
 
 
 [theme]
-name = "tokyo-night"
+name = "catppuccin"
 auto_switch = false
 
 # `Ctrl+b` then `Shift+m`: prompt for a directory + name, then build a 3-tab

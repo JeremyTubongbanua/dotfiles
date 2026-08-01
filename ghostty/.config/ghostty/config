@@ -11,7 +11,8 @@ font-size = 16
 
 # Theme
 # theme = Espresso
-theme = "light:Flexoki Light,dark:TokyoNight Storm"
+theme = "light:Catppuccin Latte,dark:Catppuccin Mocha"
+# theme = "light:Flexoki Light,dark:TokyoNight Storm"
 
 # Background
 background-opacity = 0.95
