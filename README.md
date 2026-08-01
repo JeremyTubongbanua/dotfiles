@@ -12,6 +12,8 @@ nvim/        →  ~/.config/nvim/
 ghostty/     →  ~/.config/ghostty/
 agents/      →  ~/.agents/
 claude/      →  ~/.claude/{CLAUDE.md, settings.json, agents/}
+claude-work/ →  ~/.claude-work/{CLAUDE.md, settings.json, agents/, skills/}
+herdr/       →  ~/.config/herdr/
 scripts/     →  ~/.scripts/
 dockerfiles/ →  ~/.dockerfiles/
 linearmouse/ →  ~/.config/linearmouse/linearmouse.json
@@ -25,10 +27,10 @@ gh/          →  ~/.config/gh/config.yml
 
 ## Install
 
+Install or repair every package:
+
 ```sh
-brew install stow
-cd ~/GitHub/dotfiles
-stow --target "$HOME" --restow <package>
+brew install stow && cd ~/GitHub/personal/dotfiles && stow --target "$HOME" --restow agents claude claude-work docker dockerfiles gh ghostty git herdr linearmouse nvim scripts ssh zsh
 ```
 
 Stow packages are the top-level directories in this repo. Each package mirrors the path it should create under `$HOME`.
@@ -36,33 +38,30 @@ Stow packages are the top-level directories in this repo. Each package mirrors t
 Useful commands:
 
 ```sh
-# Preview one or more packages without changing anything.
-stow --target "$HOME" --simulate --verbose --restow git gh ssh
+# Preview every package before attempting a full restow.
+cd ~/GitHub/personal/dotfiles && stow --target "$HOME" --simulate --verbose --restow agents claude claude-work docker dockerfiles gh ghostty git herdr linearmouse nvim scripts ssh zsh
 
-# Install or repair packages.
-stow --target "$HOME" --restow git
-stow --target "$HOME" --restow git gh ssh
+# Preview one or more packages without changing anything.
+cd ~/GitHub/personal/dotfiles && stow --target "$HOME" --simulate --verbose --restow git gh ssh
+
+# Install or repair a subset of packages.
+cd ~/GitHub/personal/dotfiles && stow --target "$HOME" --restow git gh ssh
 
 # Remove one package's symlinks from $HOME.
-stow --target "$HOME" --delete git
-
-# Preview every package before attempting a full restow.
-stow --target "$HOME" --simulate --verbose --restow zsh nvim ghostty agents claude scripts dockerfiles linearmouse ssh docker git gh
+cd ~/GitHub/personal/dotfiles && stow --target "$HOME" --delete git
 ```
 
 If a target path is already a real file, stow refuses to clobber it. Compare it with the repo copy, move the real file aside, then restow the package:
 
 ```sh
-diff -u ~/.gitconfig ~/GitHub/dotfiles/git/.gitconfig
-mkdir -p ~/.dotfiles-backup
-mv ~/.gitconfig ~/.dotfiles-backup/.gitconfig
-stow --target "$HOME" --restow git
+diff -u ~/.gitconfig ~/GitHub/personal/dotfiles/git/.gitconfig
+mkdir -p ~/.dotfiles-backup && mv ~/.gitconfig ~/.dotfiles-backup/.gitconfig && cd ~/GitHub/personal/dotfiles && stow --target "$HOME" --restow git
 ```
 
 ## Adding or Changing Tracked Files
 
-See [AGENTS.md](AGENTS.md). Short version: drop the file into the right package directory at the path it would have under `$HOME` with leading dots preserved, then restow that package:
+See [AGENTS.md](AGENTS.md). Short version: drop the file into the right package directory at the path it would have under `$HOME` with leading dots preserved, then restow everything:
 
 ```sh
-stow --target "$HOME" --restow <package>
+cd ~/GitHub/personal/dotfiles && stow --target "$HOME" --restow agents claude claude-work docker dockerfiles gh ghostty git herdr linearmouse nvim scripts ssh zsh
 ```
