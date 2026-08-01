@@ -5,8 +5,7 @@
 - toggleterm -> tmux
 - bufferline -> nothing
 - nvim-tree -> oil
-- telescope --> fzf lua
-  - snacks
+- snacks.picker
 - persistence
 - mini.ai
 - mini.surround
@@ -178,13 +177,21 @@ Contains context for nvim tree sitter
 
 - `mode = 'top'` - shows context at the top of the window (for example what class or function you're in)
 
-### telescope.lua
+### snacks.lua
 
-Fuzzy finder
+Fuzzy finder (snacks.picker), plus dashboard, indent guides, notifier, etc.
 
 - `<leader><leader>` - find file
 - `<leader>ff` - find file
 - `<leader>fg` - live grep
+
+The picker is modal. It opens in insert mode so you can type to filter:
+
+- `<Esc>` - drop to normal mode
+- `j` / `k` - move down / up the result list
+- `gg` / `G` - jump to first / last result
+- `i` - back to insert mode
+- `q` or `<Esc>` (normal mode) - close the picker
 
 ### toggleterm.lua
 
