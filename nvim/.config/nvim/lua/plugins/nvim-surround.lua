@@ -1,4 +1,4 @@
--- See README.md for usage details
+-- let's me do `cs"'` (change " to ')
 return {
   'kylechui/nvim-surround',
   config = function()
