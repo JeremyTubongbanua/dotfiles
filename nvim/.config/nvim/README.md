@@ -120,12 +120,14 @@ Markdown preview in browser
 
 ### lsp.lua
 
-LSP configuration with Mason for managing language servers
+LSP configuration. Mason is gone - server binaries are not managed by neovim.
+They come from nix (`xavierchanth/dotfiles` `modules/shared/packages.nix`),
+rustup (rust-analyzer), the system toolchain (clangd, dart), or a project's
+`node_modules` (biome). A server that will not start means the binary is not on
+PATH.
 
-- `:Mason` - opens mason ui
 - `:checkhealth lsp` - to check if LSP is configured
-
-In the Mason UI, do g? to open help
+- `:LspInfo` / `:che vim.lsp` - which servers attached to this buffer
 
 #### LSP Keymaps (when LSP is attached)
 
