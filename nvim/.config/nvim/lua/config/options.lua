@@ -8,12 +8,14 @@ vim.opt.wrap = true -- true => wrap lines | false => don't wrap lines
 vim.opt.virtualedit = 'block' -- allow cursor to move where there is no text in visual block mode
 vim.opt.isfname:append("@-@") -- treats `@` as a valid filename character
 -- vim.opt.guicursor = "" -- basically when you're in insert mode, the normal mode cursor will remain. Cursor will always be in block mode
+vim.opt.splitright = true -- vertical splits will now open to the right
+vim.opt.clipboard = 'unnamedplus' -- synchronize with system clipboard
+vim.opt.inccommand = 'split' -- show effects of substitution incrementally in a split
 
--- Editing feel
-vim.opt.autowrite = true
-vim.opt.autoread = true
+vim.opt.autowrite = true -- auto saves current buffer before commands that leave it
+vim.opt.autoread = true -- when file is edited outside of neovim, neovim will autodetect
 
--- tab stuff
+-- Tab stuff
 vim.opt.backspace = '2' -- backspace works over 2 space indents
 vim.opt.tabstop = 2 -- make tabwidth 2
 vim.opt.softtabstop = 2 -- make tabwidth 2
@@ -21,12 +23,6 @@ vim.opt.shiftwidth = 2 -- make tabwidth 2
 vim.opt.expandtab = true -- any tab keys into spaces, not literal tab characters
 vim.opt.smartindent = true -- nvim will intelligently indent lines based on context
 vim.opt.shiftround = true -- >> and << shift will snap to multiples of `shiftwidth`
-
--- Split documentation below instead of top
-vim.opt.splitright = true -- vertical splits will now open to the right
-
-vim.opt.clipboard = 'unnamedplus' -- synchronize with system clipboard
-vim.opt.inccommand = 'split' -- show effects of substitution incrementally in a split
 
 -- Line numbers
 vim.opt.number = true -- set line numbers
