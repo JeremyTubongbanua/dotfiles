@@ -17,51 +17,22 @@ return {
       automatic_installation = true,
     })
 
-    -- Diagnostic display. Neovim 0.11+ ships with virtual_text OFF, so without
-    -- this block LSP errors are an unlabelled sign in the gutter and nothing else.
+    -- Diagnostic display. The message text itself is drawn by
+    -- tiny-inline-diagnostic.nvim; everything set here is the surrounding chrome
+    -- (gutter sign, undercurl on the bad range, the <leader>vd float).
     vim.diagnostic.config({
       severity_sort = true, -- errors render on top of warnings on the same line
-      underline = true,
-      signs = true,
+      underline = true, -- marks *which* token is wrong; the plugin only shows text
+      signs = true, -- gutter sign, different column, doesn't collide
       update_in_insert = false, -- don't churn diagnostics while typing
-      -- owned by tiny-inline-diagnostic.nvim, which renders the message inline
-      -- under the cursor line instead of truncating it at end-of-line. Leaving
-      -- this on would draw every diagnostic twice.
+      -- tiny-inline-diagnostic.nvim owns the message display. Leaving this on
+      -- would append a truncated copy at end-of-line, i.e. draw everything twice.
+      -- virtual_lines is left at its default (false) for the same reason.
       virtual_text = false,
       float = {
         border = 'rounded',
         source = 'if_many',
       },
-    })
-
-    -- tokyonight paints diagnostics with its *darkest* red (red1 #c53b53), and
-    -- Neovim only undercurls the erroring range without recolouring it -- so type
-    -- errors read as dim maroon. Force the bright red and add `fg` to the underline
-    -- group so the offending token itself goes red: diagnostic extmarks sit at
-    -- priority 150, above treesitter's 100, so this fg wins over syntax colours.
-    local error_red = '#ff757f'
-    local function brighten_error_diagnostics()
-      -- merge rather than replace, to keep each group's existing bg/attrs
-      local function tint(group, overrides)
-        local hl = vim.api.nvim_get_hl(0, { name = group, link = false })
-        vim.api.nvim_set_hl(0, group, vim.tbl_extend('force', hl, overrides))
-      end
-      for _, group in ipairs({
-        'DiagnosticError',
-        'DiagnosticSignError',
-        'DiagnosticFloatingError',
-        'DiagnosticVirtualTextError',
-      }) do
-        tint(group, { fg = error_red })
-      end
-      tint('DiagnosticUnderlineError', { fg = error_red, sp = error_red, undercurl = true })
-    end
-
-    brighten_error_diagnostics()
-    -- `:colorscheme` clears user highlights, so reapply on every theme switch
-    vim.api.nvim_create_autocmd('ColorScheme', {
-      desc = 'Keep bright red LSP error highlights across colorscheme changes',
-      callback = brighten_error_diagnostics,
     })
 
     vim.lsp.config('*', {
