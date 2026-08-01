@@ -21,7 +21,15 @@ return {
     }, -- brew install imagemagick ghostscript
     indent = { enabled = true },
     input = { enabled = true },
-    picker = { enabled = true },
+    picker = {
+      enabled = true,
+      sources = {
+        -- `hidden` shows this repo's dotted dirs (nvim/.config/...); snacks'
+        -- rg/fd/find commands already prune .git, so only .jj needs excluding
+        files = { hidden = true, exclude = { ".jj" } },
+        grep = { hidden = true, exclude = { ".jj" } },
+      },
+    },
     notifier = { enabled = true },
     quickfile = { enabled = true },
     rename = { enabled = true },
@@ -31,5 +39,10 @@ return {
     -- windows = { enabled = true },
     -- words = { enabled = true },
     -- zen = { enabled = true },
+  },
+  keys = {
+    { "<leader><leader>", function() Snacks.picker.files() end, desc = "Find Files" },
+    { "<leader>ff", function() Snacks.picker.files() end, desc = "Find Files" },
+    { "<leader>fg", function() Snacks.picker.grep() end, desc = "Live Grep" },
   },
 }
