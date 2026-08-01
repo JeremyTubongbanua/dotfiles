@@ -15,6 +15,10 @@ ssh() {
     TERM=xterm-256color command ssh "$@"
 }
 
+darkmode() { osascript -e 'tell app "System Events" to tell appearance preferences to set dark mode to true'; }
+lightmode() { osascript -e 'tell app "System Events" to tell appearance preferences to set dark mode to false'; }
+togglemode() { osascript -e 'tell app "System Events" to tell appearance preferences to set dark mode to not dark mode'; }
+
 export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
 export PATH="/Applications/Docker.app/Contents/Resources/bin:$PATH"
 export PATH="/opt/homebrew/bin:$PATH"
