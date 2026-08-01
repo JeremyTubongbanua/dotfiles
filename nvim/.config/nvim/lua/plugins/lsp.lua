@@ -17,39 +17,30 @@ return {
       automatic_installation = true,
     })
 
-    -- Diagnostic display. The message text itself is drawn by
-    -- tiny-inline-diagnostic.nvim; everything set here is the surrounding chrome
-    -- (gutter sign, undercurl on the bad range, the <leader>vd float).
     vim.diagnostic.config({
       severity_sort = true, -- errors render on top of warnings on the same line
       underline = true, -- marks *which* token is wrong; the plugin only shows text
       signs = true, -- gutter sign, different column, doesn't collide
       update_in_insert = false, -- don't churn diagnostics while typing
-      -- tiny-inline-diagnostic.nvim owns the message display. Leaving this on
-      -- would append a truncated copy at end-of-line, i.e. draw everything twice.
-      -- virtual_lines is left at its default (false) for the same reason.
       virtual_text = false,
       float = {
         border = 'rounded',
         source = 'if_many',
       },
     })
-
     vim.lsp.config('*', {
       root_markers = { '.git' },
     })
-
     vim.lsp.config.lua_ls = {
       settings = { Lua = { diagnostics = { globals = { 'vim' } } } },
     }
-    -- lspconfig ships bash and sh; zsh is the only addition
     vim.lsp.config.bashls = {
-      filetypes = { 'bash', 'sh', 'zsh' },
+      filetypes = {
+        'bash',
+        'sh',
+        'zsh'
+      },
     }
-
-    -- typescript-language-server takes the same shape under `typescript` and
-    -- `javascript`, so build it once and reuse. Hints are served but not shown
-    -- until `<leader>vh` toggles them on (see keymaps below).
     local ts_inlay_hints = {
       includeInlayParameterNameHints = 'literals', -- 'none' | 'literals' | 'all'
       includeInlayParameterNameHintsWhenArgumentMatchesName = false,
@@ -65,40 +56,47 @@ return {
       quotePreference = 'auto',
       jsxAttributeCompletionStyle = 'auto', -- fills `={}` / `=""` on JSX props
     }
-
-    vim.lsp.config.ts_ls = {
-      settings = {
-        -- tsserver won't offer function-call snippets without this
-        completions = { completeFunctionCalls = true },
-        typescript = {
-          inlayHints = ts_inlay_hints,
-          preferences = ts_preferences,
-          updateImportsOnFileMove = { enabled = 'always' },
+    -- vtsls replaces ts_ls. It speaks VSCode setting names rather than the raw
+    -- tsserver protocol ones, so the two tables above are translated here --
+    -- note `suppressWhenArgumentMatchesName` is the inverse of the ts_ls key.
+    local vtsls_ts = {
+      inlayHints = {
+        parameterNames = {
+          enabled = ts_inlay_hints.includeInlayParameterNameHints,
+          suppressWhenArgumentMatchesName = not ts_inlay_hints
+            .includeInlayParameterNameHintsWhenArgumentMatchesName,
         },
-        javascript = {
-          inlayHints = ts_inlay_hints,
-          preferences = ts_preferences,
-          updateImportsOnFileMove = { enabled = 'always' },
-        },
+        parameterTypes = { enabled = ts_inlay_hints.includeInlayFunctionParameterTypeHints },
+        variableTypes = { enabled = ts_inlay_hints.includeInlayVariableTypeHints },
+        propertyDeclarationTypes = { enabled = ts_inlay_hints.includeInlayPropertyDeclarationTypeHints },
+        functionLikeReturnTypes = { enabled = ts_inlay_hints.includeInlayFunctionLikeReturnTypeHints },
+        enumMemberValues = { enabled = ts_inlay_hints.includeInlayEnumMemberValueHints },
       },
+      preferences = {
+        importModuleSpecifier = ts_preferences.importModuleSpecifier,
+        quoteStyle = ts_preferences.quotePreference,
+        jsxAttributeCompletionStyle = ts_preferences.jsxAttributeCompletionStyle,
+      },
+      suggest = {
+        autoImports = ts_preferences.includeCompletionsForModuleExports,
+        completeFunctionCalls = true,
+      },
+      updateImportsOnFileMove = { enabled = 'always' },
+    }
+    vim.lsp.config.vtsls = {
+      settings = { typescript = vtsls_ts, javascript = vtsls_ts },
     }
     vim.lsp.config.tailwindcss = {
       settings = {
         tailwindCSS = {
-          -- also complete classes inside cn()/clsx()/cva() wrappers, not just className
           classFunctions = { 'cn', 'clsx', 'cx', 'cva', 'tw', 'twMerge' },
         },
       },
-      -- Overrides lspconfig's root_dir. Tailwind v4 needs no tailwind.config.*, so
-      -- lspconfig falls back to `.git` -- which starts this server in every git repo
-      -- for any js/ts/css/markdown buffer. Require a real Tailwind signal instead.
       root_dir = function(bufnr, on_dir)
         local fname = vim.api.nvim_buf_get_name(bufnr)
         if fname == '' then
           return
         end
-
-        -- v3 and earlier: an explicit config file marks the project root
         local config = vim.fs.find({
           'tailwind.config.js', 'tailwind.config.cjs', 'tailwind.config.mjs', 'tailwind.config.ts',
           'postcss.config.js', 'postcss.config.cjs', 'postcss.config.mjs', 'postcss.config.ts',
@@ -107,9 +105,6 @@ return {
           on_dir(vim.fs.dirname(config))
           return
         end
-
-        -- v4: no config file, so use the nearest package.json that actually
-        -- depends on tailwindcss. In a monorepo this lands on the package dir.
         local pkgs = vim.fs.find('package.json', { path = fname, upward = true, limit = math.huge })
         for _, pkg in ipairs(pkgs) do
           local ok, data = pcall(vim.json.decode, table.concat(vim.fn.readfile(pkg), '\n'))
@@ -122,68 +117,59 @@ return {
             end
           end
         end
-        -- no Tailwind anywhere above this file: never call on_dir, server stays down
       end,
     }
-
-    -- lspconfig ships the rest; these two differ from its defaults
     vim.lsp.config.dartls = {
       init_options = { onlyAnalyzeProjectsWithOpenFiles = false },
       settings = { dart = { updateImportsOnRename = true } },
     }
-
     vim.lsp.enable({
+      -- scripting
       'lua_ls',
       'bashls',
-      'eslint',
-      'ts_ls',
+      'ruff',
+      'basedpyright',
+      -- static
       'gopls',
-      'jsonls',
-      'marksman',
-      'yamlls',
-      'astro',
-      'tailwindcss',
       'dartls',
+      -- systems
+      'clangd',
+      'neocmake',
+      'rust_analyzer',
+      'zls',
+      -- markup
+      'jsonls',
+      'yamlls',
+      'marksman',
+      'tinymist',
+      'tombi',
+      -- docker
+      'docker_compose_language_service',
+      'dockerls',
+      -- web
+      'biome',
+      'eslint',
+      'astro',
+      'svelte',
+      'tailwindcss',
+      'vtsls',
     })
-
-    -- LSP Keymaps
     vim.api.nvim_create_autocmd("LspAttach", {
       callback = function(event)
         vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "Go to Definition", buffer = event.buf })
         vim.keymap.set("n", "K", vim.lsp.buf.hover, { desc = "LSP Hover", buffer = event.buf })
-        -- vim.keymap.set("n", "<leader>vws", vim.lsp.buf.workspace_symbol, { desc = "LSP Workspace Symbol", buffer = event.buf })
         vim.keymap.set("n", "<leader>vd", vim.diagnostic.open_float, { desc = "View Diagnostics", buffer = event.buf })
-        -- `]` is forward and `[` is backward, per vim convention. goto_next/goto_prev
-        -- are deprecated in 0.11+; vim.diagnostic.jump replaces both.
         vim.keymap.set("n", "]d", function()
           vim.diagnostic.jump({ count = 1, float = true })
         end, { desc = "Next Diagnostic", buffer = event.buf })
         vim.keymap.set("n", "[d", function()
           vim.diagnostic.jump({ count = -1, float = true })
         end, { desc = "Previous Diagnostic", buffer = event.buf })
-        -- silence the inline message when it's in the way of reading the code
-        vim.keymap.set("n", "<leader>vv", function()
-          require('tiny-inline-diagnostic').toggle()
-        end, { desc = "Toggle Inline Diagnostics", buffer = event.buf })
-        vim.keymap.set("n", "<leader>vh", function()
-          vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = event.buf }),
-            { bufnr = event.buf })
-        end, { desc = "Toggle Inlay Hints", buffer = event.buf })
         vim.keymap.set("n", "<leader>vca", vim.lsp.buf.code_action, { desc = "Code Action", buffer = event.buf })
         vim.keymap.set("v", "<leader>vca", vim.lsp.buf.code_action, { desc = "Code Action", buffer = event.buf })
         vim.keymap.set("n", "<leader>vrr", vim.lsp.buf.references, { desc = "LSP References", buffer = event.buf })
         vim.keymap.set("n", "<leader>vrn", vim.lsp.buf.rename, { desc = "LSP Rename", buffer = event.buf })
         vim.keymap.set("n", "<leader>vru", vim.lsp.buf.incoming_calls, { desc = "Find Uses (Incoming Calls)", buffer = event.buf })
-        -- vim.keymap.set("i", "<C-h>", vim.lsp.buf.signature_help, { desc = "Signature Help", buffer = event.buf })
-
-        -- ts_ls only: whole-file `source.*` actions (organize imports, add all
-        -- missing imports, remove unused). tsserver hides these from the normal
-        -- code_action list, so they need the dedicated command lspconfig defines.
-        local client = vim.lsp.get_client_by_id(event.data.client_id)
-        if client and client.name == "ts_ls" then
-          vim.keymap.set("n", "<leader>vi", "<cmd>LspTypescriptSourceAction<cr>",
-            { desc = "TS Source Action (organize/add imports)", buffer = event.buf })
-        end
       end,
     })
   end,
