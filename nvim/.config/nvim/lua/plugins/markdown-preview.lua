@@ -3,7 +3,7 @@ return {
   cmd = {
     "MarkdownPreviewToggle",
     "MarkdownPreview",
-    "MarkdownPreviewStop" 
+    "MarkdownPreviewStop"
   },
   build = "cd app && npm install",
   init = function()
