@@ -44,5 +44,37 @@ return {
     { "<leader><leader>", function() Snacks.picker.files() end, desc = "Find Files" },
     { "<leader>ff", function() Snacks.picker.files() end, desc = "Find Files" },
     { "<leader>fg", function() Snacks.picker.grep() end, desc = "Live Grep" },
+    {
+      "<leader>fd",
+      function()
+        Snacks.picker.pick({
+          source = "directories",
+          title = "Directories",
+          format = "file",
+          -- `fd` isn't installed and snacks' `files` source hardcodes `-type f`,
+          -- so drive `find` directly to list directories instead
+          finder = function(opts, ctx)
+            local cwd = vim.fs.normalize(opts.cwd or vim.fn.getcwd())
+            return require("snacks.picker.source.proc").proc({
+              cmd = "find",
+              cwd = cwd,
+              args = { ".", "-type", "d", "-not", "-path", "*/.git/*", "-not", "-path", "*/.jj/*" },
+              transform = function(item)
+                item.cwd = cwd
+                item.file = item.text
+                item.dir = true
+              end,
+            }, ctx)
+          end,
+          confirm = function(picker, item)
+            picker:close()
+            if item then
+              require("oil").open(Snacks.picker.util.path(item))
+            end
+          end,
+        })
+      end,
+      desc = "Find Directory (Oil)",
+    },
   },
 }
