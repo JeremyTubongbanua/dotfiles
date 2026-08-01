@@ -206,6 +206,7 @@ Git integration plugin
 - `<leader>gd` - opens three-way git diff split
 - `<leader>gh` - diff get left, available in normal and visual mode
 - `<leader>gl` - diff get right, available in normal and visual mode
+- `<leader>gq` - closes the git diff windows, leaving unrelated splits open
 
 - `s` - stage
 - `u` - unstage
