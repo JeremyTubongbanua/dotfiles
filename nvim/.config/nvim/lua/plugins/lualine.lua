@@ -4,7 +4,6 @@ return {
   dependencies = {
     'echasnovski/mini.diff',
   },
-  version = "*",
   config = function()
     require('lualine').setup({
       options = {
