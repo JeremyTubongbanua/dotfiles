@@ -1,6 +1,4 @@
 -- icon provider -- https://github.com/nvim-mini/mini.icons
--- nvim-web-devicons is not installed; nvim-tree and oil both ask for it by
--- name, so mock it here and they get mini.icons instead.
 ---@type LazyPluginSpec
 return {
   'nvim-mini/mini.icons',
@@ -8,7 +6,7 @@ return {
   lazy = false,
   priority = 1000,
   config = function()
-    require('mini.icons').setup()
+    require('nvim-mini/mini.icons').setup()
     MiniIcons.mock_nvim_web_devicons()
   end,
 }
