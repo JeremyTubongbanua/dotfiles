@@ -11,35 +11,7 @@ return {
   config = function()
     local function on_attach(bufnr)
       local api = require('nvim-tree.api')
-
-      -- Default mappings
       api.config.mappings.default_on_attach(bufnr)
-
-      -- Custom mapping to add file to harpoon on open
-      -- local function open_and_harpoon()
-      --   local node = api.tree.get_node_under_cursor()
-      --   if node then
-      --     if node.type == 'file' then
-      --       api.node.open.edit()
-      --       vim.schedule(function()
-      --         local harpoon = require("harpoon")
-      --         local list = harpoon:list()
-      --
-      --         -- Remove oldest if at max capacity (8)
-      --         if #list.items >= 8 then
-      --           list:remove_at(1)
-      --         end
-      --
-      --         list:add()
-      --       end)
-      --     elseif node.type == 'directory' then
-      --       api.node.open.edit()
-      --     end
-      --   end
-      -- end
-
-      -- vim.keymap.set('n', '<CR>', open_and_harpoon, { buffer = bufnr, desc = 'Open and add to harpoon' })
-      -- vim.keymap.set('n', 'o', open_and_harpoon, { buffer = bufnr, desc = 'Open and add to harpoon' })
     end
 
     require('nvim-tree').setup({
