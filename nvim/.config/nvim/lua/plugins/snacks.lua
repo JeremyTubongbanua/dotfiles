@@ -17,10 +17,8 @@ return {
   end,
   ---@type snacks.Config
   opts = {
-    animate = { enabled = true },
+    rename = { enabled = true },
     bigfile = { enabled = true },
-    dashboard = { enabled = true },
-    debug = { enabled = true },
     image = {
       enabled = true,
       doc = {
