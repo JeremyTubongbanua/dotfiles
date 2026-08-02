@@ -2,31 +2,37 @@
 -- :InspectTree   :TSInstall <language>   :TSUpdate
 -- `main` is a full, incompatible rewrite of the old `master` API:
 -- no `require("nvim-treesitter.configs").setup{}`, no highlight/indent modules.
+
+-- parsers to install up front (async; no-op if already installed)
+local ensure_installed = {
+  "c",
+  "lua",
+  "vim",
+  "vimdoc",
+  "query",
+  "astro",
+  "javascript",
+  "typescript",
+  "tsx",
+  "dart",
+}
+
 ---@type LazyPluginSpec
 return {
   "nvim-treesitter/nvim-treesitter",
-  version = "*",
+  branch = "main", -- no version pin: the only tags (v0.10.0) are on the archived master branch
   lazy = false, -- main branch does not support lazy-loading
   build = ":TSUpdate",
-  config = function()
+  opts = {
+    -- prepended to runtimepath so these parsers/queries take priority
+    install_dir = vim.fn.stdpath("data") .. "/site",
+  },
+  -- main branch needs post-setup wiring (install + per-buffer enable), so this
+  -- config only does what opts cannot express; the settings live in opts above
+  config = function(_, opts)
     local ts = require("nvim-treesitter")
-    ts.setup({
-      -- prepended to runtimepath so these parsers/queries take priority
-      install_dir = vim.fn.stdpath("data") .. "/site",
-    })
-    -- parsers to install up front (async; no-op if already installed)
-    ts.install({
-      "c",
-      "lua",
-      "vim",
-      "vimdoc",
-      "query",
-      "astro",
-      "javascript",
-      "typescript",
-      "tsx",
-      "dart",
-    })
+    ts.setup(opts)
+    ts.install(ensure_installed)
 
     -- set of languages that actually have a parser (computed once). guards the
     -- auto-install below so non-code filetypes (oil, lazy, mason, ...) don't warn
