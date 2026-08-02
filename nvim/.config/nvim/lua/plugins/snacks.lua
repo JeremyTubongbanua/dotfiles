@@ -15,7 +15,7 @@ return {
         },
       },
     },
-    explorer = { -- sidebar file tree, `<leader>e` (replaces nvim-tree)
+    explorer = { -- sidebar file tree, `<leader>e`
       enabled = true,
       replace_netrw = false, -- oil owns directory buffers, don't fight it
     },
@@ -38,6 +38,8 @@ return {
       enabled = true,
       sources = {
         explorer = {
+          enter = false, -- opening it shouldn't move my cursor, it's a view
+          focus = "list", -- when we `<C-w>h`, it enters in normal mode. default behaviour puts us in insert to search
           hidden = true,
           exclude = {
             "node_modules",
@@ -81,13 +83,19 @@ return {
     {
       "<leader>e",
       function()
-        -- Snacks.explorer() only opens/focuses, so close it by hand to get a toggle
-        local explorer = Snacks.picker.get({ source = "explorer" })[1]
+        local explorer = Snacks.picker.get({
+          source = "explorer"
+        })[1]
+
+        -- toggles explorer
         if explorer then
           explorer:close()
-        else
-          Snacks.explorer()
+          return
         end
+
+        -- if we are currently in an oil dir, then open that in explorer
+        local oil_dir = vim.bo.filetype == "oil" and require("oil").get_current_dir(0) or nil
+        Snacks.explorer.reveal({ file = oil_dir })
       end,
       desc = "Toggle Explorer",
     },
