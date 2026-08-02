@@ -4,6 +4,18 @@ return {
   version = "*",
   priority = 1000,
   lazy = false,
+  init = function()
+    -- snacks bigfile registers a `.*` filetype pattern that returns "bigfile" when
+    -- avg line length > 1000. git's binary index (8KB, ~no newlines) trips that, so
+    -- fugitive's status buffer got flagged. a higher-priority pattern wins the match.
+    vim.filetype.add({
+      pattern = {
+        ['.*/%.git/index'] = { 'git', { priority = 100 } },
+        ['.*/%.git/index%.lock'] = { 'git', { priority = 100 } },
+        ['.*/%.git/worktrees/[^/]+/index'] = { 'git', { priority = 100 } },
+      },
+    })
+  end,
   ---@type snacks.Config
   opts = {
     animate = { enabled = true },
