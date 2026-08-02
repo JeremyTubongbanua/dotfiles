@@ -11,11 +11,9 @@ return {
         "gopls",
         "neocmake",
         "rust_analyzer",
-        "zls",
         "jsonls",
         "yamlls",
         "marksman",
-        "tinymist",
         "tombi",
         "docker_compose_language_service",
         "dockerls",
@@ -24,9 +22,13 @@ return {
         "astro",
         "svelte",
         "tailwindcss",
+        "html",
+        "cssls",
         "vtsls",
       },
-      automatic_installation = true,
+      -- Guard, not dead weight: ts_ls is uninstalled, but if anything pulls it
+      -- back in, mason-lspconfig would auto-enable it alongside vtsls and every
+      -- TS diagnostic would appear twice.
       automatic_enable = { exclude = { "ts_ls" } },
     })
 
@@ -39,6 +41,17 @@ return {
       float = {
         border = 'rounded',
         source = 'if_many',
+      },
+    })
+    -- Compose files arrive as plain `yaml`, so yamlls claimed them and
+    -- docker_compose_language_service (which only handles `yaml.docker-compose`)
+    -- never attached. The dotted filetype keeps yamlls attached as well.
+    vim.filetype.add({
+      filename = {
+        ['docker-compose.yml'] = 'yaml.docker-compose',
+        ['docker-compose.yaml'] = 'yaml.docker-compose',
+        ['compose.yml'] = 'yaml.docker-compose',
+        ['compose.yaml'] = 'yaml.docker-compose',
       },
     })
     vim.lsp.config('*', {
@@ -60,12 +73,10 @@ return {
       'dartls', -- from dart sdk!
       'clangd',
       'neocmake',
-      'rust_analyzer',
-      'zls',
+      'rust_analyzer', -- needs rustup: `rustup toolchain install stable`
       'jsonls',
       'yamlls',
       'marksman',
-      'tinymist',
       'tombi',
       'docker_compose_language_service',
       'dockerls',
@@ -74,6 +85,8 @@ return {
       'astro',
       'svelte',
       'tailwindcss',
+      'html',
+      'cssls',
       'vtsls',
     })
     vim.api.nvim_create_autocmd("LspAttach", {
