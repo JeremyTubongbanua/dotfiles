@@ -5,19 +5,14 @@ return {
   lazy = false,
   ---@type snacks.Config
   opts = {
-    -- your configuration comes here
-    -- or leave it empty to use the default settings
-    -- refer to the configuration section below
     animate = { enabled = true },
     bigfile = { enabled = true },
-    -- bufdelete = { enabled = true },
     dashboard = { enabled = true },
     debug = { enabled = true },
-    -- explorer = { enabled = true },
     image = {
       enabled = true,
       doc = {
-        enabled = false, -- Disable inline rendering in markdown/documents
+        enabled = false, -- disable inline rendering in markdown/documents
       },
     }, -- brew install imagemagick ghostscript
     indent = { enabled = true },
@@ -37,9 +32,6 @@ return {
     scope = { enabled = true },
     scroll = { enabled = true },
     statuscolumn = { enabled = true },
-    -- windows = { enabled = true },
-    -- words = { enabled = true },
-    -- zen = { enabled = true },
   },
   keys = {
     { "<leader><leader>", function() Snacks.picker.files() end, desc = "Find Files" },

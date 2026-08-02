@@ -1,5 +1,7 @@
 # nvim
 
+Jeremy's personal neovim configuration
+
 ## Rough notes
 
 - toggleterm -> tmux
@@ -13,9 +15,20 @@
 - nvim-cmp --> blink.comp
   - Ctrl-n, Ctrl-p
   vim.opt.completeopt --> no select and no insert
-  vim.opt.iskeyword --> ascii characters 
+  vim.opt.iskeyword --> ascii characters
 
-Jeremy's personal neovim configuration
+- You need an empty `opts = {}` in order for a plugin to be loaded. Or a `config = function() /* code */ end,`. See code example in neovim:
+
+```lua
+if plugin.config or plugin.opts then
+  M.config(plugin)
+end
+```
+
+- We prefer `opts` over `config` in my configuration.
+
+### List of brew formulaes needed
+
 
 ## vim notes
 
@@ -39,7 +52,7 @@ Jeremy's personal neovim configuration
 
 - `S{char}` - in visual mode, surround selection with {char}
 
-- `zf` - create a folder from selection 
+- `zf` - create a folder from selection
 - `zd` - delete a folder from selection
 - `zo` - open folder
 - `zc` - close folder
@@ -66,15 +79,10 @@ Auto completion plugin
 - `<C-Space>` - trigger completion menu (insert mode)
 - `<C-n>` - next item in completion menu (insert mode)
 - `<C-p>` - previous item in completion menu (insert mode)
- 
-### copilot.lua
 
-GitHub Copilot in Neovim
+### catppuccin.lua
 
-- `<Tab>` - accept a suggestion
-- `:Copilot enable`
-- `:Copilot disable`
-- `:Copilot status`
+Neovim theme
 
 ### mini-diff.lua
 
@@ -90,15 +98,14 @@ Inline git diff signs (replaced gitsigns.nvim)
 
 mini.diff has no blame, unstage-hunk, or diffthis, so these hand off to fugitive:
 
-- `<leader>guh` - opens `:Git` status, where `u` unstages
-- `<leader>gb` - `:Git blame` split
-- `<leader>gD` - `:Gvdiffsplit` against the index
-
 `<leader>gB` (toggle inline line blame) is gone - nothing equivalent exists.
 
-### harpoon2.lua
+### harpoon.lua
 
 I use harpoon to navigate between frequently used files
+
+- `<leader>a` to add current file to Harpoon menu
+- `<Ctrl>e` to open Harpoon menu
 
 ### img-clip.lua
 
@@ -151,12 +158,8 @@ each server's settings live in its own file there rather than in this one.
 
 Helpful key maps to surround things with characters
 
-- `ys{motion}{char}` - add surounding characters
 - `cs{old_char}{new_char}` - change surrounding characters
 - `ds{char}` - delete surrounding characters
-- Example: `ysiw'` - you surround inner word with single quotes
-- Example: `cs"'` - change surrounding double quotes to single quotes
-- Example: `ds(` - delete surrounding parentheses
 
 ### nvim-tree.lua
 
@@ -205,17 +208,6 @@ The picker is modal. It opens in insert mode so you can type to filter:
 - `i` - back to insert mode
 - `q` or `<Esc>` (normal mode) - close the picker
 
-### toggleterm.lua
-
-Keeps terminal sessions alive
-
-- `<C-/>` - toggle terminal (opens on the bottom)
-- `<C-w>` - exit terminal mode and enable window commands (terminal mode)
-
-### tokyonight.lua
-
-Neovim theme 
-
 ### vim-fugitive.lua
 
 Git integration plugin
@@ -253,10 +245,3 @@ Upon opening nvim, use `s` to restore last session (on Dashboard)
 
 - `s{word}` - jump to place in current buffer
 - `S{char}` - Flash using nvim-treesitter
-- `f{char}`, `F{char}`, `t{char}`, `T{char}` - enhanced f/t motions, use f/t to jump to next iteration of {char}
-- `yR` - remote flash
-- `yr` - remote flash for single char
-
-A nice motion is
-
-- `vs{char}{selection}S{char}` - visual mode, flash to {char}, selection to {selection}, surround with {char}
