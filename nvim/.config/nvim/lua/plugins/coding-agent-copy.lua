@@ -3,6 +3,10 @@
 return {
   "JeremyTubongbanua/coding-agent-copy.nvim",
   branch = "trunk",
+  opts = {
+    path_style = "home",
+    prefix = "@",
+  },
   keys = {
     {
       "<leader>y",
