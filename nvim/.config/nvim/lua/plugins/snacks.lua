@@ -5,9 +5,6 @@ return {
   lazy = false,
   ---@type snacks.Config
   opts = {
-    animation = {
-      enable = true,
-    },
     dashboard = {
       enabled = true,
       preset = {
