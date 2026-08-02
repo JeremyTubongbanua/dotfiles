@@ -47,6 +47,7 @@ return {
             "dist",
             ".venv",
             "target",
+            ".wrangler",
           }
         },
         files = {
@@ -57,6 +58,7 @@ return {
             "dist",
             ".venv",
             "target",
+            ".wrangler",
           }
         },
         grep = {
@@ -67,6 +69,7 @@ return {
             "dist",
             ".venv",
             "target",
+            ".wrangler",
           }
         },
       },
