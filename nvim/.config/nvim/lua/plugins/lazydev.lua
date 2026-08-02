@@ -6,7 +6,6 @@ return {
   ft = 'lua',
   opts = {
     library = {
-      -- `words` = only pull this library in when the pattern appears in the file
       { path = '${3rd}/luv/library', words = { 'vim%.uv' } },
       { path = 'lazy.nvim',          words = { 'LazyPluginSpec' } },
     },
