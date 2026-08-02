@@ -1,6 +1,7 @@
 ---@type LazyPluginSpec
 return {
   'tpope/vim-fugitive',
+  version = "*",
   config = function()
     vim.keymap.set('n', '<leader>gg', ':Git<CR>', { desc = 'Git Status' })
     vim.keymap.set('n', '<leader>gd', ':Gvdiffsplit!<CR>', { desc = 'Git Diff Split' }) -- create a three-way vertical split. Left = feature branch (//2), Middle = current file, Right = merging branch (//3)

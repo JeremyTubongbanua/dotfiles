@@ -3,6 +3,7 @@
 return {
   "HakonHarnes/img-clip.nvim",
   event = "VeryLazy",
+  version = "*",
   opts = {
     default = {
       dir_path = function()

@@ -1,6 +1,7 @@
 ---@type LazyPluginSpec
 return {
   "iamcco/markdown-preview.nvim",
+  version = "*",
   cmd = {
     "MarkdownPreviewToggle",
     "MarkdownPreview",
@@ -10,5 +11,7 @@ return {
   init = function()
     vim.g.mkdp_filetypes = { "markdown" }
   end,
-  ft = { "markdown" },
+  ft = {
+    "markdown"
+  },
 }
