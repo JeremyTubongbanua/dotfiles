@@ -6,7 +6,7 @@ return {
   lazy = false,
   priority = 1000,
   config = function()
-    require('nvim-mini/mini.icons').setup()
-    MiniIcons.mock_nvim_web_devicons()
+    require('mini.icons').setup()
+    MiniIcons.mock_nvim_web_devicons() -- required for nvim-tree icons to work
   end,
 }
