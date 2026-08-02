@@ -3,7 +3,6 @@
 ---@type LazyPluginSpec
 return {
   'nvim-tree/nvim-tree.lua',
-  version = "*",
   lazy = false,
   dependencies = {
     'nvim-mini/mini.icons',

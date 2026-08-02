@@ -1,15 +1,15 @@
 ---@type LazyPluginSpec
 return {
   "iamcco/markdown-preview.nvim",
-  version = "*",
   cmd = {
     "MarkdownPreviewToggle",
     "MarkdownPreview",
     "MarkdownPreviewStop"
   },
-  build = function()
-    vim.fn["mkdp#util#install"]()
-  end,
+  -- shell build, not `vim.fn["mkdp#util#install"]()`: lazy does not load the plugin
+  -- for function builds, so the autoload is missing (E117). install.sh downloads the
+  -- prebuilt binary synchronously; mkdp#util#install() only opens a terminal.
+  build = "cd app && ./install.sh",
   init = function()
     vim.g.mkdp_filetypes = { "markdown" }
   end,

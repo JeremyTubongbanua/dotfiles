@@ -1,7 +1,6 @@
 ---@type LazyPluginSpec
 return {
   'rachartier/tiny-inline-diagnostic.nvim',
-  version = "*",
   event = "VeryLazy",
   priority = 1000,
   opts = {

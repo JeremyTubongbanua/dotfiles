@@ -1,7 +1,6 @@
 ---@type LazyPluginSpec
 return {
   "stevearc/oil.nvim",
-  version = "*",
   lazy = false, -- oil must be eager to disable netrw during setup
   dependencies = {
     'nvim-mini/mini.icons', -- icons in oil

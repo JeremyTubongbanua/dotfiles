@@ -7,7 +7,8 @@ end
 ---@type LazyPluginSpec
 return {
   'tpope/vim-fugitive',
-  version = "*", -- stable
+  -- no version pin: the newest tag (v3.7, 2022) is ~200 commits behind master and
+  -- predates `P` pushing from the Unpushed section (s:StagePatch)
   lazy = false, -- must load early
   keys = {
     { '<leader>gg', ':Git<CR>', desc = 'Git Status' }, -- opens fugitive
