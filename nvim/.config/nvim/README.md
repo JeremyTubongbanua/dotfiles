@@ -118,16 +118,18 @@ Markdown preview in browser
 - `:MarkdownPreviewStop` - stop preview
 - `:MarkdownPreviewToggle` - toggle preview
 
-### lsp.lua
+### mason-lspconfig.lua
 
-LSP configuration. Mason is gone - server binaries are not managed by neovim.
-They come from nix (`xavierchanth/dotfiles` `modules/shared/packages.nix`),
-rustup (rust-analyzer), the system toolchain (clangd, dart), or a project's
-`node_modules` (biome). A server that will not start means the binary is not on
-PATH.
+LSP configuration with Mason for managing language servers. Mason installs every
+server here except `dartls`, which has no Mason package and comes from the Dart
+SDK. A server that will not start means its binary is not on PATH.
 
-- `:checkhealth lsp` - to check if LSP is configured
-- `:LspInfo` / `:che vim.lsp` - which servers attached to this buffer
+Neovim 0.11+ automatically finds `~/.config/nvim/lsp/<server>.lua` on the
+runtimepath and merges whatever table it returns into that server's config, so
+each server's settings live in its own file there rather than in this one.
+
+- `:Mason` - opens mason ui (`g?` for help inside it)
+- `:checkhealth vim.lsp` - which servers attached, and why others did not
 
 #### LSP Keymaps (when LSP is attached)
 
@@ -140,7 +142,6 @@ PATH.
 - `<leader>vca` - code action
 - `<leader>vrr` - LSP references
 - `<leader>vrn` - LSP rename symbol
-<!-- - `<C-h>` - signature help (insert mode) -->
 - `grn` - rename symbol
 
 ### nvim-surround.lua
