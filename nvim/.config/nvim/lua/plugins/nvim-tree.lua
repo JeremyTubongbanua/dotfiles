@@ -5,7 +5,7 @@ return {
   version = "*",
   lazy = false,
   dependencies = {
-    'nvim-tree/nvim-web-devicons',
+    'nvim-mini/mini.icons',
   },
   config = function()
     local function on_attach(bufnr)
