@@ -10,12 +10,10 @@ return {
   build = ":TSUpdate",
   config = function()
     local ts = require("nvim-treesitter")
-
     ts.setup({
       -- prepended to runtimepath so these parsers/queries take priority
       install_dir = vim.fn.stdpath("data") .. "/site",
     })
-
     -- parsers to install up front (async; no-op if already installed)
     ts.install({
       "c",
@@ -37,7 +35,6 @@ return {
     for _, l in ipairs(ts.get_available()) do
       available[l] = true
     end
-
     -- per-buffer: start highlighting + treesitter indent, auto-installing the
     -- parser if missing. Replaces the old highlight/indent/auto_install modules.
     vim.api.nvim_create_autocmd("FileType", {
