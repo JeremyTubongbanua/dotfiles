@@ -19,6 +19,16 @@ return {
   opts = {
     rename = { enabled = true },
     bigfile = { enabled = true },
+    dashboard = {
+      enabled = true,
+      preset = {
+        keys = {
+          { icon = " ", key = "s", desc = "Restore Session", section = "session" },
+          { icon = "󰒲 ", key = "L", desc = "Lazy", action = ":Lazy", enabled = package.loaded.lazy ~= nil },
+          { icon = " ", key = "q", desc = "Quit", action = ":qa" },
+        },
+      },
+    },
     image = {
       enabled = true,
       doc = {
