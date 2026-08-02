@@ -15,12 +15,17 @@ return {
         },
       },
     },
+    explorer = { -- sidebar file tree, `<leader>e` (replaces nvim-tree)
+      enabled = true,
+      replace_netrw = false, -- oil owns directory buffers, don't fight it
+    },
     image = { -- image viewer => `brew install imagemagick ghostscript`
       enabled = true,
       doc = {
         enabled = false, -- disable inline rendering in markdown/documents
       },
-    },     indent = { -- indent lines in a file
+    },
+    indent = { -- indent lines in a file
       enabled = true
     },
     input = { -- nice top input form for things like `vrn`
@@ -32,6 +37,16 @@ return {
     picker = { -- `<leader><leader>|<leader>ff and <leader>fg`
       enabled = true,
       sources = {
+        explorer = {
+          hidden = true,
+          exclude = {
+            "node_modules",
+            ".dart_tool",
+            "dist",
+            ".venv",
+            "target",
+          }
+        },
         files = {
           hidden = true,
           exclude = {
@@ -63,6 +78,19 @@ return {
   },
   keys = {
     { "<leader><leader>", function() Snacks.picker.files() end, desc = "Find Files" },
+    {
+      "<leader>e",
+      function()
+        -- Snacks.explorer() only opens/focuses, so close it by hand to get a toggle
+        local explorer = Snacks.picker.get({ source = "explorer" })[1]
+        if explorer then
+          explorer:close()
+        else
+          Snacks.explorer()
+        end
+      end,
+      desc = "Toggle Explorer",
+    },
     { "<leader>ff", function() Snacks.picker.files() end, desc = "Find Files" },
     { "<leader>fg", function() Snacks.picker.grep() end, desc = "Live Grep" },
     {
