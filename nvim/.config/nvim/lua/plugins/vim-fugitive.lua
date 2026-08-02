@@ -6,7 +6,11 @@ end
 ---@type LazyPluginSpec
 return {
   'tpope/vim-fugitive',
+  dependencies = {
+    'nvim-treesitter/nvim-treesitter',
+  },
   version = "*",
+  opts = {},
   cmd = {
     'Git',
     'Gvdiffsplit',
