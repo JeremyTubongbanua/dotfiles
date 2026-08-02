@@ -2,6 +2,7 @@
 -- :InspectTree   :TSInstall <language>   :TSUpdate
 -- `main` is a full, incompatible rewrite of the old `master` API:
 -- no `require("nvim-treesitter.configs").setup{}`, no highlight/indent modules.
+---@type LazyPluginSpec
 return {
   "nvim-treesitter/nvim-treesitter",
   branch = "main",

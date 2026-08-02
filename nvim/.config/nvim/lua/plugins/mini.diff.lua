@@ -1,6 +1,7 @@
 -- inline git diff signs -- https://github.com/echasnovski/mini.diff
 -- replaces gitsigns.nvim. mini.diff has no blame / unstage-hunk / diffthis, so
 -- those three keymaps now go through vim-fugitive instead.
+---@type LazyPluginSpec
 return {
   'echasnovski/mini.diff',
   version = false,

@@ -1,4 +1,5 @@
 -- In visual mode, copy a `path:start-end` reference (relative to nvim's working dir) to the clipboard for pasting into a coding agent.
+---@type LazyPluginSpec
 return {
   "JeremyTubongbanua/coding-agent-copy",
   keys = {

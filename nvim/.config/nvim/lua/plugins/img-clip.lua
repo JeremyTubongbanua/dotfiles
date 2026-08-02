@@ -1,4 +1,5 @@
 -- brew install pngpaste is needed
+---@type LazyPluginSpec
 return {
   "HakonHarnes/img-clip.nvim",
   event = "VeryLazy",
