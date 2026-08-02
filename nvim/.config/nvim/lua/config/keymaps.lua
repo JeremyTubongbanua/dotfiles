@@ -16,3 +16,9 @@ vim.keymap.set('n', '0', '0^', { desc = "Beginning of line" })
 -- Indent a selection without having to re-select
 vim.keymap.set('v', '>', '>gv', { desc = "Indent right and reselect" })
 vim.keymap.set('v', '<', '<gv', { desc = "Indent left and reselect" })
+
+-- `x`, `p`, `d`, `dd` no longer overwrite register
+vim.keymap.set('x', 'x', '"_x', { desc = "Delete without overwriting register" })
+vim.keymap.set('x', 'd', '"_d', { desc = "Delete without overwriting register" })
+vim.keymap.set('x', 'p', '"_dP ', { desc = "Paste without overwriting register" })
+vim.keymap.set('n', 'dd', '"_dd', { desc = "Delete line without overwriting register" })
