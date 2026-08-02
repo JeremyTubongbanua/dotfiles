@@ -3,21 +3,11 @@ return {
   "folke/snacks.nvim",
   priority = 1000,
   lazy = false,
-  init = function()
-    -- snacks bigfile registers a `.*` filetype pattern that returns "bigfile" when
-    -- avg line length > 1000. git's binary index (8KB, ~no newlines) trips that, so
-    -- fugitive's status buffer got flagged. a higher-priority pattern wins the match.
-    vim.filetype.add({
-      pattern = {
-        ['.*/%.git/index'] = { 'git', { priority = 100 } },
-        ['.*/%.git/index%.lock'] = { 'git', { priority = 100 } },
-        ['.*/%.git/worktrees/[^/]+/index'] = { 'git', { priority = 100 } },
-      },
-    })
-  end,
   ---@type snacks.Config
   opts = {
-    bigfile = { enabled = true },
+    animation = {
+      enable = true,
+    },
     dashboard = {
       enabled = true,
       preset = {
@@ -28,29 +18,51 @@ return {
         },
       },
     },
-    image = {
+    image = { -- image viewer => `brew install imagemagick ghostscript`
       enabled = true,
       doc = {
         enabled = false, -- disable inline rendering in markdown/documents
       },
-    }, -- brew install imagemagick ghostscript
-    indent = { enabled = true },
-    input = { enabled = true },
-    notifier = { enabled = true },
-    picker = {
+    },     indent = { -- indent lines in a file
+      enabled = true
+    },
+    input = { -- nice top input form for things like `vrn`
+      enabled = true
+    },
+    notifier = { -- adds notifier to the top right
+      enabled = true
+    },
+    picker = { -- `<leader><leader>|<leader>ff and <leader>fg`
       enabled = true,
       sources = {
-        -- `hidden` shows this repo's dotted dirs (nvim/.config/...); snacks'
-        -- rg/fd/find commands already prune .git, so only .jj needs excluding
-        files = { hidden = true, exclude = { ".jj" } },
-        grep = { hidden = true, exclude = { ".jj" } },
+        files = {
+          hidden = true,
+          exclude = {
+            "node_modules",
+            ".dart_tool",
+            "dist",
+            ".venv",
+            "target",
+          }
+        },
+        grep = {
+          hidden = true,
+          exclude = {
+            "node_modules",
+            ".dart_tool",
+            "dist",
+            ".venv",
+            "target",
+          }
+        },
       },
     },
-    quickfile = { enabled = true },
-    rename = { enabled = true },
-    scope = { enabled = true },
-    scroll = { enabled = true },
-    statuscolumn = { enabled = true },
+    scope = { -- vii and vai, and [i and ]i
+      enabled = true,
+    },
+    scroll = { -- smooth animation scrolling when Ctrl+U and Ctrl+D for example
+      enabled = true,
+    },
   },
   keys = {
     { "<leader><leader>", function() Snacks.picker.files() end, desc = "Find Files" },
@@ -70,7 +82,14 @@ return {
             return require("snacks.picker.source.proc").proc({
               cmd = "find",
               cwd = cwd,
-              args = { ".", "-type", "d", "-not", "-path", "*/.git/*", "-not", "-path", "*/.jj/*" },
+              args = {
+                ".",
+                "-type", "d",
+                "-not", "-path", "*/.git/*",
+                "-not", "-path", "*/.jj/*",
+                "-not", "-path", "*/node_modules/*",
+                "-not", "-name", "node_modules",
+              },
               transform = function(item)
                 item.cwd = cwd
                 item.file = item.text
