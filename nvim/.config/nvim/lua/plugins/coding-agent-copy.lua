@@ -4,8 +4,11 @@ return {
   "JeremyTubongbanua/coding-agent-copy.nvim",
   branch = "trunk",
   opts = {
-    path_style = "home",
-    prefix = "@",
+    path_style = "home", -- file path will be relative to home directory (e.g. ~/GitHub/...)
+    prefix = "@", -- adds `@` to the very front of the text that is copied
+    notify = false, -- removes status notification after copying
+    separator = " (lines ", -- separate file and line numbers with a space
+    suffix = ")",
   },
   keys = {
     {
