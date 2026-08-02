@@ -2,6 +2,7 @@
 ---@type LazyPluginSpec
 return {
   'nvim-treesitter/nvim-treesitter-context',
+  version = "*",
   opts = {
     enable = true,
     max_lines = 0,

@@ -1,6 +1,7 @@
 ---@type LazyPluginSpec
 return {
   'windwp/nvim-ts-autotag',
+  version = "*",
   lazy = false, -- docs say not to lazy load it
   dependencies = {
     'nvim-treesitter/nvim-treesitter'

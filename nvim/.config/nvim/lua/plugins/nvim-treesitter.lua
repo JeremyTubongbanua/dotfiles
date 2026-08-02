@@ -5,7 +5,7 @@
 ---@type LazyPluginSpec
 return {
   "nvim-treesitter/nvim-treesitter",
-  branch = "main",
+  version = "*",
   lazy = false, -- main branch does not support lazy-loading
   build = ":TSUpdate",
   config = function()

@@ -2,7 +2,7 @@
 ---@type LazyPluginSpec
 return {
   "JeremyTubongbanua/coding-agent-copy.nvim",
-  branch = "trunk",
+  version = "*",
   opts = {
     path_style = "home", -- file path will be relative to home directory (e.g. ~/GitHub/...)
     prefix = "@", -- adds `@` to the very front of the text that is copied

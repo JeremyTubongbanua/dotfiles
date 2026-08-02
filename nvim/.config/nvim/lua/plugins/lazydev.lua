@@ -3,6 +3,8 @@
 ---@type LazyPluginSpec
 return {
   'folke/lazydev.nvim',
+  version = "*",
+  lazy = false,
   ft = 'lua',
   opts = {
     library = {
