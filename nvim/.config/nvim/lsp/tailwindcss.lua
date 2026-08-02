@@ -4,9 +4,6 @@ return {
       classFunctions = { 'cn', 'clsx', 'cx', 'cva', 'tw', 'twMerge' },
     },
   },
-  -- Only attach where tailwind is actually used: a tailwind/postcss config, or
-  -- a package.json that depends on tailwindcss. Without this it attaches to
-  -- every html/css/jsx file in any git repo.
   root_dir = function(bufnr, on_dir)
     local fname = vim.api.nvim_buf_get_name(bufnr)
     if fname == '' then
