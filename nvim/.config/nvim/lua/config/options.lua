@@ -1,4 +1,3 @@
-vim.opt.swapfile = false
 vim.opt.showcmd = true -- shows commands while typing (like 14j) on the bottom right
 vim.opt.cursorline = true -- highlights line that cursor is on
 vim.opt.termguicolors = true -- enable 24-bit colors, uses colours from terminal (Ghostty)
@@ -9,7 +8,7 @@ vim.opt.virtualedit = 'block' -- allow cursor to move where there is no text in 
 vim.opt.isfname:append("@-@") -- treats `@` as a valid filename character
 -- vim.opt.guicursor = "" -- basically when you're in insert mode, the normal mode cursor will remain. Cursor will always be in block mode
 vim.opt.splitright = true -- vertical splits will now open to the right
-vim.opt.clipboard = 'unnamedplus' -- synchronize with system clipboard
+vim.opt.clipboard:append("unnamedplus") -- synchronize with system clipboard
 vim.opt.inccommand = 'split' -- show effects of substitution incrementally in a split
 
 vim.opt.autowrite = true -- auto saves current buffer before commands that leave it
@@ -34,6 +33,7 @@ vim.opt.smartcase = true
 
 -- Editing safety
 vim.opt.backup = false -- no file~ backups | vim/nvim saves a file, it keeps a file~ version as a backup copy alongside it. Setting this to false gets rid of that clutter
+vim.opt.swapfile = false
 vim.opt.undofile = true -- enables storing
 vim.opt.undodir = vim.fn.stdpath('data') .. "/undodir" -- ~/.local/share/nvim | creates an undo directory so that undos are persistent between sessions. Normally only exists in memory so it does not persist when you close a file.
 
