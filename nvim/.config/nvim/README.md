@@ -29,6 +29,16 @@ end
 
 ### List of brew formulaes needed
 
+```
+imagemagick
+ghostscript
+fd
+node
+ripgrep
+pngpaste
+tree-sitter
+go
+```
 
 ## vim notes
 
