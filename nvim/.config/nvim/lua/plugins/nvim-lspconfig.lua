@@ -1,6 +1,9 @@
 ---@type LazyPluginSpec
 return {
   'neovim/nvim-lspconfig',
+  dependencies = {
+    'williamboman/mason.nvim',
+  },
   config = function()
     vim.diagnostic.config({
       severity_sort = true, -- errors render on top of warnings on the same line
@@ -71,8 +74,4 @@ return {
       end,
     })
   end,
-  dependencies = {
-    'williamboman/mason.nvim',
-    'saghen/blink.cmp',
-  },
 }
