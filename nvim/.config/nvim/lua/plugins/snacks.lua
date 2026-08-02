@@ -17,7 +17,6 @@ return {
   end,
   ---@type snacks.Config
   opts = {
-    rename = { enabled = true },
     bigfile = { enabled = true },
     dashboard = {
       enabled = true,
@@ -37,6 +36,7 @@ return {
     }, -- brew install imagemagick ghostscript
     indent = { enabled = true },
     input = { enabled = true },
+    notifier = { enabled = true },
     picker = {
       enabled = true,
       sources = {
@@ -46,8 +46,8 @@ return {
         grep = { hidden = true, exclude = { ".jj" } },
       },
     },
-    notifier = { enabled = true },
     quickfile = { enabled = true },
+    rename = { enabled = true },
     scope = { enabled = true },
     scroll = { enabled = true },
     statuscolumn = { enabled = true },
