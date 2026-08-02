@@ -1,4 +1,5 @@
 -- useful plugin for showing function header as you scroll down
+---@type LazyPluginSpec
 return {
   'nvim-treesitter/nvim-treesitter-context',
   config = function()

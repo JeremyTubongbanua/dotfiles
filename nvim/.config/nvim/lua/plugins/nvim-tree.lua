@@ -1,5 +1,6 @@
 -- directory thing
 -- --> use Oil, like netRW but makes sense
+---@type LazyPluginSpec
 return {
   'nvim-tree/nvim-tree.lua',
   version = "*",

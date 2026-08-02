@@ -1,4 +1,5 @@
 -- shows help when you press a key
+---@type LazyPluginSpec
 return {
   "folke/which-key.nvim",
   event = "VeryLazy",

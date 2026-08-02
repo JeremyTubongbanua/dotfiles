@@ -1,6 +1,7 @@
 -- icon provider -- https://github.com/nvim-mini/mini.icons
 -- nvim-web-devicons is not installed; nvim-tree and oil both ask for it by
 -- name, so mock it here and they get mini.icons instead.
+---@type LazyPluginSpec
 return {
   'nvim-mini/mini.icons',
   version = false,
