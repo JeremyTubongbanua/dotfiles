@@ -4,7 +4,7 @@
 ---@type LazyPluginSpec
 return {
   'echasnovski/mini.diff',
-  version = false,
+  version = "*", -- stable
   event = { 'BufReadPre', 'BufNewFile' },
   opts = {
     -- gitsigns drew both signs and number highlights; mini.diff does one or the

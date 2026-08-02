@@ -2,7 +2,7 @@
 ---@type LazyPluginSpec
 return {
   'nvim-mini/mini.icons',
-  version = false,
+  version = "*",
   lazy = false,
   priority = 1000,
   config = function()
