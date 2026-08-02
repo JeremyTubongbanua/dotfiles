@@ -9,23 +9,14 @@ return {
   dependencies = {
     'nvim-treesitter/nvim-treesitter',
   },
-  version = "*",
+  version = "*", -- stable
   opts = {},
-  cmd = {
-    'Git',
-    'Gvdiffsplit',
-    'Gdiffsplit',
-    'Gread',
-    'Gwrite',
-    'Gedit',
-    'Glog',
-    'Gclog'
-  },
+  lazy = false, -- must load early
   keys = {
-    { '<leader>gg', ':Git<CR>', desc = 'Git Status' }, -- create a three-way vertical split. Left = feature branch (//2), Middle = current file, Right = merging branch (//3)
-    { '<leader>gd', ':Gvdiffsplit!<CR>', desc = 'Git Diff Split' }, -- get changes from the left side where your cursor or selection is. Cursor must be in the middle buffer.
-    { '<leader>gh', ':diffget //2<CR>', mode = { 'n', 'x' }, desc = 'Git Diff Get Left' }, -- get changes from the right side where your cursor or selection is. Cursor must be in the middle buffer.
-    { '<leader>gl', ':diffget //3<CR>', mode = { 'n', 'x' }, desc = 'Git Diff Get Right' },
+    { '<leader>gg', ':Git<CR>', desc = 'Git Status' }, -- opens fugitive
+    { '<leader>gd', ':Gvdiffsplit!<CR>', desc = 'Git Diff Split' }, -- create a three-way vertical split. Left = feature branch (//2), Middle = current file, Right = merging branch (//3)
+    { '<leader>gh', ':diffget //2<CR>', mode = { 'n', 'x' }, desc = 'Git Diff Get Left' }, -- get changes from the left side where your cursor or selection is. Cursor must be in the middle buffer.
+    { '<leader>gl', ':diffget //3<CR>', mode = { 'n', 'x' }, desc = 'Git Diff Get Right' }, -- get changes from the right side where your cursor or selection is. Cursor must be in the middle buffer.
     {
       '<leader>gq',
       function()
