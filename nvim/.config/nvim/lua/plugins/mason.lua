@@ -1,6 +1,6 @@
 ---@type LazyPluginSpec
 return {
   "williamboman/mason.nvim",
-  version = "*",
+  version = "*", -- stable
   opts = {},
 }
