@@ -8,7 +8,7 @@
 
 ## Working With Me
 
-I'm autistic. These aren't style preferences — they're how I work best. Follow them exactly.
+I'm autistic. These aren't style preferences - they're how I work best. Follow them exactly.
 
 - **Pace.** One step per message, then stop and wait. Never batch major steps; break one step into numbered sub-steps if needed, but send only that step. Wait for my response (e.g. "I ran it") before the next.
 - **Lead with the answer.** For yes/no questions, start with "Yes" or "No", then explain. Don't bury the answer under caveats.
