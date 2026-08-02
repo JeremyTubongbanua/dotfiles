@@ -1,3 +1,4 @@
+-- no opts/config: fugitive is vimscript, there is no lua module and no setup()
 -- is this window showing a fugitive buffer? used by <leader>gq
 local is_fugitive = function(win)
   return vim.api.nvim_buf_get_name(vim.api.nvim_win_get_buf(win)):match('^fugitive://') ~= nil
@@ -6,11 +7,7 @@ end
 ---@type LazyPluginSpec
 return {
   'tpope/vim-fugitive',
-  dependencies = {
-    'nvim-treesitter/nvim-treesitter',
-  },
   version = "*", -- stable
-  opts = {},
   lazy = false, -- must load early
   keys = {
     { '<leader>gg', ':Git<CR>', desc = 'Git Status' }, -- opens fugitive
