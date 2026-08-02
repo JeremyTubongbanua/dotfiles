@@ -14,6 +14,9 @@
 # collection root, so ~/GitHub/atsign/noports/jt/feature -> jt/feature and
 # .../jt-feature -> jt-feature.
 #
+# The workspace name defaults to that same branch name when <dir> sits in a
+# worktree collection, otherwise to the last path component.
+#
 # Bound in config.toml as a [[keys.command]] popup. Tab completes directories,
 # Ctrl+C cancels.
 
@@ -39,10 +42,6 @@ dir="${dir%/}"
 dir="${dir:a}"
 [[ -n $dir ]] || die 'no directory given'
 
-label="${dir:t}"
-vared -p 'workspace name: ' label
-[[ -n $label ]] || die 'no workspace name given'
-
 if [[ -d $dir ]]; then
   fresh=0
 else
@@ -54,19 +53,25 @@ dir="${dir:A}"
 # --- worktree collection? --------------------------------------------------
 
 trunk=
-if (( fresh )); then
-  for cand in "${dir:h}/trunk" "${dir:h:h}/trunk"; do
-    if [[ $cand != $dir && -e $cand/.git ]]; then
-      trunk="$cand"
-      break
-    fi
-  done
-fi
+for cand in "${dir:h}/trunk" "${dir:h:h}/trunk"; do
+  if [[ $cand != $dir && -e $cand/.git ]]; then
+    trunk="$cand"
+    break
+  fi
+done
 
 if [[ -n $trunk ]]; then
   root="${trunk:h}"
   branch="${dir#$root/}"
+  label="$branch"
+else
+  label="${dir:t}"
+fi
 
+vared -p 'workspace name: ' label
+[[ -n $label ]] || die 'no workspace name given'
+
+if (( fresh )) && [[ -n $trunk ]]; then
   print -- "trunk:  $trunk"
   print -- "branch: $branch"
 
