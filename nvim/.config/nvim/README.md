@@ -118,11 +118,14 @@ Markdown preview in browser
 - `:MarkdownPreviewStop` - stop preview
 - `:MarkdownPreviewToggle` - toggle preview
 
-### mason-lspconfig.lua
+### nvim-lspconfig.lua
 
-LSP configuration with Mason for managing language servers. Mason installs every
-server here except `dartls`, which has no Mason package and comes from the Dart
-SDK. A server that will not start means its binary is not on PATH.
+LSP configuration. nvim-lspconfig ships the default config for every server;
+Mason installs the binaries and prepends its bin dir to PATH. There is no bridge
+plugin between them, so servers are installed by hand with `:Mason` and started
+only by the explicit `vim.lsp.enable()` list in this file. `dartls` is the one
+server with no Mason package -- it comes from the Dart SDK. A server that will
+not start means its binary is not on PATH.
 
 Neovim 0.11+ automatically finds `~/.config/nvim/lsp/<server>.lua` on the
 runtimepath and merges whatever table it returns into that server's config, so

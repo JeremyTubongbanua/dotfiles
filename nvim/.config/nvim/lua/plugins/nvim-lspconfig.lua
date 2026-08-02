@@ -1,51 +1,17 @@
 return {
-  "williamboman/mason-lspconfig.nvim",
+  'neovim/nvim-lspconfig',
   config = function()
-    require('mason-lspconfig').setup({
-      ensure_installed = {
-        "lua_ls",
-        "bashls",
-        "clangd",
-        "ruff",
-        "basedpyright",
-        "gopls",
-        "neocmake",
-        "rust_analyzer",
-        "jsonls",
-        "yamlls",
-        "marksman",
-        "tombi",
-        "docker_compose_language_service",
-        "dockerls",
-        "biome",
-        "eslint",
-        "astro",
-        "svelte",
-        "tailwindcss",
-        "html",
-        "cssls",
-        "vtsls",
-      },
-      -- Guard, not dead weight: ts_ls is uninstalled, but if anything pulls it
-      -- back in, mason-lspconfig would auto-enable it alongside vtsls and every
-      -- TS diagnostic would appear twice.
-      automatic_enable = { exclude = { "ts_ls" } },
-    })
-
     vim.diagnostic.config({
       severity_sort = true, -- errors render on top of warnings on the same line
       underline = true, -- marks *which* token is wrong; the plugin only shows text
       signs = true, -- gutter sign, different column, doesn't collide
-      update_in_insert = false, -- don't churn diagnostics while typing
+      update_in_insert = true, -- false => don't churn diagnostics while typing | true => update on insert
       virtual_text = false,
       float = {
         border = 'rounded',
         source = 'if_many',
       },
     })
-    -- Compose files arrive as plain `yaml`, so yamlls claimed them and
-    -- docker_compose_language_service (which only handles `yaml.docker-compose`)
-    -- never attached. The dotted filetype keeps yamlls attached as well.
     vim.filetype.add({
       filename = {
         ['docker-compose.yml'] = 'yaml.docker-compose',
@@ -64,30 +30,26 @@ return {
         vim.lsp.config[server] = dofile(lsp_dir .. '/' .. entry)
       end
     end
+    -- Mirrors `:Mason`, plus dartls. Add a name here only after installing it.
     vim.lsp.enable({
-      'lua_ls',
+      'astro',
       'bashls',
-      'ruff',
-      'basedpyright',
-      'gopls',
-      'dartls', -- from dart sdk!
       'clangd',
-      'neocmake',
-      'rust_analyzer', -- needs rustup: `rustup toolchain install stable`
-      'jsonls',
-      'yamlls',
-      'marksman',
-      'tombi',
+      'cssls',
+      'dartls', -- from dart sdk!
       'docker_compose_language_service',
       'dockerls',
-      'biome',
-      'eslint',
-      'astro',
-      'svelte',
-      'tailwindcss',
+      'gopls',
       'html',
-      'cssls',
+      'jsonls',
+      'lua_ls',
+      'marksman',
+      'neocmake',
+      'postgres_lsp', -- mason calls it postgres-language-server
+      'tailwindcss',
+      'tombi',
       'vtsls',
+      'yamlls',
     })
     vim.api.nvim_create_autocmd("LspAttach", {
       callback = function(event)
@@ -109,8 +71,7 @@ return {
     })
   end,
   dependencies = {
-    "williamboman/mason.nvim",
-    'neovim/nvim-lspconfig',
+    'williamboman/mason.nvim',
     'saghen/blink.cmp',
   },
 }
