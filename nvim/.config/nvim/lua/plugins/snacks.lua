@@ -64,8 +64,8 @@ return {
           source = "directories",
           title = "Directories",
           format = "file",
-          -- `fd` isn't installed and snacks' `files` source hardcodes `-type f`,
-          -- so drive `find` directly to list directories instead
+          -- snacks' `files` source hardcodes `-type f`, so drive a directory
+          -- listing directly instead
           finder = function(opts, ctx)
             local cwd = vim.fs.normalize(opts.cwd or vim.fn.getcwd())
             return require("snacks.picker.source.proc").proc({
