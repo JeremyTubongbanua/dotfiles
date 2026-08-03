@@ -5,7 +5,7 @@
 - **Commits are mine.** Never run `git add`, `git commit`, or `git push` unless I explicitly ask. **NEVER PUSH TO TRUNK.**
 - **Read a file before editing it.**
 - **Look before you destroy.** Check for existing assets before any `rm -rf xyz; mkdir -p xyz` — don't wipe out work.
-- **No in-line code documentation** for simple code changes, do not write comments. Comments for functions are fine.
+- **No code documentation** whatsoever. I will write documentation for code myself.
 
 ## Working With Me
 
