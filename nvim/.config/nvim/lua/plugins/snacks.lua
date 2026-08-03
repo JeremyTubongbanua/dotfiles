@@ -107,13 +107,24 @@ return {
     {
       "<leader>fd",
       function()
+        local loaded = false -- turns loading to false so text box can open instantly
         Snacks.picker.pick({
           source = "directories",
           title = "Directories",
           format = "file",
+          show_empty = true, -- otherwise the empty first pass closes the picker
+          filter = {
+            transform = function(_, filter)
+              loaded = loaded or filter.pattern ~= ""
+              filter.search = loaded and "\1" or ""
+            end,
+          },
           -- snacks' `files` source hardcodes `-type f`, so drive a directory
           -- listing directly instead
           finder = function(opts, ctx)
+            if ctx.filter.search == "" then -- don't search if search is empty
+              return function() end
+            end
             local cwd = vim.fs.normalize(opts.cwd or vim.fn.getcwd())
             return require("snacks.picker.source.proc").proc({
               cmd = "find",
