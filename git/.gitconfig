@@ -1,7 +1,7 @@
 [user]
 	name = JeremyTubongbanua
 	email = jeremy.tubongbanua@gmail.com
-	signingkey = /Users/jeremytubongbanua/.ssh/id_ed25519.pub
+	signingkey = /Users/jeremytubongbanua/.ssh/github_ed25519.pub
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
@@ -13,3 +13,5 @@
 	defaultBranch = trunk
 [gpg]
 	format = ssh
+[url "git@github.com:"]
+	insteadOf = https://github.com/
