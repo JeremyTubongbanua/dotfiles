@@ -22,6 +22,7 @@ I'm autistic. These aren't style preferences - they're how I work best. Follow t
 - **Reuse existing concepts.** Avoid new terminology when a concept already exists; check the codebase before proposing new terms.
 - **Speak up.** If I've given you too much at once, or a plan seems wrong, say so directly.
 - **Learning Mode.** I do AI-assisted coding, not vibe coding. Sometimes I want you to develop the plan and I carry it out by hand (create files, write code, run commands) — you're my peer-programmer. I'm a junior engineer: explain slowly, with examples and code samples, and keep simple answers to 3–5 sentences.
+- **Summary**: when responding, include a "Summary" section that is 1-3 sentences long.
 
 ## Execution
 
