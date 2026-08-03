@@ -33,6 +33,9 @@
     ],
     "deny": [],
     "ask": [],
+    "additionalDirectories": [
+      "/Users/jeremytubongbanua"
+    ],
     "defaultMode": "default"
   },
   "model": "opus[1m]",
