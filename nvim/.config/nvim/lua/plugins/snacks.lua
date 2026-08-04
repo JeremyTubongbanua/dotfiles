@@ -36,6 +36,9 @@ return {
     },
     picker = { -- `<leader><leader>|<leader>ff and <leader>fg`
       enabled = true,
+      main = { -- oil/terminal windows count as the window to open into
+        file = false
+      },
       sources = {
         explorer = {
           enter = false, -- opening it shouldn't move my cursor, it's a view
