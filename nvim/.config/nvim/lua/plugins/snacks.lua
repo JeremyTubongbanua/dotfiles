@@ -48,7 +48,29 @@ return {
             ".venv",
             "target",
             ".wrangler",
-          }
+          },
+          actions = {
+            -- with >1 window open, prompt for the target window before opening
+            confirm_pick_win = function(picker, item, action)
+              local explorer_confirm = require("snacks.explorer.actions").actions.confirm
+              if not item or item.dir or picker.input.filter.meta.searching then
+                return explorer_confirm(picker, item, action)
+              end
+              -- returns true when cancelled; `pick_win` no-ops with a single window
+              if Snacks.picker.actions.pick_win(picker, item, action) then
+                return
+              end
+              Snacks.picker.actions.jump(picker, item, action)
+            end,
+          },
+          win = {
+            list = {
+              keys = {
+                ["<CR>"] = "confirm_pick_win",
+                ["<2-LeftMouse>"] = "confirm_pick_win",
+              },
+            },
+          },
         },
         files = {
           hidden = true,
