@@ -3,6 +3,7 @@ vim.opt.cursorline = true -- highlights line that cursor is on
 vim.opt.termguicolors = true -- enable 24-bit colors, uses colours from terminal (Ghostty)
 vim.opt.signcolumn = 'yes' -- keep the git/lsp sign column visible, no layout jump
 vim.opt.wrap = true -- true => wrap lines | false => don't wrap lines
+vim.opt.diffopt:append('followwrap') -- diff mode forces 'wrap' off otherwise, ignoring the line above
 vim.opt.virtualedit = 'block' -- allow cursor to move where there is no text in visual block mode
 vim.opt.isfname:append("@-@") -- treats `@` as a valid filename character
 -- vim.opt.guicursor = "" -- basically when you're in insert mode, the normal mode cursor will remain. Cursor will always be in block mode
