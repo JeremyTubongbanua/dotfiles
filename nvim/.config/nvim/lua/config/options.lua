@@ -1,7 +1,6 @@
 vim.opt.showcmd = true -- shows commands while typing (like 14j) on the bottom right
 vim.opt.cursorline = true -- highlights line that cursor is on
 vim.opt.termguicolors = true -- enable 24-bit colors, uses colours from terminal (Ghostty)
-vim.opt.scrolloff = 999 -- always keep cursor in middle of screen, screen scrolls instead
 vim.opt.signcolumn = 'yes' -- keep the git/lsp sign column visible, no layout jump
 vim.opt.wrap = true -- true => wrap lines | false => don't wrap lines
 vim.opt.virtualedit = 'block' -- allow cursor to move where there is no text in visual block mode
