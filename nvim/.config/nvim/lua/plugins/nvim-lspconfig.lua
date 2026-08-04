@@ -186,8 +186,14 @@ return {
         })
       end
     end
+    local function is_uri_buffer(bufnr)
+      return vim.api.nvim_buf_get_name(bufnr):match('^%a[%w+.%-]*://') ~= nil
+    end
     vim.api.nvim_create_autocmd("LspAttach", {
       callback = function(event)
+        if is_uri_buffer(event.buf) then
+          vim.diagnostic.enable(false, { bufnr = event.buf })
+        end
         vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "Go to Definition", buffer = event.buf })
         vim.keymap.set("n", "K", vim.lsp.buf.hover, { desc = "LSP Hover", buffer = event.buf })
         vim.keymap.set("n", "<leader>vd", vim.diagnostic.open_float, { desc = "View Diagnostics", buffer = event.buf })
