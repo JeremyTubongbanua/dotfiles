@@ -18,10 +18,10 @@ vim.keymap.set('v', '>', '>gv', { desc = "Indent right and reselect" })
 vim.keymap.set('v', '<', '<gv', { desc = "Indent left and reselect" })
 
 -- `x`, `p`, `d`, `dd` no longer overwrite register
-vim.keymap.set('x', 'x', '"_x', { desc = "Delete without overwriting register" })
-vim.keymap.set('x', 'd', '"_d', { desc = "Delete without overwriting register" })
-vim.keymap.set('x', 'p', '"_dP ', { desc = "Paste without overwriting register" })
-vim.keymap.set('n', 'dd', '"_dd', { desc = "Delete line without overwriting register" })
+-- vim.keymap.set('x', 'x', '"_x', { desc = "Delete without overwriting register" })
+-- vim.keymap.set('x', 'd', '"_d', { desc = "Delete without overwriting register" })
+-- vim.keymap.set('x', 'p', '"_dP ', { desc = "Paste without overwriting register" })
+-- vim.keymap.set('n', 'dd', '"_dd', { desc = "Delete line without overwriting register" })
 
 -- move down/up in buffer with cursor centered
 -- vim.keymap.set('n', '<C-d>', '<C-d>zz', { desc = "Move down half page and center cursor" })
