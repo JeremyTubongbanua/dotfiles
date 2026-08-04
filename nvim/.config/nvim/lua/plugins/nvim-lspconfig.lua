@@ -55,6 +55,137 @@ return {
       'vtsls',
       'yamlls',
     })
+    local IMPORT_KINDS = { 'source.addMissingImports', 'source.organizeImports' }
+    local function cursor_code_action_params(bufnr, encoding)
+      local mode = vim.api.nvim_get_mode().mode
+      if mode ~= 'v' and mode ~= 'V' and mode ~= '\22' then
+        return vim.lsp.util.make_range_params(0, encoding)
+      end
+      local from = vim.fn.getpos('v')
+      local to = vim.fn.getpos('.')
+      local start_row, start_col, end_row, end_col = from[2], from[3], to[2], to[3]
+      if start_row == end_row and end_col < start_col then
+        start_col, end_col = end_col, start_col
+      elseif end_row < start_row then
+        start_row, end_row = end_row, start_row
+        start_col, end_col = end_col, start_col
+      end
+      if mode == 'V' then
+        start_col = 1
+        end_col = #vim.api.nvim_buf_get_lines(bufnr, end_row - 1, end_row, true)[1]
+      end
+      return vim.lsp.util.make_given_range_params(
+        { start_row, start_col - 1 },
+        { end_row, end_col - 1 },
+        bufnr,
+        encoding
+      )
+    end
+    local function file_code_action_params(bufnr, encoding)
+      local last_row = vim.api.nvim_buf_line_count(bufnr)
+      local last_line = vim.api.nvim_buf_get_lines(bufnr, last_row - 1, last_row, true)[1]
+      return vim.lsp.util.make_given_range_params(
+        { 1, 0 },
+        { last_row, math.max(#last_line - 1, 0) },
+        bufnr,
+        encoding
+      )
+    end
+    local function apply_code_action(client, action, bufnr)
+      if action.edit then
+        vim.lsp.util.apply_workspace_edit(action.edit, client.offset_encoding)
+      end
+      if type(action.command) == 'table' then
+        client:exec_cmd(action.command, { bufnr = bufnr })
+      elseif type(action.command) == 'string' then
+        client:exec_cmd(action, { bufnr = bufnr })
+      end
+    end
+    local function run_code_action(client, action, bufnr)
+      if action.edit or action.command or not client:supports_method('codeAction/resolve') then
+        apply_code_action(client, action, bufnr)
+        return
+      end
+      client:request('codeAction/resolve', action, function(err, resolved)
+        if err or not resolved then
+          vim.notify(err and err.message or ('Could not resolve: ' .. action.title), vim.log.levels.WARN)
+          return
+        end
+        apply_code_action(client, resolved, bufnr)
+      end, bufnr)
+    end
+    local function code_action_with_imports()
+      local bufnr = vim.api.nvim_get_current_buf()
+      local clients = vim.lsp.get_clients({ bufnr = bufnr, method = 'textDocument/codeAction' })
+      if #clients == 0 then
+        vim.notify('No LSP client supports code actions', vim.log.levels.WARN)
+        return
+      end
+      local cursor_diagnostics = vim.lsp.diagnostic.from(
+        vim.diagnostic.get(bufnr, { lnum = vim.api.nvim_win_get_cursor(0)[1] - 1 })
+      )
+      local file_diagnostics = vim.lsp.diagnostic.from(vim.diagnostic.get(bufnr))
+      local buckets = { {}, {} }
+      local pending = #clients * #buckets
+      local function show()
+        pending = pending - 1
+        if pending > 0 then
+          return
+        end
+        local items, seen = {}, {}
+        for _, bucket in ipairs(buckets) do
+          for _, item in ipairs(bucket) do
+            local key = item.client.id .. ':' .. item.action.title
+            if not seen[key] then
+              seen[key] = true
+              items[#items + 1] = item
+            end
+          end
+        end
+        if #items == 0 then
+          vim.notify('No code actions available', vim.log.levels.INFO)
+          return
+        end
+        vim.ui.select(items, {
+          prompt = 'Code Action:',
+          kind = 'codeaction',
+          format_item = function(item)
+            return (item.action.title:gsub('%s*\r?\n%s*', ' '))
+          end,
+        }, function(item)
+          if item then
+            run_code_action(item.client, item.action, bufnr)
+          end
+        end)
+      end
+      local function request(client, bucket, params, context)
+        params.context = vim.tbl_extend('error', context, {
+          triggerKind = vim.lsp.protocol.CodeActionTriggerKind.Invoked,
+        })
+        local ok = client:request('textDocument/codeAction', params, function(err, result)
+          for _, action in ipairs(err and {} or result or {}) do
+            bucket[#bucket + 1] = {
+              action = action,
+              ctx = { bufnr = bufnr, client_id = client.id, method = 'textDocument/codeAction' },
+              client = client,
+            }
+          end
+          show()
+        end, bufnr)
+        if not ok then
+          show()
+        end
+      end
+      for _, client in ipairs(clients) do
+        request(client, buckets[1], cursor_code_action_params(bufnr, client.offset_encoding), {
+          diagnostics = cursor_diagnostics,
+        })
+        request(client, buckets[2], file_code_action_params(bufnr, client.offset_encoding), {
+          diagnostics = file_diagnostics,
+          only = IMPORT_KINDS,
+        })
+      end
+    end
     vim.api.nvim_create_autocmd("LspAttach", {
       callback = function(event)
         vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "Go to Definition", buffer = event.buf })
@@ -66,8 +197,8 @@ return {
         vim.keymap.set("n", "[d", function()
           vim.diagnostic.jump({ count = -1, float = true })
         end, { desc = "Previous Diagnostic", buffer = event.buf })
-        vim.keymap.set("n", "<leader>vca", vim.lsp.buf.code_action, { desc = "Code Action", buffer = event.buf })
-        vim.keymap.set("v", "<leader>vca", vim.lsp.buf.code_action, { desc = "Code Action", buffer = event.buf })
+        vim.keymap.set("n", "<leader>vca", code_action_with_imports, { desc = "Code Action", buffer = event.buf })
+        vim.keymap.set("v", "<leader>vca", code_action_with_imports, { desc = "Code Action", buffer = event.buf })
         vim.keymap.set("n", "<leader>vrr", vim.lsp.buf.references, { desc = "LSP References", buffer = event.buf })
         vim.keymap.set("n", "<leader>vrn", vim.lsp.buf.rename, { desc = "LSP Rename", buffer = event.buf })
         vim.keymap.set("n", "<leader>vru", vim.lsp.buf.incoming_calls, { desc = "Find Uses (Incoming Calls)", buffer = event.buf })
