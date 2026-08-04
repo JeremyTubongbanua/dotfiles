@@ -184,10 +184,10 @@
       "Bash(launchctl *)",
       "Bash(git config --global *)"
     ],
+    "defaultMode": "default",
     "additionalDirectories": [
       "/Users/jeremytubongbanua"
-    ],
-    "defaultMode": "default"
+    ]
   },
   "model": "opus[1m]",
   "hooks": {
@@ -219,7 +219,7 @@
       }
     }
   },
-  "effortLevel": "high",
+  "effortLevel": "xhigh",
   "theme": "auto",
   "editorMode": "normal"
 }
