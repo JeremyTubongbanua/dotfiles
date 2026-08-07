@@ -193,6 +193,9 @@ return {
     { '<leader>gg', ':Git<CR>', desc = 'Git Status' }, -- opens fugitive
     { '<leader>gd', ':Gvdiffsplit!<CR>', desc = 'Git Diff Split' }, -- create a three-way vertical split. Left = feature branch (//2), Middle = current file, Right = merging branch (//3)
     { '<leader>gD', review, desc = 'Git Review vs Base Branch' }, -- pick a changed file, get base (left) vs work tree (right)
+    -- n: blame the whole file, scrollbound to this window. x: Vim auto-prepends '<,'>,
+    -- and fugitive restricts blame to just that range (own split, no scrollbind) when a range is given
+    { '<leader>gb', ':Git blame<CR>', mode = { 'n', 'x' }, desc = 'Git Blame' },
     { ']q', function() nav(1) end, desc = 'Quickfix Next' },
     { '[q', function() nav(-1) end, desc = 'Quickfix Previous' },
     { '<leader>gh', ':diffget //2<CR>', mode = { 'n', 'x' }, desc = 'Git Diff Get Left' }, -- get changes from the left side where your cursor or selection is. Cursor must be in the middle buffer.
