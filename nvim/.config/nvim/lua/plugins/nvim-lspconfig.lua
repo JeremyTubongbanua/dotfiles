@@ -55,6 +55,20 @@ return {
       'vtsls',
       'yamlls',
     })
+    -- Dart/TS servers send window/showMessageRequest to confirm updating imports
+    -- on file rename/move (regardless of which file explorer triggered it); always say yes
+    local default_show_message_request = vim.lsp.handlers['window/showMessageRequest']
+    vim.lsp.handlers['window/showMessageRequest'] = function(err, result, ctx, config)
+      if result and result.message and result.message:lower():find('import') then
+        for _, action in ipairs(result.actions or {}) do
+          if action.title:lower():find('^yes') then
+            return action
+          end
+        end
+        return result.actions and result.actions[1]
+      end
+      return default_show_message_request(err, result, ctx, config)
+    end
     local IMPORT_KINDS = { 'source.addMissingImports', 'source.organizeImports' }
     local function cursor_code_action_params(bufnr, encoding)
       local mode = vim.api.nvim_get_mode().mode
