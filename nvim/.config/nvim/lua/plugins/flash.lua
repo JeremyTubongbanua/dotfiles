@@ -7,7 +7,6 @@ return {
     modes = {
       char = { -- `f'` then keep pressing `f` to hop between matches (`F` to go back)
         enabled = true,
-        jump_labels = true,
       },
     },
   },
