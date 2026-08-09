@@ -11,7 +11,7 @@ font-size = 16
 
 # Theme
 # theme = Espresso
-theme = "light:Catppuccin Latte,dark:Catppuccin Mocha"
+theme = "light:Catppuccin Latte,dark:Catppuccin Macchiato"
 # theme = "light:Flexoki Light,dark:TokyoNight Storm"
 
 # Background
@@ -26,7 +26,7 @@ keybind=super+c=copy_to_clipboard
 keybind=super+v=paste_from_clipboard
 
 # fixes shift+enter new line
-keybind = shift+enter=text:\n 
+keybind = shift+enter=text:\n
 
 # keybind = cmd+d=new_split:right
 # keybind = ctrl+w>period=resize_split:right,1000
