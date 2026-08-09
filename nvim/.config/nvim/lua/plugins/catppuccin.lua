@@ -8,7 +8,7 @@ return {
     flavour = "auto",
     background = {
       light = "latte",
-      dark = "mocha"
+      dark = "macchiato"
     },
     integrations = {
       native_lsp = {
