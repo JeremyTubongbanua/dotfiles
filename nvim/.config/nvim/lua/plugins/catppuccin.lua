@@ -12,6 +12,8 @@ return {
     },
     integrations = {
       native_lsp = {
+        flash = true,
+        harpoon = false,
         underlines = {
           errors = {
             "undercurl"
@@ -19,6 +21,17 @@ return {
         },
       },
     },
+    mason = false,
+    mini = {
+      enabled = true,
+      indentscope_color = "",
+    },
+    treesitter_context = true,
+    snacks = {
+      enabled = false,
+      indent_scope_color = "", -- catppuccin color (eg. `lavender`) Default: overlay2
+    },
+    which_key = false,
     custom_highlights = function(colors)
       return {
         DiagnosticUnderlineError = {
