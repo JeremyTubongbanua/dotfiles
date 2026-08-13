@@ -34,7 +34,7 @@ return {
     notifier = { -- adds notifier to the top right
       enabled = true
     },
-    picker = { -- `<leader><leader>|<leader>ff and <leader>fg`
+    picker = { -- `<leader><leader>|<leader>ff and <leader>fg` | <leader>fd
       enabled = true,
       main = { -- oil/terminal windows count as the window to open into
         file = false
