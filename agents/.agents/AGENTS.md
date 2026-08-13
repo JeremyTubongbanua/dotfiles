@@ -30,6 +30,9 @@ I'm autistic. These aren't style preferences - they're how I work best. Follow t
 
 ## Git
 
+- Never make tickets or pull requests on your own, I usually make them unless I explicitly ask you to.
+- **Commits are mine.** Never run `git add`, `git commit`, or `git push` unless I explicitly ask.
+- **NEVER PUSH TO TRUNK.**
 - Default branch is `trunk`; the primary remote is named `upstream`, not `origin`.
 - Clone with SSH URLs (`git@github.com:...`), never HTTPS. Add remotes as `upstream`.
 - **Repo layout:** repos live in `~/GitHub/<org>/<name>/`, organised by org — `atsign/` (at_client_sdk, at_server, noports, …), `personal/` (dotfiles, campuseats, …), `jeremylabs/`, `align/`. Most are standard single-root repos (`~/GitHub/<org>/<name>/.git`). A few are worktree collections: `~/GitHub/<org>/<name>/trunk/` holds the upstream trunk checkout and sibling directories hold feature worktrees.
