@@ -35,6 +35,10 @@ alias pip='pip3'
 alias h='herdr'
 alias ccusage='CLAUDE_CONFIG_DIR="$HOME/.claude,$HOME/.claude-work" ccusage' # tracks both claude and claude-work for usage
 
-set keyseq-timeout 0 # no key delays
+bindkey -M viins '^[b' backward-word
+bindkey -M viins '^[f' forward-word
+bindkey -M viins '^A' beginning-of-line
+bindkey -M viins '^E' end-of-line
+
 [ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
 eval "$(starship init zsh)"
