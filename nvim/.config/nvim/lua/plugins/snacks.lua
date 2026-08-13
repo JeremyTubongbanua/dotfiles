@@ -102,9 +102,9 @@ return {
     scope = { -- vii and vai, and [i and ]i
       enabled = true,
     },
-    scroll = { -- smooth animation scrolling when Ctrl+U and Ctrl+D for example
-      enabled = true,
-    },
+    -- scroll = { -- smooth animation scrolling when Ctrl+U and Ctrl+D for example
+    --   enabled = true,
+    -- },
   },
   keys = {
     { "<leader><leader>", function() Snacks.picker.files() end, desc = "Find Files" },
