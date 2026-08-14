@@ -6,7 +6,7 @@ return {
     },
   },
   keys = {
-    { "<leader>ce", function() require("copilot").setup({ enabled = true }) end, desc = "Enable Copilot" },
-    { "<leader>cd", function() require("copilot").setup({ enabled = false }) end, desc = "Disable Copilot" },
+    { "<leader>ce", function() require("copilot.command").enable() end, desc = "Enable Copilot" },
+    { "<leader>cd", function() require("copilot.command").disable() end, desc = "Disable Copilot" },
   },
 }
