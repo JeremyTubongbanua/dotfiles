@@ -119,13 +119,13 @@
       "Edit(~/.ssh/**)",
       "Edit(~/.aws/**)"
     ],
-    "ask": [
-    ],
+    "ask": [],
     "defaultMode": "auto",
     "additionalDirectories": [
       "/Users/jeremytubongbanua"
     ]
   },
+  "model": "opus[1m]",
   "hooks": {
     "SessionStart": [
       {
