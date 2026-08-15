@@ -1,0 +1,104 @@
+tap "atsign-foundation/tap"
+tap "dart-lang/dart"
+tap "jcleira/tap"
+tap "stripe/stripe-cli", trusted: { formulae: ["stripe"] }
+tap "supabase/tap"
+# Incredibly fast JavaScript runtime, bundler, test runner, and package manager
+brew "bun"
+# Core application library for C
+brew "glib"
+# CLI tool for analyzing Claude Code usage from local JSONL files
+brew "ccusage"
+# Open-source, cross-platform JavaScript runtime environment
+brew "node"
+# CLI tool for Cloudflare Workers
+brew "cloudflare-wrangler"
+# Cross-platform make
+brew "cmake"
+# Powerful, clean, object-oriented scripting language
+brew "ruby"
+# Dependency manager for Cocoa projects
+brew "cocoapods"
+# GNU File, Shell, and Text utilities
+brew "coreutils"
+# Simple, fast and user-friendly alternative to find
+brew "fd"
+# GitHub command-line tool
+brew "gh"
+# OpenType text shaping engine
+brew "harfbuzz"
+# Interpreter for PostScript and PDF
+brew "ghostscript"
+# GNU Transport Layer Security (TLS) Library
+brew "gnutls"
+# Open source programming language to build simple/reliable/efficient software
+brew "go"
+# Agent multiplexer that lives in your terminal
+brew "herdr"
+# Tools and libraries to manipulate images in select formats
+brew "imagemagick"
+# Library for quantum-safe cryptography
+brew "liboqs"
+# Java-based project management
+brew "maven"
+# NCurses Disk Usage
+brew "ncdu"
+# Incremental parsing library
+brew "tree-sitter"
+# Ambitious Vim-fork focused on extensibility and agility
+brew "neovim"
+# Port scanning utility for large networks
+brew "nmap"
+# Paste PNG into files
+brew "pngpaste"
+# Persistent key-value database, with built-in net interface
+brew "redis"
+# Search tool like grep and The Silver Searcher
+brew "ripgrep"
+# Cross-shell prompt for astronauts
+brew "starship"
+# Organize software neatly under a single directory tree (e.g. /usr/local)
+brew "stow"
+# Terminal multiplexer
+brew "tmux"
+# Supabase CLI
+brew "supabase/tap/supabase", trusted: true
+# Enable Windows-like alt-tab
+cask "alt-tab"
+# Integrated CAD, CAM, CAE, and PCB software
+cask "autodesk-fusion"
+# Tool to flash OS images to SD cards & USB drives
+cask "balenaetcher"
+# 3D model slicing software for 3D printers, maintained by Bambu Lab
+cask "bambu-studio"
+# Anthropic's official Claude AI desktop app
+cask "claude"
+# Terminal-based AI coding assistant
+cask "claude-code@latest"
+# Voice and text chat software
+cask "discord"
+# UI toolkit for building applications for mobile, web and desktop
+cask "flutter"
+# Terminal emulator that uses platform-native UI and GPU acceleration
+cask "ghostty"
+# Desktop client for GitHub repositories
+cask "github"
+# Customise mouse behavior
+cask "linearmouse"
+cask "noports"
+# Open-source software for live streaming and screen recording
+cask "obs"
+# Get up and running with large language models locally
+cask "ollama-app"
+# Imaging utility to install operating systems to a microSD card
+cask "raspberry-pi-imager"
+# Move and resize windows using keyboard shortcuts or snap areas
+cask "rectangle"
+# Music streaming service
+cask "spotify"
+# Temperature monitoring, fan control and diagnostics
+cask "tg-pro"
+npm "expo"
+npm "pnpm"
+npm "tree-sitter-cli"
+npm "typescript"
