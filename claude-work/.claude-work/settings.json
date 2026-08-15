@@ -120,11 +120,12 @@
       "Edit(~/.aws/**)"
     ],
     "ask": [],
-    "defaultMode": "default",
+    "defaultMode": "auto",
     "additionalDirectories": [
       "/Users/jeremytubongbanua"
     ]
   },
+  "model": "opus[1m]",
   "hooks": {
     "SessionStart": [
       {
@@ -156,6 +157,5 @@
   },
   "effortLevel": "xhigh",
   "theme": "auto",
-  "editorMode": "normal",
-  "model": "opus[1m]"
+  "editorMode": "normal"
 }
