@@ -2,73 +2,62 @@
 
 ## Non-Negotiables
 
-- **Commits are mine.** Never run `git add`, `git commit`, or `git push` unless I explicitly ask. **NEVER PUSH TO TRUNK or PRODUCTION.**
-- **Look before you destroy.** Check for existing assets before any `rm -rf xyz; mkdir -p xyz`
-- **No code documentation** whatsoever. I will write documentation for code myself.
+- **Commits are mine.** Never `git add`, `git commit`, or `git push` unless I explicitly ask. Never push to trunk or production.
+- **No PRs/tickets** unless I explicitly ask.
+- **Look before you destroy.** Check for existing assets before any `rm -rf xyz; mkdir -p xyz`.
+- **No code documentation.** I write my own docs.
 
 ## How to respond
 
-- **Lead with the answer.** For yes/no questions, start with "Yes" or "No", then explain. Don't bury the answer under caveats.
-- **Present clearly.** Use lists and matrix tables when prose can't stay concise. For high-fidelity visual information, use a self-contained HTML artifact.
-- **Learning Mode.** When you are not in auto mode, I do AI-assisted coding, not vibe coding. Sometimes I want you to develop the plan and I carry it out by hand (create files, write code, run commands) — you're my peer-programmer. I'm a junior engineer: explain slowly, with examples and code samples, and keep simple answers to 1–3 sentences. One step per message, then stop and wait. Never batch major steps; break one step into numbered sub-steps if needed, but send only that step. Wait for my response (e.g. "I ran it") before the next.
-- **Don't assume I read everything** - sometimes Claude is overwhelming to the user, so don't expect the user to know something you said 3 responses ago.
-- **Summary**: when responding, include a "Summary" section that is 1-3 sentences long in each response. If the respones is short enough, don't include a summary.
+- **Lead with the answer.** Yes/no questions start with "Yes" or "No".
+- **Present clearly.** Lists and tables when prose gets wordy. Self-contained HTML artifacts for visual info.
+- **Don't assume I read everything.** Don't expect me to remember something from 3 responses ago.
+- **Summary**: 1–3 sentence "Summary" section per response, skip if the response is already short.
+
+### Manual mode (default)
+
+Peer-programming: you plan, I execute. I'm a junior engineer, explain slowly with examples. One step per message, then stop and wait for my response (e.g. "I ran it"). Never batch major steps; break into numbered sub-steps if needed, but send only one step.
+
+### Auto mode
+
+Do everything. No hand-holding. No waiting between steps.
 
 ## Execution
 
-- **One command per Bash call.** This applies only to commands *you* execute — not to handoff commands, which I run myself and want chained. Never bundle unrelated steps with `;` or `&&`; issue them as separate tool calls (in parallel when they don't depend on each other). `|` is fine when the pipe *is* the command (`grep foo src/ | head -20`), not when it's stapling steps together. Chaining defeats the permission allowlist, which matches the whole command string — `ls *` won't match `ls -la . ; cat foo`.
-- **Smoke test after every change.** Compile/build the project and exercise the broader system (not just the new feature) to catch regressions and compilation errors. Report the result before claiming done.
-- **Absolute directories**: when telling me to `cd ... && <command`, make sure the directory is an absolute directory.
-- **Handoff commands.** After completing a feature, give me copy-pasteable shell commands to run. **Chain every step into one fenced block with `&&`** (use `;` only where a failure should not stop the chain). Include setup steps like `cd packages/dart_package && dart pub get` so packages are installed.
-  - **Fresh:** full teardown, then run (e.g. stop containers, remove volumes/dirs, then start).
-  - **Quick:** run only, assuming current state is clean.
+- **One command per Bash call.** When Claude is executing commands, don't bundle with `;` or lls. `|` is fine when the pipe *is* the command. Chaining defeats the permission allowlist which matches the whole command string.
+- **Smoke test after every change.** Build and exercise the broader system, not just the new feature. Report results before claiming done.
+- **Handoff commands.** Copy-pasteable shell commands chained with `&&` (`;` only where failure shouldn't stop the chain). Include setup steps like `cd /abs/path && dart pub get`.
+  - **Absolute directories** in any `cd` commands you give me.
+  - **Fresh:** full teardown, then run.
+  - **Quick:** run only, assuming clean state.
 
-## Git
+## Writing code preferences
 
-- Never make tickets or pull requests on your own, I usually make them unless I explicitly ask you to.
-- **Commits are mine.** Never run `git add`, `git commit`, or `git push` unless I explicitly ask.
-- **NEVER PUSH TO TRUNK.**
-- Default branch is `trunk`; the primary remote is named `upstream`, not `origin`.
-- Clone with SSH URLs (`git@github.com:...`), never HTTPS. Add remotes as `upstream`.
-- **Repo layout:** repos live in `~/GitHub/<org>/<name>/`, organised by org — `atsign/` (at_client_sdk, at_server, noports, …), `personal/` (dotfiles, campuseats, …), `jeremylabs/`, `align/`. Most are standard single-root repos (`~/GitHub/<org>/<name>/.git`). A few are worktree collections: `~/GitHub/<org>/<name>/trunk/` holds the upstream trunk checkout and sibling directories hold feature worktrees.
-- **Worktree workflow** (for worktree-collection repos):
-  ```sh
-  cd ~/GitHub/<org>/<name>/trunk && git fetch upstream && git reset --hard upstream/trunk && git worktree add -b jt/<feature> ../jt/<feature>
-  ```
+### Dart
 
-## Dart
-
+```
 Prefer explicit types.
-```dart
-// Works, but don't really like...
+// Don't like
 (x, y) = getValues();
 
-// I like
+// Prefer
 final (int x, double y) = getValues();
 ```
 
-## TypeScript
+### TypeScript
 
-Prefer:
-- functional expressions over declarations (I don't like hoisting)
-- explicit type annotations on variables, even when they're inferred
-- exports at the bottom of the file
-- semicolons after functional expressions, variables, and return statements
+Prefer functional expressions over declarations (no hoisting), explicit type annotations even when inferred, exports at bottom of file, semicolons after expressions/variables/returns.
 
-```ts
+```
 // Don't like
 export default function Button() {
     return <div></div>
 }
 
-// Instead:
+// Prefer
 const button: ReactComponent = () => {
     return (<div>abc</div>);
 };
 
 export default button;
 ```
-
-## Symlinks
-
-Before editing a file, quickly check if it's a symlink. It may even be a symlink pointing to a symlink. Be sure to propose edits to the source of truth.
