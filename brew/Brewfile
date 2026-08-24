@@ -1,7 +1,7 @@
 tap "atsign-foundation/tap"
 tap "dart-lang/dart"
 tap "jcleira/tap"
-tap "stripe/stripe-cli", trusted: { formulae: ["stripe"] }
+tap "stripe/stripe-cli"
 tap "supabase/tap"
 # Incredibly fast JavaScript runtime, bundler, test runner, and package manager
 brew "bun"
@@ -39,6 +39,8 @@ brew "herdr"
 brew "imagemagick"
 # Library for quantum-safe cryptography
 brew "liboqs"
+# Next-gen compiler infrastructure
+brew "llvm"
 # Java-based project management
 brew "maven"
 # NCurses Disk Usage
@@ -61,10 +63,10 @@ brew "starship"
 brew "stow"
 # Terminal multiplexer
 brew "tmux"
+# Stripe CLI utility
+brew "stripe/stripe-cli/stripe", trusted: true
 # Supabase CLI
 brew "supabase/tap/supabase", trusted: true
-# Enable Windows-like alt-tab
-cask "alt-tab"
 # Integrated CAD, CAM, CAE, and PCB software
 cask "autodesk-fusion"
 # Tool to flash OS images to SD cards & USB drives
@@ -86,8 +88,6 @@ cask "github"
 # Customise mouse behavior
 cask "linearmouse"
 cask "noports"
-# Open-source software for live streaming and screen recording
-cask "obs"
 # Get up and running with large language models locally
 cask "ollama-app"
 # Imaging utility to install operating systems to a microSD card
@@ -98,6 +98,9 @@ cask "rectangle"
 cask "spotify"
 # Temperature monitoring, fan control and diagnostics
 cask "tg-pro"
+# Menu bar toolkit with keep-awake, system monitor and volume mixer
+cask "vorssaint"
+npm "clerk"
 npm "expo"
 npm "pnpm"
 npm "tree-sitter-cli"
