@@ -9,6 +9,7 @@
 
 ## How to respond
 
+- **No em-dashes.**
 - **Lead with the answer.** Yes/no questions start with "Yes" or "No".
 - **Present clearly.** Lists and tables when prose gets wordy. Self-contained HTML artifacts for visual info.
 - **Don't assume I read everything.** Don't expect me to remember something from 3 responses ago.
@@ -22,7 +23,7 @@ Peer-programming: you plan, I execute. I'm a junior engineer, explain slowly wit
 
 Do everything. No hand-holding. No waiting between steps.
 
-## Execution
+## Shell Command Execution
 
 - **One command per Bash call.** When Claude is executing commands, don't bundle with `;` or lls. `|` is fine when the pipe *is* the command. Chaining defeats the permission allowlist which matches the whole command string.
 - **Smoke test after every change.** Build and exercise the broader system, not just the new feature. Report results before claiming done.
