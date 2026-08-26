@@ -27,6 +27,8 @@ brew "fd"
 brew "gh"
 # OpenType text shaping engine
 brew "harfbuzz"
+# TIFF library and utilities
+brew "libtiff"
 # Interpreter for PostScript and PDF
 brew "ghostscript"
 # GNU Transport Layer Security (TLS) Library
