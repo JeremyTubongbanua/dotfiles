@@ -128,13 +128,45 @@ return {
         apply_code_action(client, resolved, bufnr)
       end, bufnr)
     end
+    local function jq_filter(bufnr, args, label)
+      if vim.fn.executable('jq') ~= 1 then
+        vim.notify('jq not found; falling back to LSP formatting', vim.log.levels.WARN)
+        vim.lsp.buf.format({ bufnr = bufnr })
+        return
+      end
+      local input = table.concat(vim.api.nvim_buf_get_lines(bufnr, 0, -1, false), '\n')
+      local cmd = { 'jq' }
+      vim.list_extend(cmd, args)
+      local result = vim.system(cmd, { stdin = input, text = true }):wait()
+      if result.code ~= 0 then
+        vim.notify(label .. ' failed: ' .. vim.trim(result.stderr or ''), vim.log.levels.ERROR)
+        return
+      end
+      local view = vim.fn.winsaveview()
+      vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, vim.split(vim.trim(result.stdout or ''), '\n'))
+      vim.fn.winrestview(view)
+    end
+    local CUSTOM_ACTIONS = {
+      json = {
+        {
+          title = 'Format JSON',
+          run = function(bufnr)
+            local indent = math.min(math.max(vim.bo[bufnr].shiftwidth, 1), 7)
+            jq_filter(bufnr, { '--indent', tostring(indent), '.' }, 'Format JSON')
+          end,
+        },
+        {
+          title = 'Minify JSON',
+          run = function(bufnr)
+            jq_filter(bufnr, { '-c', '.' }, 'Minify JSON')
+          end,
+        },
+      },
+    }
+    CUSTOM_ACTIONS.jsonc = CUSTOM_ACTIONS.json
     local function code_action_with_imports()
       local bufnr = vim.api.nvim_get_current_buf()
       local clients = vim.lsp.get_clients({ bufnr = bufnr, method = 'textDocument/codeAction' })
-      if #clients == 0 then
-        vim.notify('No LSP client supports code actions', vim.log.levels.WARN)
-        return
-      end
       local cursor_diagnostics = vim.lsp.diagnostic.from(
         vim.diagnostic.get(bufnr, { lnum = vim.api.nvim_win_get_cursor(0)[1] - 1 })
       )
@@ -147,6 +179,9 @@ return {
           return
         end
         local items, seen = {}, {}
+        for _, action in ipairs(CUSTOM_ACTIONS[vim.bo[bufnr].filetype] or {}) do
+          items[#items + 1] = { action = action, custom = action.run }
+        end
         for _, bucket in ipairs(buckets) do
           for _, item in ipairs(bucket) do
             local key = item.client.id .. ':' .. item.action.title
@@ -167,9 +202,14 @@ return {
             return (item.action.title:gsub('%s*\r?\n%s*', ' '))
           end,
         }, function(item)
-          if item then
-            run_code_action(item.client, item.action, bufnr)
+          if not item then
+            return
           end
+          if item.custom then
+            item.custom(bufnr)
+            return
+          end
+          run_code_action(item.client, item.action, bufnr)
         end)
       end
       local function request(client, bucket, params, context)
@@ -199,7 +239,16 @@ return {
           only = IMPORT_KINDS,
         })
       end
+      if #clients == 0 then
+        show()
+      end
     end
+    vim.api.nvim_create_autocmd('FileType', {
+      pattern = vim.tbl_keys(CUSTOM_ACTIONS),
+      callback = function(event)
+        vim.keymap.set({ 'n', 'v' }, '<leader>vca', code_action_with_imports, { desc = 'Code Action', buffer = event.buf })
+      end,
+    })
     local function is_uri_buffer(bufnr)
       return vim.api.nvim_buf_get_name(bufnr):match('^%a[%w+.%-]*://') ~= nil
     end
