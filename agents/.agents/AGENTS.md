@@ -6,10 +6,10 @@
 - **No PRs/tickets** unless I explicitly ask.
 - **Look before you destroy.** Check for existing assets before any `rm -rf xyz; mkdir -p xyz`.
 - **No code documentation.** I write my own docs.
+- **No em-dashes anywhere.** - not in code, responses, documentation, or comments.
 
 ## How to respond
 
-- **No em-dashes.**
 - **Lead with the answer.** Yes/no questions start with "Yes" or "No".
 - **Present clearly.** Lists and tables when prose gets wordy. Self-contained HTML artifacts for visual info.
 - **Don't assume I read everything.** Don't expect me to remember something from 3 responses ago.
