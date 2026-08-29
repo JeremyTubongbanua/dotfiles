@@ -125,6 +125,7 @@
       "/Users/jeremytubongbanua"
     ]
   },
+  "model": "claude-opus-4-6",
   "hooks": {
     "SessionStart": [
       {
@@ -155,7 +156,12 @@
       }
     }
   },
-  "effortLevel": "xhigh",
+  "effortLevel": "high",
+  "modelSettings": {
+    "claude-opus-4-6": {
+      "effortLevel": "high"
+    }
+  },
   "theme": "auto",
   "editorMode": "normal"
 }
