@@ -1,0 +1,4 @@
+interface:
+  display_name: "Code Review"
+  short_description: "Review PRs and branches against stable trunk"
+  default_prompt: "Use $code-review to inspect this change against trunk and report actionable findings."
