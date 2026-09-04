@@ -35,7 +35,7 @@
     "openai-codex/gpt-5.6-sol": "high"
   },
   "warnings": {
-    "anthropicExtraUsage": false
+    "anthropicExtraUsage": true
   },
   "hideThinkingBlock": true,
   "terminal": {
