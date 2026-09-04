@@ -1,0 +1,21 @@
+modelRoles:
+  default: anthropic/claude-opus-4-6
+symbolPreset: nerd
+composer:
+  shape: pi
+theme:
+  dark: titanium
+  light: light
+setupVersion: 2
+enabledProviders:
+  - claude
+  - codex
+extendedContext: true
+disabledProviders:
+  - claude-plugins
+  - agents-md
+  - codex
+  - claude
+  - builtin-defaults
+disabledExtensions:
+  - skill:find-skills
