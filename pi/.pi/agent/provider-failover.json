@@ -128,7 +128,9 @@
 	],
 	"continuationPrompt": "Provider failover activated: switched to {to} after {from} hit a quota or rate limit. Continue the interrupted task from where it stopped. The interrupted turn itself is preserved verbatim in this session as a [handoff:interrupted-turn] record — read it before acting: it contains the reasoning and output of that turn plus every tool call it issued, marking which ones never returned a result. Anything shown there was already attempted, so verify the current state instead of redoing it, and do not restart the task from the beginning.",
 	"maxRecheckIntervalMs": 600000,
-	"contextGuard": true,
+	"contextGuard": {
+		"maxWindowTokens": 1000000
+	},
 	"continueAfterCompaction": true,
 	"preserveInterruptedContext": true,
 	"routeCompactionToHealthyAccount": true,
