@@ -1,0 +1,6 @@
+# Keep Pi dotfiles portable. Runtime state, credentials, generated models, logs, caches, and installed packages stay local.
+*
+!.gitignore
+!AGENTS.md
+!provider-failover.json
+!settings.json
