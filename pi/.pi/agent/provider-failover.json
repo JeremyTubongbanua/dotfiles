@@ -4,28 +4,19 @@
 	"autoDiscover": true,
 	"autoDiscoverModels": true,
 	"maxAccountsPerProvider": 10,
-	"includeQwen": true,
-	"qwenProvider": "alibaba",
-	"includeOllama": true,
-	"includeOtherProviders": true,
-	"includeCursor": true,
+	"includeQwen": false,
+	"includeOllama": false,
+	"includeOtherProviders": false,
+	"includeCursor": false,
 	"childProxy": true,
 	"neverFailoverProviders": [],
 	"providerOrder": [
 		"anthropic",
-		"openai-codex",
-		"kimi-coding",
-		"cursor",
-		"qwen",
-		"ollama"
+		"openai-codex"
 	],
 	"providerPriority": [
 		"anthropic",
-		"openai-codex",
-		"kimi-coding",
-		"cursor",
-		"qwen",
-		"ollama"
+		"openai-codex"
 	],
 	"cooldownMs": 21600000,
 	"probeCooldownMs": 300000,
