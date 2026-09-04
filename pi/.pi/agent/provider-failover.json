@@ -27,7 +27,11 @@
 	"usageStatusRefreshMs": 60000,
 	"pendingPollMs": 60000,
 	"maxAutoContinuesPerPrompt": 8,
-	"fallbacks": [],
+	"fallbacks": [
+		"anthropic",
+		"openai-codex-account-2",
+		"openai-codex"
+	],
 	"openaiCodexAliases": [],
 	"anthropicOAuthAliases": [],
 	"limitErrorPatterns": [
