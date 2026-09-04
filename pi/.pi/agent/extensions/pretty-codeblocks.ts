@@ -29,12 +29,15 @@ type MarkdownInternals = {
   defaultTextStyle?: { bgColor?: (text: string) => string };
   renderToken: RenderToken;
   render: (width: number) => string[];
-  [key: symbol]: unknown;
+  [PATCHED]?: boolean;
+  [ORIGINAL]?: RenderToken;
+  [ORIGINAL_RENDER]?: (width: number) => string[];
 };
 
 let activeTheme: Theme | undefined;
 
-const getBackground: () => string = () => activeTheme?.getBgAnsi("toolPendingBg") ?? "";
+const getBackground: () => string = () =>
+  activeTheme?.getBgAnsi("toolPendingBg") ?? "";
 // Default is full-width because it looks like Pi's own user/tool blocks.
 // Set PI_PRETTY_CODEBLOCKS_COMPACT=1 before starting pi for copy-friendly
 // non-padded code lines instead.
@@ -53,7 +56,9 @@ function applyBackground(line: string, width: number): string {
   const pad = repeat(" ", width - visibleWidth(line));
   // Syntax highlighters emit resets. Re-apply the background after each reset so the
   // block stays visually solid across colored spans.
-  return background + line.replace(/\x1b\[0m/g, RESET + background) + pad + RESET;
+  return (
+    background + line.replace(/\x1b\[0m/g, RESET + background) + pad + RESET
+  );
 }
 
 function applyInlineBackground(line: string, width: number): string {
@@ -92,9 +97,14 @@ function highlightShellLine(line: string): string {
     );
 }
 
-function codeLines(markdownTheme: MarkdownTheme, code: string, lang?: string): string[] {
+function codeLines(
+  markdownTheme: MarkdownTheme,
+  code: string,
+  lang?: string,
+): string[] {
   if (isShellLang(lang)) return code.split("\n").map(highlightShellLine);
-  if (markdownTheme.highlightCode) return markdownTheme.highlightCode(code, lang);
+  if (markdownTheme.highlightCode)
+    return markdownTheme.highlightCode(code, lang);
   return code.split("\n").map(markdownTheme.codeBlock);
 }
 
@@ -114,7 +124,11 @@ function renderPrettyCodeBlock(
       // itself remains visually distinct and copy stays simple.
       out.push(styledBorder(markdownTheme, ` ${lang} `));
     }
-    for (const rawLine of codeLines(markdownTheme, token.text || "", lang || undefined)) {
+    for (const rawLine of codeLines(
+      markdownTheme,
+      token.text || "",
+      lang || undefined,
+    )) {
       const wrapped = wrapTextWithAnsi(rawLine, Math.max(1, width));
       for (const part of wrapped.length ? wrapped : [""]) {
         out.push(applyInlineBackground(part, width));
@@ -129,13 +143,23 @@ function renderPrettyCodeBlock(
   const title = lang ? ` ${lang} ` : "";
 
   const topVisible = "╭" + "─" + title;
-  const top = styledBorder(markdownTheme, topVisible + repeat("─", blockWidth - visibleWidth(topVisible) - 1) + "╮");
-  const bottom = styledBorder(markdownTheme, "╰" + repeat("─", blockWidth - 2) + "╯");
+  const top = styledBorder(
+    markdownTheme,
+    topVisible + repeat("─", blockWidth - visibleWidth(topVisible) - 1) + "╮",
+  );
+  const bottom = styledBorder(
+    markdownTheme,
+    "╰" + repeat("─", blockWidth - 2) + "╯",
+  );
   const left = styledBorder(markdownTheme, "│ ");
   const right = styledBorder(markdownTheme, " │");
 
   const out: string[] = [applyBackground(top, blockWidth)];
-  for (const rawLine of codeLines(markdownTheme, token.text || "", lang || undefined)) {
+  for (const rawLine of codeLines(
+    markdownTheme,
+    token.text || "",
+    lang || undefined,
+  )) {
     const wrapped = wrapTextWithAnsi(rawLine || " ", innerWidth);
     for (const part of wrapped.length ? wrapped : [""]) {
       const padded = part + repeat(" ", innerWidth - visibleWidth(part));
@@ -153,18 +177,16 @@ export default function (pi: ExtensionAPI) {
     activeTheme = context.ui.theme;
   });
 
-  const proto: MarkdownInternals = Markdown.prototype as unknown as MarkdownInternals;
+  // SAFETY: This extension intentionally patches Pi TUI's private Markdown renderer methods.
+  const proto: MarkdownInternals =
+    Markdown.prototype as unknown as MarkdownInternals;
 
   // /reload runs extensions again in the same process. If an older version of
   // this patch is already installed, restore Pi's original methods first so
   // changes to this file are actually reapplied.
   if (proto[PATCHED] === true) {
-    const previousRenderToken: RenderToken | undefined = proto[ORIGINAL] as RenderToken | undefined;
-    const previousRender: ((width: number) => string[]) | undefined = proto[ORIGINAL_RENDER] as
-      | ((width: number) => string[])
-      | undefined;
-    if (previousRenderToken) proto.renderToken = previousRenderToken;
-    if (previousRender) proto.render = previousRender;
+    if (proto[ORIGINAL]) proto.renderToken = proto[ORIGINAL];
+    if (proto[ORIGINAL_RENDER]) proto.render = proto[ORIGINAL_RENDER];
     proto[PATCHED] = false;
   }
 
@@ -173,7 +195,8 @@ export default function (pi: ExtensionAPI) {
   proto[ORIGINAL] = originalRenderToken;
   proto[ORIGINAL_RENDER] = originalRender;
 
-  proto.renderToken = function patchedRenderToken(
+  const patchedRenderToken: RenderToken = function (
+    this: MarkdownInternals,
     token: CodeToken,
     width: number,
     nextTokenType?: string,
@@ -182,17 +205,26 @@ export default function (pi: ExtensionAPI) {
     if (token.type === "code") {
       return renderPrettyCodeBlock(this, token, width, nextTokenType);
     }
-    return originalRenderToken.call(this, token, width, nextTokenType, styleContext);
+    return originalRenderToken.call(
+      this,
+      token,
+      width,
+      nextTokenType,
+      styleContext,
+    );
   };
 
-  proto.render = function patchedRender(width: number): string[] {
-    const lines: string[] = originalRender.call(this, width);
-    // Pi's Markdown pads lines to the full terminal width. That looks OK, but it
-    // makes copied code blocks include hundreds of trailing spaces. For Markdown
-    // without an explicit block background, trim only the final literal spaces.
-    if (this.defaultTextStyle?.bgColor) return lines;
-    return lines.map((line: string) => line.trimEnd());
-  };
+  const patchedRender: (this: MarkdownInternals, width: number) => string[] =
+    function (this: MarkdownInternals, width: number): string[] {
+      const lines: string[] = originalRender.call(this, width);
+      // Pi's Markdown pads lines to the full terminal width. That looks OK, but it
+      // makes copied code blocks include hundreds of trailing spaces. For Markdown
+      // without an explicit block background, trim only the final literal spaces.
+      if (this.defaultTextStyle?.bgColor) return lines;
+      return lines.map((line: string) => line.trimEnd());
+    };
 
+  proto.renderToken = patchedRenderToken;
+  proto.render = patchedRender;
   proto[PATCHED] = true;
 }
