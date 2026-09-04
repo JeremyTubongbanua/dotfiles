@@ -20,10 +20,16 @@
   "defaultProvider": "anthropic",
   "defaultModel": "claude-opus-4-6",
   "enabledModels": [
-    "anthropic*/*",
-    "openai*/*"
+    "openai-codex/gpt-5.6-sol",
+    "anthropic/claude-haiku-4-5",
+    "anthropic/claude-opus-4-6",
+    "anthropic/claude-opus-4-7",
+    "anthropic/claude-opus-4-8",
+    "anthropic/claude-opus-5",
+    "anthropic/claude-sonnet-5",
+    "anthropic/claude-fable-5-1"
   ],
-  "defaultThinkingLevel": "medium",
+  "defaultThinkingLevel": "high",
   "warnings": {
     "anthropicExtraUsage": false
   },
