@@ -28,9 +28,9 @@
 	"pendingPollMs": 60000,
 	"maxAutoContinuesPerPrompt": 8,
 	"fallbacks": [
-		"anthropic",
-		"openai-codex-account-2",
-		"openai-codex"
+		"anthropic/claude-opus-4-6",
+		"openai-codex-account-2/gpt-5.6-sol",
+		"openai-codex/gpt-5.6-sol"
 	],
 	"openaiCodexAliases": [],
 	"anthropicOAuthAliases": [],
@@ -141,8 +141,15 @@
 	"autoRecoverStuck": true,
 	"debugLog": true,
 	"preferLatestModel": true,
-	"reasoningLevel": "auto",
-	"preferredModels": {},
+	"reasoningLevel": "xhigh",
+	"preferredModels": {
+		"anthropic": [
+			"claude-opus-4-6"
+		],
+		"openai-codex": [
+			"gpt-5.6-sol"
+		]
+	},
 	"resumeIdleTimeoutMs": 90000,
 	"stuckWatchdogMs": 180000,
 	"compactionWatchdogMs": 480000
