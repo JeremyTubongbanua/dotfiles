@@ -7,8 +7,7 @@
     "npm:pi-web-access",
     "npm:pi-multi-account@1.21.2",
     "npm:@narumitw/pi-usage",
-    "npm:pi-tool-display",
-    "github:vvv850/pi-pretty-codeblocks"
+    "npm:pi-tool-display"
   ],
   "retry": {
     "provider": {
