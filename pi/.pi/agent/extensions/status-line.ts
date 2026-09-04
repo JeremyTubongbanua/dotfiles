@@ -41,7 +41,7 @@ type FailoverState = {
 	usageByProvider?: Record<string, ProviderUsage>;
 };
 
-type FiveHourUsage = {
+type UsageSummary = {
 	percentLeft: number;
 	resetIn: string;
 };
@@ -262,8 +262,11 @@ const formatResetCountdown = (resetAt: number): string => {
 	const hours: number = Math.floor(minutesLeft / 60);
 	const minutes: number = minutesLeft % 60;
 	if (hours === 0) return `${minutes}m`;
-	if (minutes === 0) return `${hours}h`;
-	return `${hours}h ${minutes}m`;
+	if (hours < 24) return minutes === 0 ? `${hours}h` : `${hours}h ${minutes}m`;
+
+	const days: number = Math.floor(hours / 24);
+	const remainingHours: number = hours % 24;
+	return remainingHours === 0 ? `${days}d` : `${days}d ${remainingHours}h`;
 };
 
 const stripAnsi = (value: string): string => {
@@ -290,37 +293,41 @@ const stripAnsi = (value: string): string => {
 	return plain;
 };
 
-const getFiveHourUsage = (
+const getUsageSummary = (
 	provider: string,
 	statuses: ReadonlyArray<readonly [string, string]>,
-): FiveHourUsage | undefined => {
+): UsageSummary | undefined => {
 	const providerUsage: ProviderUsage | undefined = getProviderUsage(provider);
-	const windows: Array<UsageWindow | undefined> = [
+	const windows: UsageWindow[] = [
 		providerUsage?.primary,
 		providerUsage?.secondary,
-	];
-	const fiveHourWindow: UsageWindow | undefined = windows.find(
-		(window: UsageWindow | undefined): boolean =>
-			window?.windowSeconds === 18_000,
+	].filter(
+		(window: UsageWindow | undefined): window is UsageWindow =>
+			window?.usedPercent !== undefined && window.resetAt !== undefined,
 	);
+	const shortestWindow: UsageWindow | undefined = windows.sort(
+		(left: UsageWindow, right: UsageWindow): number =>
+			(left.windowSeconds ?? Number.POSITIVE_INFINITY) -
+			(right.windowSeconds ?? Number.POSITIVE_INFINITY),
+	)[0];
 
 	if (
-		fiveHourWindow?.usedPercent !== undefined &&
-		fiveHourWindow.resetAt !== undefined
+		shortestWindow?.usedPercent !== undefined &&
+		shortestWindow.resetAt !== undefined
 	) {
 		return {
 			percentLeft: Math.max(
 				0,
-				Math.min(100, Math.round(100 - fiveHourWindow.usedPercent)),
+				Math.min(100, Math.round(100 - shortestWindow.usedPercent)),
 			),
-			resetIn: formatResetCountdown(fiveHourWindow.resetAt),
+			resetIn: formatResetCountdown(shortestWindow.resetAt),
 		};
 	}
 
 	for (const [, status] of statuses) {
 		const plain: string = stripAnsi(status);
 		const match: RegExpMatchArray | null = plain.match(
-			/\b5h\s+(\d{1,3})%\s+left\s*\/\s*(\d+[dhm](?:\s?\d+[hm])?)/i,
+			/\b(?:\d+[dh]|week(?:ly)?|session|auth)\s+(\d{1,3})%\s+left\s*\/\s*(\d+[dhm](?:\s?\d+[hm])?)/i,
 		);
 		if (!match?.[1] || !match[2]) continue;
 		return {
@@ -485,7 +492,7 @@ const statusLine = (pi: ExtensionAPI): void => {
 					} else if ((contextUsage?.percent ?? 0) >= 50) {
 						contextColor = "warning";
 					}
-					const fiveHourUsage: FiveHourUsage | undefined = getFiveHourUsage(
+					const usageSummary: UsageSummary | undefined = getUsageSummary(
 						provider,
 						statuses,
 					);
@@ -494,13 +501,13 @@ const statusLine = (pi: ExtensionAPI): void => {
 						theme.fg(contextColor, contextText),
 						theme.fg(
 							"dim",
-							fiveHourUsage
-								? `usage: ${fiveHourUsage.percentLeft}% left`
+							usageSummary
+								? `usage: ${usageSummary.percentLeft}% left`
 								: "usage: ? left",
 						),
 						theme.fg(
 							"dim",
-							fiveHourUsage ? `resets in ${fiveHourUsage.resetIn}` : "resets in ?",
+							usageSummary ? `resets in ${usageSummary.resetIn}` : "resets in ?",
 						),
 					];
 
