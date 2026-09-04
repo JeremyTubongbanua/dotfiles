@@ -106,10 +106,7 @@ type CodexProfileClaims = {
 	email?: string;
 };
 
-type CodexClaims = Record<
-	string,
-	CodexProfileClaims | string | undefined
-> & {
+type CodexClaims = Record<string, CodexProfileClaims | string | undefined> & {
 	email?: string;
 };
 
@@ -194,7 +191,9 @@ const readClaudeAccount = (
 	}
 };
 
-const getCodexEmailFromToken = (token: string | undefined): string | undefined => {
+const getCodexEmailFromToken = (
+	token: string | undefined,
+): string | undefined => {
 	try {
 		const payload: string | undefined = token?.split(".")[1];
 		if (!payload) return undefined;
@@ -264,10 +263,7 @@ const readPiCodexProviderAccounts = (
 		...Object.keys(sidecar),
 	]);
 	for (const provider of providers) {
-		if (
-			provider !== "openai-codex" &&
-			!provider.startsWith("openai-codex-")
-		) {
+		if (provider !== "openai-codex" && !provider.startsWith("openai-codex-")) {
 			continue;
 		}
 		const token: string | undefined =
