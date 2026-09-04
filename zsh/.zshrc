@@ -2,6 +2,12 @@ export TERMINAL="ghostty"
 export EDITOR="nvim"
 export VISUAL="nvim"
 
+# Oh My Zsh
+export ZSH="$HOME/.oh-my-zsh"
+ZSH_THEME="robbyrussell"
+plugins=(git)
+source "$ZSH/oh-my-zsh.sh"
+
 # Exports
 export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
 export PATH="/Applications/Docker.app/Contents/Resources/bin:$PATH"
@@ -42,8 +48,3 @@ bindkey -M viins '^A' beginning-of-line
 bindkey -M viins '^E' end-of-line
 
 [ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
-
-# Prompt
-if (( $+commands[brew] )); then
-  source "$(brew --prefix)/opt/spaceship/spaceship.zsh"
-fi
