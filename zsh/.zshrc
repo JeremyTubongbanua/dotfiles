@@ -42,4 +42,8 @@ bindkey -M viins '^A' beginning-of-line
 bindkey -M viins '^E' end-of-line
 
 [ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
-eval "$(starship init zsh)"
+
+# Prompt
+if (( $+commands[brew] )); then
+  source "$(brew --prefix)/opt/spaceship/spaceship.zsh"
+fi
