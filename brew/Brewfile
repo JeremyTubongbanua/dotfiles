@@ -60,8 +60,6 @@ brew "pngpaste"
 brew "redis"
 # Search tool like grep and The Silver Searcher
 brew "ripgrep"
-# Zsh prompt for Astronauts
-brew "spaceship"
 # Organize software neatly under a single directory tree (e.g. /usr/local)
 brew "stow"
 # Terminal multiplexer
