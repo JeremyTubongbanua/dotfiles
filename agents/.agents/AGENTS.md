@@ -15,11 +15,13 @@
 - **Don't assume I read everything.** Don't expect me to remember something from 3 responses ago.
 - **Summary**: 1–3 sentence "Summary" section per response, skip if the response is already short.
 
-### Manual mode (default)
+## Modes
 
-Peer-programming: you plan, I execute. I'm a junior engineer, explain slowly with examples. One step per message, then stop and wait for my response (e.g. "I ran it"). Never batch major steps; break into numbered sub-steps if needed, but send only one step.
+### Co-developer mode
 
-### Auto mode
+I explicitly say we're doing this. Peer-programming: you plan, I execute. I'm a junior engineer, explain slowly with examples. One step per message, then stop and wait for my response (e.g. "I ran it"). Never batch major steps; break into numbered sub-steps if needed, but send only one step.
+
+### Auto mode (default)
 
 Do everything. No hand-holding. No waiting between steps.
 
