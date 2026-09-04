@@ -1,0 +1,30 @@
+prefix_rule(
+    pattern = [["sudo", "/usr/bin/sudo"]],
+    decision = "forbidden",
+    justification = "Run the required operation without elevated privileges.",
+    match = ["sudo ls", "/usr/bin/sudo ls"],
+)
+
+prefix_rule(
+    pattern = ["git", "push"],
+    decision = "forbidden",
+    justification = "The user performs pushes.",
+    match = ["git push", "git push origin trunk"],
+    not_match = ["git status", "git pull"],
+)
+
+prefix_rule(
+    pattern = ["gh", "repo", "delete"],
+    decision = "forbidden",
+    justification = "Repository deletion is not permitted.",
+    match = ["gh repo delete owner/repository"],
+    not_match = ["gh repo view owner/repository"],
+)
+
+prefix_rule(
+    pattern = ["npm", "publish"],
+    decision = "forbidden",
+    justification = "Package publishing is not permitted.",
+    match = ["npm publish", "npm publish --access public"],
+    not_match = ["npm view package"],
+)
