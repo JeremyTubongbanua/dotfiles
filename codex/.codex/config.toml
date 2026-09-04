@@ -67,3 +67,9 @@ trusted_hash = "sha256:55ee5b65da47f89e53a8bad98882d27d10630d197577dd94d89dfb4ec
 
 [hooks.state."/Users/jeremytubongbanua/.codex/hooks.json:session_start:0:0"]
 trusted_hash = "sha256:bfae1b8932b13e348eba637b941e2b3f5600c65630f9e49f54c727f1a5261b51"
+
+[hooks.state."/Users/jeremytubongbanua/.codex-jl/hooks.json:pre_tool_use:0:0"]
+trusted_hash = "sha256:55ee5b65da47f89e53a8bad98882d27d10630d197577dd94d89dfb4ecf7bfe5b"
+
+[hooks.state."/Users/jeremytubongbanua/.codex-jl/hooks.json:session_start:0:0"]
+trusted_hash = "sha256:bfae1b8932b13e348eba637b941e2b3f5600c65630f9e49f54c727f1a5261b51"
