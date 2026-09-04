@@ -2,6 +2,13 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, sep } from "node:path";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import {
+	calculateCost,
+	type Api,
+	type Model,
+	type Usage,
+} from "@earendil-works/pi-ai";
+import { getBuiltinModels } from "@earendil-works/pi-ai/providers/all";
 import { truncateToWidth } from "@earendil-works/pi-tui";
 
 const formatCost = (value: number): string => {
@@ -457,14 +464,47 @@ const getTodayDateString = (): string => {
 	return `${y}-${m}-${d}`;
 };
 
+type CostSessionEntry = {
+	message?: {
+		provider?: string;
+		model?: string;
+		usage?: Usage;
+	};
+	usage?: Usage;
+};
+
+const CODEX_COST_MODELS: ReadonlyMap<string, Model<Api>> = new Map(
+	getBuiltinModels("openai-codex").map(
+		(model: Model<Api>): readonly [string, Model<Api>] => [model.id, model],
+	),
+);
+
+const calculateTrackedCost = (
+	provider: string,
+	modelId: string,
+	usage: Usage,
+): Usage["cost"] => {
+	if (usage.cost.total !== 0) return usage.cost;
+	if (provider !== "openai-codex" && !provider.startsWith("openai-codex-")) {
+		return usage.cost;
+	}
+
+	const model: Model<Api> | undefined = CODEX_COST_MODELS.get(modelId);
+	if (!model) return usage.cost;
+	return calculateCost(model, { ...usage, cost: { ...usage.cost } });
+};
+
 const extractCostFromLine = (line: string): number => {
 	if (!line.includes('"cost"')) return 0;
 	try {
-		const obj: Record<string, unknown> = JSON.parse(line);
-		const msg = (obj.message ?? {}) as Record<string, unknown>;
-		const usage = (msg.usage ?? obj.usage ?? {}) as Record<string, unknown>;
-		const cost = (usage.cost ?? {}) as Record<string, unknown>;
-		return typeof cost.total === "number" ? cost.total : 0;
+		const entry: CostSessionEntry = JSON.parse(line) as CostSessionEntry;
+		const usage: Usage | undefined = entry.message?.usage ?? entry.usage;
+		if (!usage) return 0;
+		return calculateTrackedCost(
+			entry.message?.provider ?? "",
+			entry.message?.model ?? "",
+			usage,
+		).total;
 	} catch {
 		return 0;
 	}
@@ -658,9 +698,24 @@ const statusLine = (pi: ExtensionAPI): void => {
 		refreshUsage(ctx.model?.provider ?? "");
 	});
 
-	pi.on("message_end", (_event, ctx) => {
+	pi.on("message_end", (event, ctx) => {
 		requestRender?.();
 		refreshUsage(ctx.model?.provider ?? "");
+		if (event.message.role !== "assistant") return;
+
+		const cost: Usage["cost"] = calculateTrackedCost(
+			event.message.provider,
+			event.message.model,
+			event.message.usage,
+		);
+		if (cost === event.message.usage.cost) return;
+
+		return {
+			message: {
+				...event.message,
+				usage: { ...event.message.usage, cost },
+			},
+		};
 	});
 	pi.on("model_select", (event) => {
 		requestRender?.();

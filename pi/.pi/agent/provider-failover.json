@@ -1,7 +1,7 @@
 {
 	"enabled": true,
 	"autoContinue": true,
-	"autoDiscover": true,
+	"autoDiscover": false,
 	"autoDiscoverModels": true,
 	"maxAccountsPerProvider": 10,
 	"includeQwen": false,
@@ -141,7 +141,7 @@
 	"autoRecoverStuck": true,
 	"debugLog": true,
 	"preferLatestModel": true,
-	"reasoningLevel": "xhigh",
+	"reasoningLevel": "auto",
 	"preferredModels": {
 		"anthropic": [
 			"claude-opus-4-6"
