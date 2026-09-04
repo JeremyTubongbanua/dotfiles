@@ -3,13 +3,24 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "^Bash$",
         "hooks": [
           {
-            "type": "command",
             "command": "python3 ~/.codex/hooks/command-policy.py",
+            "statusMessage": "Checking publish command",
             "timeout": 5,
-            "statusMessage": "Checking publish command"
+            "type": "command"
+          }
+        ],
+        "matcher": "^Bash$"
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "bash '/Users/jeremytubongbanua/.codex/herdr-agent-state.sh' session",
+            "timeout": 10,
+            "type": "command"
           }
         ]
       }
