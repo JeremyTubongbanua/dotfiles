@@ -25,6 +25,24 @@ gh/          →  ~/.config/gh/config.yml
 ```
 
 `AGENTS.md` has the operational details (adding files, packages, conflicts, folding behavior).
+
+## Pi Provider Failover
+
+Pi is configured to default to **Anthropic Claude Opus 4.6** and automatically fail over to **OpenAI Codex** accounts when the Anthropic 5-hour usage limit is hit. When the limit resets, Pi switches back to Anthropic.
+
+How it works:
+
+1. Anthropic hits a rate/usage limit (detected via error pattern matching).
+2. Pi fails over to discovered Codex accounts and continues the task automatically.
+3. Every 5-10 minutes, Pi probes Anthropic to check if the limit has reset.
+4. Once Anthropic is healthy again, Pi switches back.
+
+Relevant config files:
+
+| File | What it controls |
+|------|------------------|
+| `pi/.pi/agent/settings.json` | `defaultProvider: "anthropic"`, `defaultModel: "claude-opus-4-6"` |
+| `pi/.pi/agent/provider-failover.json` | Failover logic, provider order, cooldowns, error patterns |
 Pi discovers skills directly from `~/.agents/skills/`; its settings add `~/.agents/agents/` to pi-subagents discovery, and `~/.pi/agent/AGENTS.md` links to the shared `~/.agents/AGENTS.md` instructions.
 The `pi` package excludes credentials, sessions, logs, caches, installed packages, and Pi Lens runtime data.
 
