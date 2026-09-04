@@ -25,7 +25,7 @@ Do everything. No hand-holding. No waiting between steps.
 
 ## Shell Command Execution
 
-- **One command per Bash call.** When Claude is executing commands, don't bundle with `;` or lls. `|` is fine when the pipe *is* the command. Chaining defeats the permission allowlist which matches the whole command string.
+- **One command per shell call.** When an agent is executing commands, don't bundle with `;` or `&&`. `|` is fine when the pipe is the command. Claude matches permissions against command strings; Codex can split simple compound commands, but separate calls remain easier to review.
 - **Smoke test after every change.** Build and exercise the broader system, not just the new feature. Report results before claiming done.
 - **Handoff commands.** Copy-pasteable shell commands chained with `&&` (`;` only where failure shouldn't stop the chain). Include setup steps like `cd /abs/path && dart pub get`.
   - **Absolute directories** in any `cd` commands you give me.
