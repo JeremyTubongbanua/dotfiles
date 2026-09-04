@@ -79,6 +79,8 @@ cask "bambu-studio"
 cask "claude"
 # Terminal-based AI coding assistant
 cask "claude-code@latest"
+# OpenAI's coding agent that runs in your terminal
+cask "codex"
 # Voice and text chat software
 cask "discord"
 # UI toolkit for building applications for mobile, web and desktop
