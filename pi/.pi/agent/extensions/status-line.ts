@@ -171,7 +171,7 @@ const statusLine = (pi: ExtensionAPI): void => {
 				invalidate: (): void => {},
 				render: (width: number): string[] => {
 					const separator: string = theme.fg("dim", " | ");
-					const firstLine: string[] = [];
+					const firstLine: string[] = [theme.fg("accent", shortenHome(ctx.cwd))];
 					const branch: string | null = footerData.getGitBranch();
 
 					if (branch) firstLine.push(theme.fg("success", branch));
@@ -200,39 +200,33 @@ const statusLine = (pi: ExtensionAPI): void => {
 						secondLine.push(theme.fg(contextColor, contextText));
 					}
 
+					const todayCost: number = getTodayCost();
+					const thirdLine: string[] = [
+						theme.fg("warning", `$${formatCost(todayCost)} USD today`),
+					];
+
 					for (const status of footerData.getExtensionStatuses().values()) {
-						// Extract usage percentage and reset time from either:
-						// @narumitw/pi-usage: "codex 94% ↻ 4h47m 61% wk"
-						// pi-multi-account: "Codex | Plus | 5h 94% left/4h47m | 7d 61% left/6d23h | +1 ready"
-						// Output: "usage: 94% left | resets in 4h 47m"
 						const plain: string = status.replace(/\x1b\[[0-9;]*m/g, "");
 
-						// pi-multi-account: "... 5h 94% left/4h47m | 7d 61% ..."
 						const multiMatch = plain.match(
 							/\d+h\s+(\d+)%\s+left\/(\d+[dhm](?:\d+[hm])?)/i,
 						);
-						// pi-usage: "codex 94% ↻ 4h47m 61% wk" or "codex 94% 5h 61% wk"
 						const piMatch = plain.match(/(\d+)%\s+(?:↻\s*)?(\d+[dhm](?:\d+[hm])?)/i);
 
 						const match = multiMatch ?? piMatch;
 						if (match) {
 							const percentage: string = match[1] ?? "";
-							// Insert space between units: "4h47m" -> "4h 47m"
 							const resetTime: string = (match[2] ?? "").replace(
 								/(\d+[dh])(\d)/,
 								"$1 $2",
 							);
-							secondLine.push(
+							thirdLine.push(
 								theme.fg("dim", `usage: ${percentage}% left | resets in ${resetTime}`),
 							);
 						} else {
-							secondLine.push(status);
+							thirdLine.push(status);
 						}
 					}
-
-					const todayCost: number = getTodayCost();
-					const thirdLine: string[] = [theme.fg("accent", shortenHome(ctx.cwd))];
-					thirdLine.push(theme.fg("warning", `$${formatCost(todayCost)} USD today`));
 
 					return [
 						"",
