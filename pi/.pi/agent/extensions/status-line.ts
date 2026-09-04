@@ -1,11 +1,7 @@
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, sep } from "node:path";
-import type { Usage } from "@earendil-works/pi-ai";
-import type {
-	ExtensionAPI,
-	ExtensionContext,
-} from "@earendil-works/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { truncateToWidth } from "@earendil-works/pi-tui";
 
 const formatCost = (value: number): string => {
@@ -19,31 +15,321 @@ const shortenHome = (cwd: string): string => {
 	return cwd;
 };
 
-const addCost = (cost: number, usage: Usage): number => {
-	return cost + usage.cost.total;
+type AccountInfo = {
+	label: string;
+	email: string;
+	family: "anthropic" | "openai-codex";
+	fiveHourUsedPercent?: number;
+	fiveHourResetAt?: number;
+	sevenDayUsedPercent?: number;
+	sevenDayResetAt?: number;
 };
 
-const getSessionCost = (ctx: ExtensionContext): number => {
-	let cost: number = 0;
+type UsageWindow = {
+	usedPercent?: number;
+	resetAt?: number;
+	windowSeconds?: number;
+};
 
-	for (const entry of ctx.sessionManager.getEntries()) {
-		if (entry.type === "message" && entry.message.role === "assistant") {
-			cost = addCost(cost, entry.message.usage);
-		} else if (
-			entry.type === "message" &&
-			entry.message.role === "toolResult" &&
-			entry.message.usage
-		) {
-			cost = addCost(cost, entry.message.usage);
-		} else if (
-			(entry.type === "branch_summary" || entry.type === "compaction") &&
-			entry.usage
-		) {
-			cost = addCost(cost, entry.usage);
-		}
+type ProviderUsage = {
+	account?: string;
+	primary?: UsageWindow;
+	secondary?: UsageWindow;
+};
+
+type FailoverState = {
+	usageByProvider?: Record<string, ProviderUsage>;
+};
+
+type FiveHourUsage = {
+	percentLeft: number;
+	resetIn: string;
+};
+
+type ClaudeUsageWindow = {
+	utilization?: number;
+	resets_at?: string;
+};
+
+type ClaudeProfile = {
+	oauthAccount?: {
+		emailAddress?: string;
+	};
+	cachedUsageUtilization?: {
+		utilization?: {
+			five_hour?: ClaudeUsageWindow;
+			seven_day?: ClaudeUsageWindow;
+		};
+	};
+};
+
+type CodexAuth = {
+	tokens?: {
+		access_token?: string;
+	};
+};
+
+type CodexClaims = Record<string, { email?: string } | undefined>;
+
+let cachedFailoverState: FailoverState | undefined;
+let lastFailoverStateScan: number = 0;
+const FAILOVER_STATE_SCAN_INTERVAL_MS: number = 30_000;
+
+let cachedAccounts: AccountInfo[] = [];
+let lastAccountScan: number = 0;
+const ACCOUNT_SCAN_INTERVAL_MS: number = 30_000;
+
+const getFailoverState = (): FailoverState | undefined => {
+	const now: number = Date.now();
+	if (now - lastFailoverStateScan < FAILOVER_STATE_SCAN_INTERVAL_MS) {
+		return cachedFailoverState;
 	}
 
-	return cost;
+	lastFailoverStateScan = now;
+	try {
+		const statePath: string = join(
+			homedir(),
+			".pi",
+			"agent",
+			"provider-failover-state.json",
+		);
+		cachedFailoverState = JSON.parse(
+			readFileSync(statePath, "utf-8"),
+		) as FailoverState;
+	} catch {
+		cachedFailoverState = undefined;
+	}
+	return cachedFailoverState;
+};
+
+const getProviderUsage = (provider: string): ProviderUsage | undefined => {
+	return getFailoverState()?.usageByProvider?.[provider];
+};
+
+const parseResetAt = (value: string | undefined): number | undefined => {
+	if (!value) return undefined;
+	const resetAt: number = Date.parse(value);
+	return Number.isFinite(resetAt) ? resetAt : undefined;
+};
+
+const readClaudeAccount = (
+	directory: string,
+	label: string,
+): AccountInfo | undefined => {
+	try {
+		const profile: ClaudeProfile = JSON.parse(
+			readFileSync(join(directory, ".claude.json"), "utf-8"),
+		) as ClaudeProfile;
+		const email: string | undefined = profile.oauthAccount?.emailAddress;
+		if (!email) return undefined;
+		const usage = profile.cachedUsageUtilization?.utilization;
+		return {
+			label,
+			email,
+			family: "anthropic",
+			fiveHourUsedPercent: usage?.five_hour?.utilization,
+			fiveHourResetAt: parseResetAt(usage?.five_hour?.resets_at),
+			sevenDayUsedPercent: usage?.seven_day?.utilization,
+			sevenDayResetAt: parseResetAt(usage?.seven_day?.resets_at),
+		};
+	} catch {
+		return undefined;
+	}
+};
+
+const readCodexAccount = (
+	directory: string,
+	label: string,
+): AccountInfo | undefined => {
+	try {
+		const auth: CodexAuth = JSON.parse(
+			readFileSync(join(directory, "auth.json"), "utf-8"),
+		) as CodexAuth;
+		const token: string | undefined = auth.tokens?.access_token;
+		const payload: string | undefined = token?.split(".")[1];
+		if (!payload) return undefined;
+		const claims: CodexClaims = JSON.parse(
+			Buffer.from(payload, "base64url").toString("utf-8"),
+		) as CodexClaims;
+		const profileKey: string | undefined = Object.keys(claims).find(
+			(key: string): boolean => key.endsWith("/profile"),
+		);
+		const email: string | undefined = profileKey
+			? claims[profileKey]?.email
+			: undefined;
+		return email ? { label, email, family: "openai-codex" } : undefined;
+	} catch {
+		return undefined;
+	}
+};
+
+const getAccounts = (): AccountInfo[] => {
+	const now: number = Date.now();
+	if (now - lastAccountScan < ACCOUNT_SCAN_INTERVAL_MS) return cachedAccounts;
+
+	lastAccountScan = now;
+	const home: string = homedir();
+	const accounts: AccountInfo[] = [];
+	try {
+		for (const entry of readdirSync(home)) {
+			if (entry === ".claude" || entry.startsWith(".claude-")) {
+				const account: AccountInfo | undefined = readClaudeAccount(
+					join(home, entry),
+					entry.slice(1),
+				);
+				if (account) accounts.push(account);
+			} else if (entry === ".codex" || entry.startsWith(".codex-")) {
+				const account: AccountInfo | undefined = readCodexAccount(
+					join(home, entry),
+					entry.slice(1),
+				);
+				if (account) accounts.push(account);
+			}
+		}
+	} catch {
+		cachedAccounts = [];
+		return cachedAccounts;
+	}
+
+	cachedAccounts = accounts;
+	return cachedAccounts;
+};
+
+const usageWindowMatches = (
+	usage: UsageWindow | undefined,
+	usedPercent: number | undefined,
+	resetAt: number | undefined,
+): boolean => {
+	if (usage?.usedPercent === undefined || usage.resetAt === undefined)
+		return false;
+	if (usedPercent === undefined || resetAt === undefined) return false;
+	return (
+		Math.round(usage.usedPercent) === Math.round(usedPercent) &&
+		Math.abs(usage.resetAt - resetAt) < 5_000
+	);
+};
+
+const getAccountInfo = (provider: string): AccountInfo => {
+	const usage: ProviderUsage | undefined = getProviderUsage(provider);
+	const family: "anthropic" | "openai-codex" = provider.startsWith(
+		"openai-codex",
+	)
+		? "openai-codex"
+		: "anthropic";
+	const accounts: AccountInfo[] = getAccounts().filter(
+		(account: AccountInfo): boolean => account.family === family,
+	);
+	const reportedAccount: AccountInfo | undefined = usage?.account
+		? accounts.find(
+				(account: AccountInfo): boolean => account.email === usage.account,
+			)
+		: undefined;
+	if (reportedAccount) return reportedAccount;
+
+	if (family === "anthropic") {
+		const matchedAccount: AccountInfo | undefined = accounts.find(
+			(account: AccountInfo): boolean =>
+				usageWindowMatches(
+					usage?.primary,
+					account.fiveHourUsedPercent,
+					account.fiveHourResetAt,
+				) &&
+				usageWindowMatches(
+					usage?.secondary,
+					account.sevenDayUsedPercent,
+					account.sevenDayResetAt,
+				),
+		);
+		if (matchedAccount) return matchedAccount;
+	}
+
+	return {
+		label: provider || "no account",
+		email: usage?.account ?? "unknown",
+		family,
+	};
+};
+
+const formatResetCountdown = (resetAt: number): string => {
+	const resetMilliseconds: number =
+		resetAt < 10_000_000_000 ? resetAt * 1000 : resetAt;
+	const minutesLeft: number = Math.max(
+		0,
+		Math.ceil((resetMilliseconds - Date.now()) / 60_000),
+	);
+	if (minutesLeft === 0) return "now";
+
+	const hours: number = Math.floor(minutesLeft / 60);
+	const minutes: number = minutesLeft % 60;
+	if (hours === 0) return `${minutes}m`;
+	if (minutes === 0) return `${hours}h`;
+	return `${hours}h ${minutes}m`;
+};
+
+const stripAnsi = (value: string): string => {
+	let plain: string = "";
+	let escapeState: "none" | "start" | "csi" = "none";
+
+	for (const character of value) {
+		const code: number = character.charCodeAt(0);
+		if (escapeState === "none" && code === 27) {
+			escapeState = "start";
+			continue;
+		}
+		if (escapeState === "start") {
+			escapeState = character === "[" ? "csi" : "none";
+			continue;
+		}
+		if (escapeState === "csi") {
+			if (code >= 64 && code <= 126) escapeState = "none";
+			continue;
+		}
+		plain += character;
+	}
+
+	return plain;
+};
+
+const getFiveHourUsage = (
+	provider: string,
+	statuses: ReadonlyArray<readonly [string, string]>,
+): FiveHourUsage | undefined => {
+	const providerUsage: ProviderUsage | undefined = getProviderUsage(provider);
+	const windows: Array<UsageWindow | undefined> = [
+		providerUsage?.primary,
+		providerUsage?.secondary,
+	];
+	const fiveHourWindow: UsageWindow | undefined = windows.find(
+		(window: UsageWindow | undefined): boolean =>
+			window?.windowSeconds === 18_000,
+	);
+
+	if (
+		fiveHourWindow?.usedPercent !== undefined &&
+		fiveHourWindow.resetAt !== undefined
+	) {
+		return {
+			percentLeft: Math.max(
+				0,
+				Math.min(100, Math.round(100 - fiveHourWindow.usedPercent)),
+			),
+			resetIn: formatResetCountdown(fiveHourWindow.resetAt),
+		};
+	}
+
+	for (const [, status] of statuses) {
+		const plain: string = stripAnsi(status);
+		const match: RegExpMatchArray | null = plain.match(
+			/\b5h\s+(\d{1,3})%\s+left\s*\/\s*(\d+[dhm](?:\s?\d+[hm])?)/i,
+		);
+		if (!match?.[1] || !match[2]) continue;
+		return {
+			percentLeft: Math.max(0, Math.min(100, Number(match[1]))),
+			resetIn: match[2].replace(/([dh])(?=\d)/g, "$1 "),
+		};
+	}
+
+	return undefined;
 };
 
 const getTodayDateString = (): string => {
@@ -171,74 +457,73 @@ const statusLine = (pi: ExtensionAPI): void => {
 				invalidate: (): void => {},
 				render: (width: number): string[] => {
 					const separator: string = theme.fg("dim", " | ");
-					const firstLine: string[] = [theme.fg("accent", shortenHome(ctx.cwd))];
+					const provider: string = ctx.model?.provider ?? "";
+					const account: AccountInfo = getAccountInfo(provider);
 					const branch: string | null = footerData.getGitBranch();
-
-					if (branch) firstLine.push(theme.fg("success", branch));
-					if (ctx.model?.provider)
-						firstLine.push(theme.fg("warning", ctx.model.provider));
-
 					const modelName: string = ctx.model?.name ?? ctx.model?.id ?? "no model";
 					const thinking: string = ctx.model?.reasoning
 						? ` (${ctx.thinkingLevel ?? "off"})`
 						: "";
-					const secondLine: string[] = [
-						theme.fg("accent", `${modelName}${thinking}`),
+					const firstLine: string[] = [
+						theme.fg("accent", shortenHome(ctx.cwd)),
+						theme.fg(branch ? "success" : "dim", branch ?? "no branch"),
+						theme.fg("warning", `${modelName}${thinking}`),
+						theme.fg("accent", account.email),
 					];
 
+					const statuses: Array<readonly [string, string]> = [
+						...footerData.getExtensionStatuses(),
+					];
 					const contextUsage = ctx.getContextUsage();
-					if (contextUsage) {
-						const contextText: string =
-							contextUsage.percent === null
-								? "ctx:?"
-								: `ctx:${Math.max(0, Math.round(100 - contextUsage.percent))}% left`;
-						const contextColor: "error" | "warning" | "success" =
-							(contextUsage.percent ?? 0) >= 80
-								? "error"
-								: (contextUsage.percent ?? 0) >= 50
-									? "warning"
-									: "success";
-						secondLine.push(theme.fg(contextColor, contextText));
+					const contextText: string =
+						contextUsage?.percent === null || contextUsage === undefined
+							? "ctx: ? left"
+							: `ctx: ${Math.max(0, Math.round(100 - contextUsage.percent))}% left`;
+					let contextColor: "error" | "warning" | "success" = "success";
+					if ((contextUsage?.percent ?? 0) >= 80) {
+						contextColor = "error";
+					} else if ((contextUsage?.percent ?? 0) >= 50) {
+						contextColor = "warning";
 					}
+					const fiveHourUsage: FiveHourUsage | undefined = getFiveHourUsage(
+						provider,
+						statuses,
+					);
+					const secondLine: string[] = [
+						theme.fg("accent", account.label),
+						theme.fg(contextColor, contextText),
+						theme.fg(
+							"dim",
+							fiveHourUsage
+								? `usage: ${fiveHourUsage.percentLeft}% left`
+								: "usage: ? left",
+						),
+						theme.fg(
+							"dim",
+							fiveHourUsage ? `resets in ${fiveHourUsage.resetIn}` : "resets in ?",
+						),
+					];
 
 					const activeLspNames: string[] = [];
-					for (const [statusId, status] of footerData.getExtensionStatuses()) {
-						const plain: string = status.replace(/\x1b\[[0-9;]*m/g, "");
-
-						const multiMatch = plain.match(
-							/\d+h\s+(\d+)%\s+left\/(\d+[dhm](?:\d+[hm])?)/i,
+					for (const [statusId, status] of statuses) {
+						if (statusId !== "pi-lens-lsp") continue;
+						const activeMatch: RegExpMatchArray | null = stripAnsi(status).match(
+							/LSP Active:\s*([^·]+)/i,
 						);
-						const piMatch = plain.match(/(\d+)%\s+(?:↻\s*)?(\d+[dhm](?:\d+[hm])?)/i);
-
-						const usageMatch = multiMatch ?? piMatch;
-						if (usageMatch) {
-							const percentage: string = usageMatch[1] ?? "";
-							const resetTime: string = (usageMatch[2] ?? "").replace(
-								/(\d+[dh])(\d)/,
-								"$1 $2",
+						if (activeMatch?.[1]) {
+							activeLspNames.push(
+								...activeMatch[1].split(",").map((name: string) => name.trim()),
 							);
-							secondLine.push(theme.fg("dim", `usage: ${percentage}% left`));
-							secondLine.push(theme.fg("dim", `resets in ${resetTime}`));
-						}
-
-						if (statusId === "pi-lens-lsp") {
-							const activeMatch = plain.match(/LSP Active:\s*([^·]+)/i);
-							if (activeMatch?.[1]) {
-								activeLspNames.push(
-									...activeMatch[1].split(",").map((name: string) => name.trim()),
-								);
-							}
 						}
 					}
 
 					const todayCost: number = getTodayCost();
 					const thirdLine: string[] = [
-						theme.fg("warning", `$${formatCost(todayCost)} USD today`),
+						theme.fg("warning", `cost: $${formatCost(todayCost)} USD today`),
 						theme.fg(
 							"dim",
 							`LSPs: ${activeLspNames.length > 0 ? activeLspNames.join(", ") : "inactive"}`,
 						),
-						theme.fg("accent", "madivoso@gmail.com"),
 					];
 
 					return [
