@@ -182,9 +182,10 @@ const statusLine = (pi: ExtensionAPI): void => {
 					const thinking: string = ctx.model?.reasoning
 						? ` (${ctx.thinkingLevel ?? "off"})`
 						: "";
-					firstLine.push(theme.fg("accent", `${modelName}${thinking}`));
+					const secondLine: string[] = [
+						theme.fg("accent", `${modelName}${thinking}`),
+					];
 
-					const secondLine: string[] = [];
 					const contextUsage = ctx.getContextUsage();
 					if (contextUsage) {
 						const contextText: string =
@@ -200,12 +201,8 @@ const statusLine = (pi: ExtensionAPI): void => {
 						secondLine.push(theme.fg(contextColor, contextText));
 					}
 
-					const todayCost: number = getTodayCost();
-					const thirdLine: string[] = [
-						theme.fg("warning", `$${formatCost(todayCost)} USD today`),
-					];
-
-					for (const status of footerData.getExtensionStatuses().values()) {
+					const activeLspNames: string[] = [];
+					for (const [statusId, status] of footerData.getExtensionStatuses()) {
 						const plain: string = status.replace(/\x1b\[[0-9;]*m/g, "");
 
 						const multiMatch = plain.match(
@@ -213,20 +210,36 @@ const statusLine = (pi: ExtensionAPI): void => {
 						);
 						const piMatch = plain.match(/(\d+)%\s+(?:↻\s*)?(\d+[dhm](?:\d+[hm])?)/i);
 
-						const match = multiMatch ?? piMatch;
-						if (match) {
-							const percentage: string = match[1] ?? "";
-							const resetTime: string = (match[2] ?? "").replace(
+						const usageMatch = multiMatch ?? piMatch;
+						if (usageMatch) {
+							const percentage: string = usageMatch[1] ?? "";
+							const resetTime: string = (usageMatch[2] ?? "").replace(
 								/(\d+[dh])(\d)/,
 								"$1 $2",
 							);
-							thirdLine.push(
-								theme.fg("dim", `usage: ${percentage}% left | resets in ${resetTime}`),
-							);
-						} else {
-							thirdLine.push(status);
+							secondLine.push(theme.fg("dim", `usage: ${percentage}% left`));
+							secondLine.push(theme.fg("dim", `resets in ${resetTime}`));
+						}
+
+						if (statusId === "pi-lens-lsp") {
+							const activeMatch = plain.match(/LSP Active:\s*([^·]+)/i);
+							if (activeMatch?.[1]) {
+								activeLspNames.push(
+									...activeMatch[1].split(",").map((name: string) => name.trim()),
+								);
+							}
 						}
 					}
+
+					const todayCost: number = getTodayCost();
+					const thirdLine: string[] = [
+						theme.fg("warning", `$${formatCost(todayCost)} USD today`),
+						theme.fg(
+							"dim",
+							`LSPs: ${activeLspNames.length > 0 ? activeLspNames.join(", ") : "inactive"}`,
+						),
+						theme.fg("accent", "madivoso@gmail.com"),
+					];
 
 					return [
 						"",
