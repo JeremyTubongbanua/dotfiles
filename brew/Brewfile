@@ -1,6 +1,5 @@
 tap "atsign-foundation/tap"
 tap "dart-lang/dart"
-tap "jcleira/tap"
 tap "stripe/stripe-cli"
 tap "supabase/tap"
 # Incredibly fast JavaScript runtime, bundler, test runner, and package manager
@@ -53,6 +52,8 @@ brew "tree-sitter"
 brew "neovim"
 # Port scanning utility for large networks
 brew "nmap"
+# AI agent toolkit
+brew "pi-coding-agent"
 # Paste PNG into files
 brew "pngpaste"
 # Persistent key-value database, with built-in net interface
