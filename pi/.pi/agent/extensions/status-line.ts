@@ -1,21 +1,11 @@
 import { homedir } from "node:os";
 import { sep } from "node:path";
 import type { Usage } from "@earendil-works/pi-ai";
-import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import type {
+	ExtensionAPI,
+	ExtensionContext,
+} from "@earendil-works/pi-coding-agent";
 import { truncateToWidth } from "@earendil-works/pi-tui";
-
-type UsageTotals = {
-	input: number;
-	output: number;
-	cost: number;
-};
-
-const formatTokens = (value: number): string => {
-	if (value < 1_000) return `${value}`;
-	if (value < 10_000) return `${(value / 1_000).toFixed(1)}k`;
-	if (value < 1_000_000) return `${Math.round(value / 1_000)}k`;
-	return `${(value / 1_000_000).toFixed(1)}m`;
-};
 
 const formatCost = (value: number): string => {
 	return value < 1 ? value.toFixed(4) : value.toFixed(2);
@@ -28,26 +18,31 @@ const shortenHome = (cwd: string): string => {
 	return cwd;
 };
 
-const addUsage = (totals: UsageTotals, usage: Usage): void => {
-	totals.input += usage.input;
-	totals.output += usage.output;
-	totals.cost += usage.cost.total;
+const addCost = (cost: number, usage: Usage): number => {
+	return cost + usage.cost.total;
 };
 
-const getUsageTotals = (ctx: ExtensionContext): UsageTotals => {
-	const totals: UsageTotals = { input: 0, output: 0, cost: 0 };
+const getSessionCost = (ctx: ExtensionContext): number => {
+	let cost: number = 0;
 
 	for (const entry of ctx.sessionManager.getEntries()) {
 		if (entry.type === "message" && entry.message.role === "assistant") {
-			addUsage(totals, entry.message.usage);
-		} else if (entry.type === "message" && entry.message.role === "toolResult" && entry.message.usage) {
-			addUsage(totals, entry.message.usage);
-		} else if ((entry.type === "branch_summary" || entry.type === "compaction") && entry.usage) {
-			addUsage(totals, entry.usage);
+			cost = addCost(cost, entry.message.usage);
+		} else if (
+			entry.type === "message" &&
+			entry.message.role === "toolResult" &&
+			entry.message.usage
+		) {
+			cost = addCost(cost, entry.message.usage);
+		} else if (
+			(entry.type === "branch_summary" || entry.type === "compaction") &&
+			entry.usage
+		) {
+			cost = addCost(cost, entry.usage);
 		}
 	}
 
-	return totals;
+	return cost;
 };
 
 const statusLine = (pi: ExtensionAPI): void => {
@@ -72,34 +67,63 @@ const statusLine = (pi: ExtensionAPI): void => {
 					const branch: string | null = footerData.getGitBranch();
 
 					if (branch) firstLine.push(theme.fg("success", branch));
-					if (ctx.model?.provider) firstLine.push(theme.fg("warning", ctx.model.provider));
+					if (ctx.model?.provider)
+						firstLine.push(theme.fg("warning", ctx.model.provider));
 
 					const modelName: string = ctx.model?.name ?? ctx.model?.id ?? "no model";
-					const thinking: string = ctx.model?.reasoning ? ` (${ctx.thinkingLevel ?? "off"})` : "";
+					const thinking: string = ctx.model?.reasoning
+						? ` (${ctx.thinkingLevel ?? "off"})`
+						: "";
 					firstLine.push(theme.fg("accent", `${modelName}${thinking}`));
 
+					const secondLine: string[] = [];
 					const contextUsage = ctx.getContextUsage();
 					if (contextUsage) {
-						const contextText: string = contextUsage.percent === null
-							? "ctx:?"
-							: `ctx:${Math.max(0, Math.round(100 - contextUsage.percent))}% left`;
+						const contextText: string =
+							contextUsage.percent === null
+								? "ctx:?"
+								: `ctx:${Math.max(0, Math.round(100 - contextUsage.percent))}% left`;
 						const contextColor: "error" | "warning" | "success" =
 							(contextUsage.percent ?? 0) >= 80
 								? "error"
 								: (contextUsage.percent ?? 0) >= 50
 									? "warning"
 									: "success";
-						firstLine.push(theme.fg(contextColor, contextText));
+						secondLine.push(theme.fg(contextColor, contextText));
 					}
 
-					const totals: UsageTotals = getUsageTotals(ctx);
-					const secondLine: string[] = [theme.fg("accent", shortenHome(ctx.cwd))];
-					secondLine.push(theme.fg("dim", `↑${formatTokens(totals.input)} ↓${formatTokens(totals.output)}`));
-					secondLine.push(theme.fg("mdLink", `$${formatCost(totals.cost)} USD (session)`));
+					for (const status of footerData.getExtensionStatuses().values()) {
+						// Extract usage percentage and reset time from @narumitw/pi-usage format
+						// Input: "codex 59% 5h 61% wk" or similar
+						// Output: "usage: 59% left | resets in 5h" (skip 7d/wk)
+						const usageMatch = status.match(
+							/(\d+)%\s+(\d+[hmd])\s+(?:\d+%\s+(?:wk|7d))?/i,
+						);
+						if (usageMatch) {
+							const percentage = usageMatch[1];
+							const resetTime = usageMatch[2];
+							secondLine.push(
+								theme.fg("dim", `usage: ${percentage}% left | resets in ${resetTime}`),
+							);
+						} else {
+							secondLine.push(status);
+						}
+					}
+
+					const sessionCost: number = getSessionCost(ctx);
+					const thirdLine: string[] = [theme.fg("accent", shortenHome(ctx.cwd))];
+					thirdLine.push(
+						theme.fg("mdLink", `$${formatCost(sessionCost)} USD (session)`),
+					);
 
 					return [
 						truncateToWidth(firstLine.join(separator), width, theme.fg("dim", "...")),
-						truncateToWidth(secondLine.join(separator), width, theme.fg("dim", "...")),
+						truncateToWidth(
+							secondLine.join(separator),
+							width,
+							theme.fg("dim", "..."),
+						),
+						truncateToWidth(thirdLine.join(separator), width, theme.fg("dim", "...")),
 					];
 				},
 			};
