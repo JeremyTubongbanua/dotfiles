@@ -1,11 +1,10 @@
 {
   "lastChangelogVersion": "0.84.4",
-  "theme": "light",
+  "theme": "light/dark",
   "packages": [
     "npm:pi-mcp-adapter",
     "npm:pi-lens",
     "npm:pi-web-access",
-    "npm:pi-subagents",
     "npm:pi-multi-account@1.21.2"
   ],
   "retry": {
@@ -20,12 +19,27 @@
   },
   "defaultProvider": "anthropic",
   "defaultModel": "claude-opus-4-6",
+  "enabledModels": [
+    "anthropic*/*",
+    "openai*/*"
+  ],
   "defaultThinkingLevel": "medium",
   "warnings": {
     "anthropicExtraUsage": false
   },
   "hideThinkingBlock": true,
-  "modelThinkingLevels": {
-    "anthropic/claude-opus-4-6": "high"
+  "terminal": {
+    "showImages": true,
+    "imageWidthCells": 120,
+    "showTerminalProgress": false
+  },
+  "editorPaddingX": 0,
+  "autocompleteMaxVisible": 3,
+  "outputPad": 0,
+  "steeringMode": "all",
+  "followUpMode": "one-at-a-time",
+  "transport": "auto",
+  "markdown": {
+    "mermaid": "streaming"
   }
 }
