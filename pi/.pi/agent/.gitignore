@@ -6,3 +6,4 @@
 !settings.json
 !extensions/
 !extensions/status-line.ts
+!extensions/pretty-codeblocks.ts
