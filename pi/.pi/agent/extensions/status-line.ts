@@ -33,6 +33,12 @@ type AccountInfo = {
 	sevenDayResetAt?: number;
 };
 
+type PiAuthEntry = {
+	access?: string;
+};
+
+type PiAuthFile = Record<string, PiAuthEntry | undefined>;
+
 type UsageWindow = {
 	usedPercent?: number;
 	resetAt?: number;
@@ -96,13 +102,23 @@ type CodexUsageResponse = {
 	}>;
 };
 
-type CodexClaims = Record<string, { email?: string } | undefined>;
+type CodexProfileClaims = {
+	email?: string;
+};
+
+type CodexClaims = Record<
+	string,
+	CodexProfileClaims | string | undefined
+> & {
+	email?: string;
+};
 
 let cachedFailoverState: FailoverState | undefined;
 let lastFailoverStateScan: number = 0;
 const FAILOVER_STATE_SCAN_INTERVAL_MS: number = 30_000;
 
 let cachedAccounts: AccountInfo[] = [];
+let cachedProviderAccounts: ReadonlyMap<string, AccountInfo> = new Map();
 let lastAccountScan: number = 0;
 const ACCOUNT_SCAN_INTERVAL_MS: number = 30_000;
 
@@ -178,6 +194,27 @@ const readClaudeAccount = (
 	}
 };
 
+const getCodexEmailFromToken = (token: string | undefined): string | undefined => {
+	try {
+		const payload: string | undefined = token?.split(".")[1];
+		if (!payload) return undefined;
+		const claims: CodexClaims = JSON.parse(
+			Buffer.from(payload, "base64url").toString("utf-8"),
+		) as CodexClaims;
+		if (claims.email) return claims.email;
+
+		const profileKey: string | undefined = Object.keys(claims).find(
+			(key: string): boolean => key.endsWith("/profile"),
+		);
+		const profile: CodexProfileClaims | undefined = profileKey
+			? (claims[profileKey] as CodexProfileClaims | undefined)
+			: undefined;
+		return profile?.email;
+	} catch {
+		return undefined;
+	}
+};
+
 const readCodexAccount = (
 	directory: string,
 	label: string,
@@ -186,24 +223,71 @@ const readCodexAccount = (
 		const auth: CodexAuth = JSON.parse(
 			readFileSync(join(directory, "auth.json"), "utf-8"),
 		) as CodexAuth;
-		const token: string | undefined = auth.tokens?.access_token;
-		const payload: string | undefined = token?.split(".")[1];
-		if (!payload) return undefined;
-		const claims: CodexClaims = JSON.parse(
-			Buffer.from(payload, "base64url").toString("utf-8"),
-		) as CodexClaims;
-		const profileKey: string | undefined = Object.keys(claims).find(
-			(key: string): boolean => key.endsWith("/profile"),
+		const email: string | undefined = getCodexEmailFromToken(
+			auth.tokens?.access_token,
 		);
-		const email: string | undefined = profileKey
-			? claims[profileKey]?.email
-			: undefined;
 		return email
 			? { label, email, family: "openai-codex", directory }
 			: undefined;
 	} catch {
 		return undefined;
 	}
+};
+
+const readPiCodexProviderAccounts = (
+	accounts: ReadonlyArray<AccountInfo>,
+): ReadonlyMap<string, AccountInfo> => {
+	const agentDirectory: string = join(homedir(), ".pi", "agent");
+	let auth: PiAuthFile = {};
+	let sidecar: PiAuthFile = {};
+	try {
+		auth = JSON.parse(
+			readFileSync(join(agentDirectory, "auth.json"), "utf-8"),
+		) as PiAuthFile;
+	} catch {
+		return new Map();
+	}
+	try {
+		sidecar = JSON.parse(
+			readFileSync(
+				join(agentDirectory, "pi-multi-account-proxy-oauth.json"),
+				"utf-8",
+			),
+		) as PiAuthFile;
+	} catch {
+		sidecar = {};
+	}
+
+	const providerAccounts: Map<string, AccountInfo> = new Map();
+	const providers: Set<string> = new Set([
+		...Object.keys(auth),
+		...Object.keys(sidecar),
+	]);
+	for (const provider of providers) {
+		if (
+			provider !== "openai-codex" &&
+			!provider.startsWith("openai-codex-")
+		) {
+			continue;
+		}
+		const token: string | undefined =
+			sidecar[provider]?.access ?? auth[provider]?.access;
+		const email: string | undefined = getCodexEmailFromToken(token);
+		if (!email) continue;
+		const matchingAccount: AccountInfo | undefined = accounts.find(
+			(account: AccountInfo): boolean =>
+				account.family === "openai-codex" && account.email === email,
+		);
+		providerAccounts.set(
+			provider,
+			matchingAccount ?? {
+				label: provider,
+				email,
+				family: "openai-codex",
+			},
+		);
+	}
+	return providerAccounts;
 };
 
 const getAccounts = (): AccountInfo[] => {
@@ -231,10 +315,12 @@ const getAccounts = (): AccountInfo[] => {
 		}
 	} catch {
 		cachedAccounts = [];
+		cachedProviderAccounts = new Map();
 		return cachedAccounts;
 	}
 
 	cachedAccounts = accounts;
+	cachedProviderAccounts = readPiCodexProviderAccounts(accounts);
 	return cachedAccounts;
 };
 
@@ -268,6 +354,10 @@ const getAccountInfo = (provider: string): AccountInfo => {
 			)
 		: undefined;
 	if (reportedAccount) return reportedAccount;
+
+	const providerAccount: AccountInfo | undefined =
+		cachedProviderAccounts.get(provider);
+	if (providerAccount) return providerAccount;
 
 	if (family === "anthropic") {
 		const matchedAccount: AccountInfo | undefined = accounts.find(
