@@ -21,18 +21,20 @@
   },
   "defaultProvider": "anthropic",
   "defaultModel": "claude-opus-4-6",
-  "enabledModels": [
-    "openai-codex/gpt-5.6-sol",
-    "anthropic/claude-fable-5-1",
-    "anthropic/claude-opus-4-6",
-    "anthropic/claude-sonnet-5",
-    "openai-codex/gpt-6-astra"
-  ],
   "defaultThinkingLevel": "high",
+  "enabledModels": [
+    "openai-codex/gpt-5.3-codex-spark",
+    "openai-codex/gpt-5.6-sol",
+    "openai-codex/gpt-6-astra",
+    "anthropic/claude-sonnet-5",
+    "anthropic/claude-opus-4-6",
+    "anthropic/claude-fable-5-1"
+  ],
   "modelThinkingLevels": {
     "anthropic/claude-sonnet-5": "xhigh",
-    "anthropic/claude-fable-5-1": "medium",
     "anthropic/claude-opus-4-6": "high",
+    "anthropic/claude-fable-5-1": "high",
+    "openai-codex/gpt-5.3-codex-spark": "high",
     "openai-codex/gpt-5.6-sol": "xhigh",
     "openai-codex/gpt-6-astra": "high"
   },
