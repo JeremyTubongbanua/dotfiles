@@ -19,6 +19,7 @@ type AccountInfo = {
 	label: string;
 	email: string;
 	family: "anthropic" | "openai-codex";
+	directory?: string;
 	fiveHourUsedPercent?: number;
 	fiveHourResetAt?: number;
 	sevenDayUsedPercent?: number;
@@ -66,7 +67,26 @@ type ClaudeProfile = {
 type CodexAuth = {
 	tokens?: {
 		access_token?: string;
+		account_id?: string;
 	};
+};
+
+type CodexUsageWindow = {
+	used_percent?: number;
+	limit_window_seconds?: number;
+	reset_at?: number;
+};
+
+type CodexRateLimit = {
+	primary_window?: CodexUsageWindow | null;
+	secondary_window?: CodexUsageWindow | null;
+};
+
+type CodexUsageResponse = {
+	rate_limit?: CodexRateLimit;
+	additional_rate_limits?: Array<{
+		rate_limit?: CodexRateLimit;
+	}>;
 };
 
 type CodexClaims = Record<string, { email?: string } | undefined>;
@@ -78,6 +98,19 @@ const FAILOVER_STATE_SCAN_INTERVAL_MS: number = 30_000;
 let cachedAccounts: AccountInfo[] = [];
 let lastAccountScan: number = 0;
 const ACCOUNT_SCAN_INTERVAL_MS: number = 30_000;
+
+const cachedCodexFiveHourUsage: Map<
+	string,
+	{ account: string; window: UsageWindow }
+> = new Map();
+const lastCodexUsageRefresh: Map<string, number> = new Map();
+const CODEX_USAGE_REFRESH_INTERVAL_MS: number = 60_000;
+const CODEX_USAGE_URL: string = [
+	"https://chatgpt.com",
+	"backend-api",
+	"wham",
+	"usage",
+].join("/");
 
 const getFailoverState = (): FailoverState | undefined => {
 	const now: number = Date.now();
@@ -127,6 +160,7 @@ const readClaudeAccount = (
 			label,
 			email,
 			family: "anthropic",
+			directory,
 			fiveHourUsedPercent: usage?.five_hour?.utilization,
 			fiveHourResetAt: parseResetAt(usage?.five_hour?.resets_at),
 			sevenDayUsedPercent: usage?.seven_day?.utilization,
@@ -157,7 +191,9 @@ const readCodexAccount = (
 		const email: string | undefined = profileKey
 			? claims[profileKey]?.email
 			: undefined;
-		return email ? { label, email, family: "openai-codex" } : undefined;
+		return email
+			? { label, email, family: "openai-codex", directory }
+			: undefined;
 	} catch {
 		return undefined;
 	}
@@ -250,6 +286,82 @@ const getAccountInfo = (provider: string): AccountInfo => {
 	};
 };
 
+const parseCodexUsageWindow = (
+	window: CodexUsageWindow | null | undefined,
+): UsageWindow | undefined => {
+	if (
+		window?.limit_window_seconds !== 18_000 ||
+		window.used_percent === undefined ||
+		window.reset_at === undefined ||
+		!Number.isFinite(window.used_percent) ||
+		!Number.isFinite(window.reset_at)
+	) {
+		return undefined;
+	}
+
+	return {
+		usedPercent: window.used_percent,
+		resetAt: window.reset_at,
+		windowSeconds: window.limit_window_seconds,
+	};
+};
+
+const refreshCodexFiveHourUsage = async (provider: string): Promise<void> => {
+	const account: AccountInfo = getAccountInfo(provider);
+	if (account.family !== "openai-codex" || !account.directory) return;
+
+	const now: number = Date.now();
+	const refreshKey: string = `${provider}:${account.email}`;
+	const lastRefresh: number = lastCodexUsageRefresh.get(refreshKey) ?? 0;
+	if (now - lastRefresh < CODEX_USAGE_REFRESH_INTERVAL_MS) return;
+	lastCodexUsageRefresh.set(refreshKey, now);
+
+	try {
+		const auth: CodexAuth = JSON.parse(
+			readFileSync(join(account.directory, "auth.json"), "utf-8"),
+		) as CodexAuth;
+		const accessToken: string | undefined = auth.tokens?.access_token;
+		if (!accessToken) return;
+
+		const headers: Headers = new Headers({
+			Authorization: `Bearer ${accessToken}`,
+			Accept: "application/json",
+		});
+		if (auth.tokens?.account_id) {
+			headers.set("ChatGPT-Account-Id", auth.tokens.account_id);
+		}
+
+		const response: Response = await fetch(CODEX_USAGE_URL, {
+			headers,
+			signal: AbortSignal.timeout(10_000),
+		});
+		if (!response.ok) return;
+
+		const body: CodexUsageResponse =
+			(await response.json()) as CodexUsageResponse;
+		const rateLimits: Array<CodexRateLimit | undefined> = [
+			body.rate_limit,
+			...(body.additional_rate_limits ?? []).map(
+				(item: { rate_limit?: CodexRateLimit }): CodexRateLimit | undefined =>
+					item.rate_limit,
+			),
+		];
+		for (const rateLimit of rateLimits) {
+			const fiveHourWindow: UsageWindow | undefined =
+				parseCodexUsageWindow(rateLimit?.primary_window) ??
+				parseCodexUsageWindow(rateLimit?.secondary_window);
+			if (!fiveHourWindow) continue;
+			cachedCodexFiveHourUsage.set(provider, {
+				account: account.email,
+				window: fiveHourWindow,
+			});
+			return;
+		}
+	} catch {
+		return;
+	}
+};
+
 const formatResetCountdown = (resetAt: number): string => {
 	const resetMilliseconds: number =
 		resetAt < 10_000_000_000 ? resetAt * 1000 : resetAt;
@@ -295,9 +407,14 @@ const getFiveHourUsage = (
 	statuses: ReadonlyArray<readonly [string, string]>,
 ): FiveHourUsage | undefined => {
 	const providerUsage: ProviderUsage | undefined = getProviderUsage(provider);
+	const account: AccountInfo = getAccountInfo(provider);
+	const cachedCodexUsage = cachedCodexFiveHourUsage.get(provider);
 	const windows: Array<UsageWindow | undefined> = [
 		providerUsage?.primary,
 		providerUsage?.secondary,
+		cachedCodexUsage?.account === account.email
+			? cachedCodexUsage.window
+			: undefined,
 	];
 	const fiveHourWindow: UsageWindow | undefined = windows.find(
 		(window: UsageWindow | undefined): boolean =>
@@ -441,6 +558,9 @@ const getTodayCost = (): number => {
 
 const statusLine = (pi: ExtensionAPI): void => {
 	let requestRender: (() => void) | undefined;
+	const refreshUsage = (provider: string): void => {
+		void refreshCodexFiveHourUsage(provider).then(() => requestRender?.());
+	};
 
 	pi.on("session_start", (_event, ctx) => {
 		if (ctx.mode !== "tui") return;
@@ -492,17 +612,13 @@ const statusLine = (pi: ExtensionAPI): void => {
 					const secondLine: string[] = [
 						theme.fg("accent", account.label),
 						theme.fg(contextColor, contextText),
-						theme.fg(
-							"dim",
-							fiveHourUsage
-								? `usage: ${fiveHourUsage.percentLeft}% left`
-								: "usage: ? left",
-						),
-						theme.fg(
-							"dim",
-							fiveHourUsage ? `resets in ${fiveHourUsage.resetIn}` : "resets in ?",
-						),
 					];
+					if (fiveHourUsage) {
+						secondLine.push(
+							theme.fg("dim", `usage: ${fiveHourUsage.percentLeft}% left`),
+							theme.fg("dim", `resets in ${fiveHourUsage.resetIn}`),
+						);
+					}
 
 					const activeLspNames: string[] = [];
 					for (const [statusId, status] of statuses) {
@@ -519,7 +635,7 @@ const statusLine = (pi: ExtensionAPI): void => {
 
 					const todayCost: number = getTodayCost();
 					const thirdLine: string[] = [
-						theme.fg("warning", `cost: $${formatCost(todayCost)} USD today`),
+						theme.fg("warning", `$${formatCost(todayCost)} USD today`),
 						theme.fg(
 							"dim",
 							`LSPs: ${activeLspNames.length > 0 ? activeLspNames.join(", ") : "inactive"}`,
@@ -539,10 +655,17 @@ const statusLine = (pi: ExtensionAPI): void => {
 				},
 			};
 		});
+		refreshUsage(ctx.model?.provider ?? "");
 	});
 
-	pi.on("message_end", () => requestRender?.());
-	pi.on("model_select", () => requestRender?.());
+	pi.on("message_end", (_event, ctx) => {
+		requestRender?.();
+		refreshUsage(ctx.model?.provider ?? "");
+	});
+	pi.on("model_select", (event) => {
+		requestRender?.();
+		refreshUsage(event.model.provider);
+	});
 	pi.on("thinking_level_select", () => requestRender?.());
 };
 
