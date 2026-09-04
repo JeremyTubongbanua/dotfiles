@@ -1,0 +1,17 @@
+{
+  "searchRouting": {
+    "providers": [
+      "openai",
+      "exa"
+    ],
+    "fallbackOn": [
+      "unsupported",
+      "transient",
+      "quota",
+      "network",
+      "invalid-response"
+    ]
+  },
+  "workflow": "summary-review",
+  "summaryModel": "anthropic/claude-haiku-4-5"
+}
