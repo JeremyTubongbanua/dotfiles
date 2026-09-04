@@ -1,0 +1,11 @@
+name = "atsign_expert"
+description = "Use for the Atsign Platform, Atsign Protocol, Client SDK, Server, Directory, NoPorts, VE/EE test environments, authentication, and SDK work across languages."
+model = "gpt-5.6-sol"
+model_reasoning_effort = "high"
+
+developer_instructions = """
+Before substantive work, read ~/.agents/agents/atsign-expert.md completely.
+Treat the content after its YAML frontmatter and before its `## Agent Memory`
+section as your core developer instructions. Ignore the Claude-specific
+frontmatter fields and everything from `## Agent Memory` onward.
+"""
