@@ -25,6 +25,7 @@ lightmode() { osascript -e 'tell app "System Events" to tell appearance preferen
 togglemode() { osascript -e 'tell app "System Events" to tell appearance preferences to set dark mode to not dark mode'; }
 claude() { CLAUDE_CONFIG_DIR="$HOME/.claude" command claude "$@"; }
 claude-work() { CLAUDE_CONFIG_DIR="$HOME/.claude-work" command claude "$@"; }
+claude-work-x() { claude-work --model claude-opus-4-6[1m] --reasoning-effort high "$@"; }
 ssh() {
     TERM=xterm-256color command ssh "$@"
 }
