@@ -1,0 +1,31 @@
+{
+  "lastChangelogVersion": "0.84.4",
+  "theme": "light",
+  "packages": [
+    "npm:pi-mcp-adapter",
+    "npm:pi-lens",
+    "npm:pi-web-access",
+    "npm:pi-subagents",
+    "npm:pi-multi-account@1.21.2"
+  ],
+  "retry": {
+    "provider": {
+      "maxRetries": 0
+    }
+  },
+  "subagents": {
+    "agentScanDirs": [
+      "~/.agents/agents"
+    ]
+  },
+  "defaultProvider": "anthropic",
+  "defaultModel": "claude-opus-4-6",
+  "defaultThinkingLevel": "medium",
+  "warnings": {
+    "anthropicExtraUsage": false
+  },
+  "hideThinkingBlock": true,
+  "modelThinkingLevels": {
+    "anthropic/claude-opus-4-6": "high"
+  }
+}

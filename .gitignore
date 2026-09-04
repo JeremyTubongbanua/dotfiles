@@ -5,4 +5,4 @@
 *.pem
 *.key
 id_*
-.pi-lens/
+/.pi-lens/
