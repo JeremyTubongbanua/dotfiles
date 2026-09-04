@@ -28,6 +28,12 @@
     "anthropic/claude-sonnet-5"
   ],
   "defaultThinkingLevel": "high",
+  "modelThinkingLevels": {
+    "anthropic/claude-sonnet-5": "xhigh",
+    "anthropic/claude-fable-5-1": "medium",
+    "anthropic/claude-opus-4-6": "high",
+    "openai-codex/gpt-5.6-sol": "high"
+  },
   "warnings": {
     "anthropicExtraUsage": false
   },
