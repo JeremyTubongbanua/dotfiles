@@ -2,9 +2,9 @@
 #
 # Prompt for a directory and a workspace name, then build a 3-tab workspace:
 #
-#   tab 1  "sh"      shell in <dir>
+#   tab 1  "zsh"      shell in <dir>
 #   tab 2  "nvim"    shell in <dir>, runs nvim
-#   tab 3  "claude"  shell in <dir>, left idle for `claude` / `claude-work`
+#   tab 3  "agent"  shell in <dir>, left idle for `claude` / `claude-work` / `codex` / `omp`
 #
 # If <dir> already exists, no git work happens at all -- the tabs are just
 # opened there. Otherwise <dir> is created, and if it lands inside a worktree
@@ -100,12 +100,12 @@ ws_json="$(herdr workspace create --cwd "$dir" --label "$label" --focus)"
 ws_id="$(print -r -- "$ws_json" | jq -r '.result.workspace.workspace_id')"
 sh_tab="$(print -r -- "$ws_json" | jq -r '.result.tab.tab_id')"
 
-herdr tab rename "$sh_tab" sh >/dev/null
+herdr tab rename "$sh_tab" zsh >/dev/null
 
 nvim_json="$(herdr tab create --workspace "$ws_id" --cwd "$dir" --label nvim --no-focus)"
 nvim_pane="$(print -r -- "$nvim_json" | jq -r '.result.root_pane.pane_id')"
 herdr pane run "$nvim_pane" nvim >/dev/null
 
-herdr tab create --workspace "$ws_id" --cwd "$dir" --label claude --no-focus >/dev/null
+herdr tab create --workspace "$ws_id" --cwd "$dir" --label agent --no-focus >/dev/null
 
 herdr tab focus "$sh_tab" >/dev/null
