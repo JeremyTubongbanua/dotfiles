@@ -1,0 +1,11 @@
+# Keep Codex dotfiles portable. Runtime state, credentials, logs, and caches stay local.
+*
+!.gitignore
+!AGENTS.md
+!agents
+!config.toml
+!hooks.json
+!hooks/
+!hooks/command-policy.py
+!rules/
+!rules/default.rules

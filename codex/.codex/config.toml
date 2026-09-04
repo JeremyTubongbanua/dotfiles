@@ -1,0 +1,61 @@
+model = "gpt-5.6-sol"
+model_reasoning_effort = "high"
+personality = "pragmatic"
+
+approval_policy = "on-request"
+approvals_reviewer = "auto_review"
+default_permissions = "claude-auto"
+web_search = "live"
+
+[features]
+hooks = true
+network_proxy = true
+
+[permissions.claude-auto]
+description = "Automatic project work with sensitive-path and network restrictions."
+extends = ":workspace"
+
+[permissions.claude-auto.filesystem]
+"~/.ssh" = "deny"
+"~/.aws" = "deny"
+
+[permissions.claude-auto.filesystem.":workspace_roots"]
+"." = "write"
+"**/.env*" = "deny"
+"**/*.pem" = "deny"
+"**/id_rsa*" = "deny"
+"**/id_ed25519*" = "deny"
+
+[permissions.claude-auto.network]
+enabled = true
+
+[permissions.claude-auto.network.domains]
+"github.com" = "allow"
+"*.github.com" = "allow"
+"raw.githubusercontent.com" = "allow"
+"objects.githubusercontent.com" = "allow"
+"pub.dev" = "allow"
+"*.pub.dev" = "allow"
+"registry.npmjs.org" = "allow"
+"atsign.com" = "allow"
+"*.atsign.com" = "allow"
+
+[tui]
+status_line = [
+    "model-with-reasoning",
+    "current-dir",
+    "git-branch",
+    "context-remaining",
+    "five-hour-limit",
+    "weekly-limit",
+    "used-tokens",
+]
+
+[projects."/Users/jeremytubongbanua/GitHub/atsign/at_client_sdk/trunk"]
+trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua/GitHub/personal/dotfiles"]
+trust_level = "trusted"
+
+[projects."/Users/jeremytubongbanua/GitHub/atsign/noports/trunk"]
+trust_level = "trusted"
