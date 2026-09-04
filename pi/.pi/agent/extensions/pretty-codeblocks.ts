@@ -1,10 +1,36 @@
 import type { ExtensionAPI, Theme } from "@earendil-works/pi-coding-agent";
-import { Markdown, visibleWidth, wrapTextWithAnsi } from "@earendil-works/pi-tui";
+import {
+  Markdown,
+  type MarkdownTheme,
+  visibleWidth,
+  wrapTextWithAnsi,
+} from "@earendil-works/pi-tui";
 
 const PATCHED = Symbol.for("vlad.pi.pretty-codeblocks.patched");
 const ORIGINAL = Symbol.for("vlad.pi.pretty-codeblocks.originalRenderToken");
 const ORIGINAL_RENDER = Symbol.for("vlad.pi.pretty-codeblocks.originalRender");
 const RESET = "\x1b[0m";
+
+type CodeToken = {
+  type?: string;
+  lang?: string;
+  text?: string;
+};
+
+type RenderToken = (
+  token: CodeToken,
+  width: number,
+  nextTokenType?: string,
+  styleContext?: unknown,
+) => string[];
+
+type MarkdownInternals = {
+  theme: MarkdownTheme;
+  defaultTextStyle?: { bgColor?: (text: string) => string };
+  renderToken: RenderToken;
+  render: (width: number) => string[];
+  [key: symbol]: unknown;
+};
 
 let activeTheme: Theme | undefined;
 
@@ -39,12 +65,12 @@ function applyInlineBackground(line: string, width: number): string {
   return background + line.replace(/\x1b\[0m/g, RESET + background) + RESET;
 }
 
-function styledBorder(theme: any, text: string): string {
-  return theme?.codeBlockBorder ? theme.codeBlockBorder(text) : text;
+function styledBorder(markdownTheme: MarkdownTheme, text: string): string {
+  return markdownTheme.codeBlockBorder(text);
 }
 
 function isShellLang(lang?: string): boolean {
-  return /^(ba)?sh|shell|zsh|fish|powershell|ps1$/i.test(String(lang || ""));
+  return /^(bash|sh|shell|zsh|fish|powershell|ps1)$/i.test(String(lang || ""));
 }
 
 function highlightShellLine(line: string): string {
@@ -66,25 +92,29 @@ function highlightShellLine(line: string): string {
     );
 }
 
-function codeLines(theme: any, code: string, lang?: string): string[] {
+function codeLines(markdownTheme: MarkdownTheme, code: string, lang?: string): string[] {
   if (isShellLang(lang)) return code.split("\n").map(highlightShellLine);
-  if (theme?.highlightCode) return theme.highlightCode(code, lang);
-  const style = theme?.codeBlock ? theme.codeBlock.bind(theme) : (s: string) => s;
-  return code.split("\n").map(style);
+  if (markdownTheme.highlightCode) return markdownTheme.highlightCode(code, lang);
+  return code.split("\n").map(markdownTheme.codeBlock);
 }
 
-function renderPrettyCodeBlock(markdown: any, token: any, width: number, nextTokenType?: string): string[] {
-  const theme = markdown.theme;
-  const lang = String(token.lang || "").trim();
+function renderPrettyCodeBlock(
+  markdown: MarkdownInternals,
+  token: CodeToken,
+  width: number,
+  nextTokenType?: string,
+): string[] {
+  const markdownTheme: MarkdownTheme = markdown.theme;
+  const lang: string = String(token.lang || "").trim();
 
   if (!BOX_STYLE) {
     const out: string[] = [];
     if (SHOW_LANG_LABEL && lang) {
       // Header is intentionally not background-filled, so the code background
       // itself remains visually distinct and copy stays simple.
-      out.push(styledBorder(theme, ` ${lang} `));
+      out.push(styledBorder(markdownTheme, ` ${lang} `));
     }
-    for (const rawLine of codeLines(theme, token.text || "", lang || undefined)) {
+    for (const rawLine of codeLines(markdownTheme, token.text || "", lang || undefined)) {
       const wrapped = wrapTextWithAnsi(rawLine, Math.max(1, width));
       for (const part of wrapped.length ? wrapped : [""]) {
         out.push(applyInlineBackground(part, width));
@@ -99,13 +129,13 @@ function renderPrettyCodeBlock(markdown: any, token: any, width: number, nextTok
   const title = lang ? ` ${lang} ` : "";
 
   const topVisible = "╭" + "─" + title;
-  const top = styledBorder(theme, topVisible + repeat("─", blockWidth - visibleWidth(topVisible) - 1) + "╮");
-  const bottom = styledBorder(theme, "╰" + repeat("─", blockWidth - 2) + "╯");
-  const left = styledBorder(theme, "│ ");
-  const right = styledBorder(theme, " │");
+  const top = styledBorder(markdownTheme, topVisible + repeat("─", blockWidth - visibleWidth(topVisible) - 1) + "╮");
+  const bottom = styledBorder(markdownTheme, "╰" + repeat("─", blockWidth - 2) + "╯");
+  const left = styledBorder(markdownTheme, "│ ");
+  const right = styledBorder(markdownTheme, " │");
 
   const out: string[] = [applyBackground(top, blockWidth)];
-  for (const rawLine of codeLines(theme, token.text || "", lang || undefined)) {
+  for (const rawLine of codeLines(markdownTheme, token.text || "", lang || undefined)) {
     const wrapped = wrapTextWithAnsi(rawLine || " ", innerWidth);
     for (const part of wrapped.length ? wrapped : [""]) {
       const padded = part + repeat(" ", innerWidth - visibleWidth(part));
@@ -123,31 +153,40 @@ export default function (pi: ExtensionAPI) {
     activeTheme = context.ui.theme;
   });
 
-  const proto = Markdown.prototype as any;
+  const proto: MarkdownInternals = Markdown.prototype as unknown as MarkdownInternals;
 
   // /reload runs extensions again in the same process. If an older version of
   // this patch is already installed, restore Pi's original methods first so
   // changes to this file are actually reapplied.
-  if (proto[PATCHED]) {
-    if (proto[ORIGINAL]) proto.renderToken = proto[ORIGINAL];
-    if (proto[ORIGINAL_RENDER]) proto.render = proto[ORIGINAL_RENDER];
+  if (proto[PATCHED] === true) {
+    const previousRenderToken: RenderToken | undefined = proto[ORIGINAL] as RenderToken | undefined;
+    const previousRender: ((width: number) => string[]) | undefined = proto[ORIGINAL_RENDER] as
+      | ((width: number) => string[])
+      | undefined;
+    if (previousRenderToken) proto.renderToken = previousRenderToken;
+    if (previousRender) proto.render = previousRender;
     proto[PATCHED] = false;
   }
 
-  if (typeof proto.renderToken !== "function") return;
+  const originalRenderToken: RenderToken = proto.renderToken;
+  const originalRender: (width: number) => string[] = proto.render;
+  proto[ORIGINAL] = originalRenderToken;
+  proto[ORIGINAL_RENDER] = originalRender;
 
-  proto[ORIGINAL] = proto.renderToken;
-  proto[ORIGINAL_RENDER] = proto.render;
-
-  proto.renderToken = function patchedRenderToken(token: any, width: number, nextTokenType?: string, styleContext?: any) {
-    if (token?.type === "code") {
+  proto.renderToken = function patchedRenderToken(
+    token: CodeToken,
+    width: number,
+    nextTokenType?: string,
+    styleContext?: unknown,
+  ): string[] {
+    if (token.type === "code") {
       return renderPrettyCodeBlock(this, token, width, nextTokenType);
     }
-    return proto[ORIGINAL].call(this, token, width, nextTokenType, styleContext);
+    return originalRenderToken.call(this, token, width, nextTokenType, styleContext);
   };
 
-  proto.render = function patchedRender(width: number) {
-    const lines = proto[ORIGINAL_RENDER].call(this, width);
+  proto.render = function patchedRender(width: number): string[] {
+    const lines: string[] = originalRender.call(this, width);
     // Pi's Markdown pads lines to the full terminal width. That looks OK, but it
     // makes copied code blocks include hundreds of trailing spaces. For Markdown
     // without an explicit block background, trim only the final literal spaces.
