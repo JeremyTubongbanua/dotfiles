@@ -4,3 +4,5 @@
 !AGENTS.md
 !provider-failover.json
 !settings.json
+!extensions/
+!extensions/status-line.ts
