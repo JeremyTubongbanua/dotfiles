@@ -1,11 +1,13 @@
 modelRoles:
-  default: anthropic/claude-opus-4-6
+  default: openai-codex/gpt-5.6-sol:xhigh
+  plan: anthropic/claude-opus-4-6:high
+  smol: openai-codex/gpt-5.6-sol:low
 symbolPreset: nerd
 composer:
-  shape: pi
+  shape: rail
 theme:
-  dark: titanium
-  light: light
+  dark: dark-catppuccin
+  light: light-catppuccin
 setupVersion: 2
 enabledProviders:
   - claude
@@ -19,3 +21,34 @@ disabledProviders:
   - builtin-defaults
 disabledExtensions:
   - skill:find-skills
+goal:
+  enabled: false
+  statusInFooter: false
+statusLine:
+  preset: ascii
+  separator: powerline-thin
+  sessionAccent: true
+  transparent: true
+providers:
+  webSearchOrder: [perplexity, duckduckgo, brave]
+task:
+  disabledAgents:
+    []
+  agentPrewalk:
+    task: "off"
+display:
+  showTokenUsage: false
+edit:
+  mode: hashline
+tools:
+  approvalMode: yolo
+secrets:
+  enabled: true
+cycleOrder:
+  - default
+retry:
+  fallbackChains:
+    plan:
+      - openai-codex/gpt-5.6-sol
+web_search:
+  enabled: true
