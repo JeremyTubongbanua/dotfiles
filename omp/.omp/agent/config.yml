@@ -30,7 +30,10 @@ statusLine:
   sessionAccent: true
   transparent: true
 providers:
-  webSearchOrder: [perplexity, duckduckgo, brave]
+  webSearchOrder:
+    - perplexity
+    - duckduckgo
+    - brave
 task:
   disabledAgents:
     []
@@ -52,3 +55,5 @@ retry:
       - openai-codex/gpt-5.6-sol
 web_search:
   enabled: true
+dev:
+  autoqaConsent: denied
