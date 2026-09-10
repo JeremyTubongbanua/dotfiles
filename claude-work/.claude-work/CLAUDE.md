@@ -1,4 +1,4 @@
-# AGENTS
+# CLAUDE
 
 ## Non-Negotiables
 
@@ -62,3 +62,9 @@ const button: ReactComponent = () => {
 
 export default button;
 ```
+
+## Branding
+
+- "Atsign Protocol" not "atProtocol"
+- "Atsigns" not "atSigns"
+- "atServer", "atDirectory"
