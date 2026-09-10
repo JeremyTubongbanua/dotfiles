@@ -13,17 +13,6 @@
         ],
         "matcher": "^Bash$"
       }
-    ],
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "command": "bash '/Users/jeremytubongbanua/.codex/herdr-agent-state.sh' session",
-            "timeout": 10,
-            "type": "command"
-          }
-        ]
-      }
     ]
   }
 }
