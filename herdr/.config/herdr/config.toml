@@ -8,6 +8,7 @@ navigate_workspace_down = ["down", "j"]
 [ui]
 # when you create a new workspace (via `Ctrl+b+N`) will prompt the workspace name
 prompt_new_workspace_name = true
+
 # shows the detected/reported agent name (e.g. `claude`) in a split pane's
 # border, unless that pane has a manual label set via `herdr pane rename`
 show_agent_labels_on_pane_borders = true
@@ -24,5 +25,5 @@ auto_switch = true
 key = "prefix+shift+m"
 type = "popup"
 command = "/Users/jeremytubongbanua/.config/herdr/new-workspace.zsh"
-width = "70%"
+width = "80%"
 height = "40%"
