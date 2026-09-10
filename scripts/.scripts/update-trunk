@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ ${PWD##*/} == trunk ]]; then
+  trunk=$PWD
+elif [[ -d $PWD/trunk ]]; then
+  trunk=$PWD/trunk
+else
+  printf 'update-trunk: no trunk directory at %s or %s\n' "$PWD" "$PWD/trunk" >&2
+  exit 1
+fi
+
+remote=upstream
+if ! git -C "$trunk" remote get-url "$remote" >/dev/null 2>&1; then
+  remote=origin
+fi
+
+git -C "$trunk" worktree prune
+git -C "$trunk" fetch --all --prune
+git -C "$trunk" reset --hard "$remote/trunk"
