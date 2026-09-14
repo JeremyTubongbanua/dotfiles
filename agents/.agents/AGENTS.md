@@ -28,7 +28,8 @@ Do everything. No hand-holding. No waiting between steps.
 ## Shell Command Execution
 
 - **One command per shell call.** When an agent is executing commands, don't bundle with `;` or `&&`. `|` is fine when the pipe is the command. Claude matches permissions against command strings; Codex can split simple compound commands, but separate calls remain easier to review.
-- **Smoke test after every change.** Build and exercise the broader system, not just the new feature. Report results before claiming done.
+- If the copy-and-pastable command is too long to give me, use `\` to separate the long lines
+- If the command requires multiple processes to run (e.g. running a backend and frontend), run tmux sessions. Then also give me commands to kill all the tmux sessions. Ensure that these test environments are ephemeral, so if you are running docker containers use `--rm`, for example.
 - **Handoff commands.** Copy-pasteable shell commands chained with `&&` (`;` only where failure shouldn't stop the chain). Include setup steps like `cd /abs/path && dart pub get`.
   - **Absolute directories** in any `cd` commands you give me.
   - **Fresh:** full teardown, then run.
