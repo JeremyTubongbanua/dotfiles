@@ -125,6 +125,7 @@
       "/Users/jeremytubongbanua"
     ]
   },
+  "model": "claude-opus-4-6[1m]",
   "hooks": {
     "SessionStart": [
       {
