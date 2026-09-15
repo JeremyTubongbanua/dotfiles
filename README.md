@@ -7,43 +7,58 @@ My personal dotfiles, installed with [GNU stow](https://www.gnu.org/software/sto
 Each top-level directory is a stow *package* whose contents mirror a subtree of `$HOME`:
 
 ```text
-zsh/         →  ~/.zshrc
-nvim/        →  ~/.config/nvim/
-ghostty/     →  ~/.config/ghostty/
 agents/      →  ~/.agents/
-claude/      →  ~/.claude/{CLAUDE.md, settings.json, agents/}
-claude-work/ →  ~/.claude-work/{CLAUDE.md, settings.json, agents/, skills/}
-pi/          →  ~/.pi/agent/{AGENTS.md, settings.json, provider-failover.json}, ~/.pi-lens/config.json
-herdr/       →  ~/.config/herdr/
-scripts/     →  ~/.scripts/
-dockerfiles/ →  ~/.dockerfiles/
-linearmouse/ →  ~/.config/linearmouse/linearmouse.json
-ssh/         →  ~/.ssh/config
+brew/        →  ~/Brewfile
+claude/      →  ~/.claude/
+claude-work/ →  ~/.claude-work/
+codex/       →  ~/.codex/
 docker/      →  ~/.docker/daemon.json
-git/         →  ~/.gitconfig, ~/.config/git/ignore
+dockerfiles/ →  ~/.dockerfiles/
 gh/          →  ~/.config/gh/config.yml
+ghostty/     →  ~/.config/ghostty/
+git/         →  ~/.gitconfig
+herdr/       →  ~/.config/herdr/
+linearmouse/ →  ~/.config/linearmouse/linearmouse.json
+nvim/        →  ~/.config/nvim/
+omp/         →  ~/.omp/agent/
+pi/          →  ~/.pi/{agent/, web-search.json}, ~/.pi-lens/config.json
+scripts/     →  ~/.scripts/
+vorssaint/   →  ~/Vorssaint Settings.plist
+zsh/         →  ~/.zshrc, ~/.config/spaceship.zsh
 ```
 
 `AGENTS.md` has the operational details (adding files, packages, conflicts, folding behavior).
 
+## Homebrew
+
+`brew/Brewfile` is stowed as `~/Brewfile`. Install its formulae and casks with:
+
+```sh
+brew bundle --file "$HOME/Brewfile"
+```
+
+Run `./update-brewfile.sh` from the repo root to replace it with a snapshot of the currently installed Homebrew packages.
+
 ## Pi Provider Failover
 
-Pi is configured to default to **Anthropic Claude Opus 4.6** and automatically fail over to **OpenAI Codex** accounts when the Anthropic 5-hour usage limit is hit. When the limit resets, Pi switches back to Anthropic.
+Pi defaults to **Anthropic Claude Opus 4.6** and automatically fails over through two configured **OpenAI Codex GPT-5.6** accounts when Anthropic hits a rate or usage limit. It switches back when Anthropic becomes healthy again.
 
 How it works:
 
-1. Anthropic hits a rate/usage limit (detected via error pattern matching).
-2. Pi fails over to discovered Codex accounts and continues the task automatically.
-3. Every 5-10 minutes, Pi probes Anthropic to check if the limit has reset.
-4. Once Anthropic is healthy again, Pi switches back.
+1. An error matches a configured quota or rate-limit pattern.
+2. Pi continues the interrupted task on the next model in the fallback chain.
+3. Pi can probe Anthropic every 5 minutes, with rechecks capped at a 10-minute interval.
+4. Once Anthropic is healthy again, Pi returns to it as the preferred provider.
 
 Relevant config files:
 
 | File | What it controls |
 |------|------------------|
-| `pi/.pi/agent/settings.json` | `defaultProvider: "anthropic"`, `defaultModel: "claude-opus-4-6"` |
-| `pi/.pi/agent/provider-failover.json` | Failover logic, provider order, cooldowns, error patterns |
-Pi discovers skills directly from `~/.agents/skills/`; its settings add `~/.agents/agents/` to pi-subagents discovery, and `~/.pi/agent/AGENTS.md` links to the shared `~/.agents/AGENTS.md` instructions.
+| `pi/.pi/agent/settings.json` | Default provider, model, thinking level, enabled models, packages, and subagent discovery |
+| `pi/.pi/agent/provider-failover.json` | Fallback chain, provider priority, cooldowns, error patterns, recovery, and continuation behavior |
+
+Pi discovers skills from `~/.agents/skills/`, scans `~/.agents/agents/` for subagents, and links `~/.pi/agent/AGENTS.md` to the shared `~/.agents/AGENTS.md` instructions.
+
 The `pi` package excludes credentials, sessions, logs, caches, installed packages, and Pi Lens runtime data.
 
 ## Install
@@ -51,7 +66,7 @@ The `pi` package excludes credentials, sessions, logs, caches, installed package
 Install or repair every package:
 
 ```sh
-brew install stow && cd ~/GitHub/personal/dotfiles && stow --target "$HOME" --restow agents claude claude-work docker dockerfiles gh ghostty git herdr linearmouse nvim pi scripts ssh zsh
+brew install stow && cd ~/GitHub/personal/dotfiles && stow --target "$HOME" --restow agents brew claude claude-work codex docker dockerfiles gh ghostty git herdr linearmouse nvim omp pi scripts vorssaint zsh
 ```
 
 Stow packages are the top-level directories in this repo. Each package mirrors the path it should create under `$HOME`.
@@ -60,13 +75,13 @@ Useful commands:
 
 ```sh
 # Preview every package before attempting a full restow.
-cd ~/GitHub/personal/dotfiles && stow --target "$HOME" --simulate --verbose --restow agents claude claude-work docker dockerfiles gh ghostty git herdr linearmouse nvim pi scripts ssh zsh
+cd ~/GitHub/personal/dotfiles && stow --target "$HOME" --simulate --verbose --restow agents brew claude claude-work codex docker dockerfiles gh ghostty git herdr linearmouse nvim omp pi scripts vorssaint zsh
 
 # Preview one or more packages without changing anything.
-cd ~/GitHub/personal/dotfiles && stow --target "$HOME" --simulate --verbose --restow git gh ssh
+cd ~/GitHub/personal/dotfiles && stow --target "$HOME" --simulate --verbose --restow codex git gh
 
 # Install or repair a subset of packages.
-cd ~/GitHub/personal/dotfiles && stow --target "$HOME" --restow git gh ssh
+cd ~/GitHub/personal/dotfiles && stow --target "$HOME" --restow codex git gh
 
 # Remove one package's symlinks from $HOME.
 cd ~/GitHub/personal/dotfiles && stow --target "$HOME" --delete git
@@ -84,5 +99,5 @@ mkdir -p ~/.dotfiles-backup && mv ~/.gitconfig ~/.dotfiles-backup/.gitconfig && 
 See [AGENTS.md](AGENTS.md). Short version: drop the file into the right package directory at the path it would have under `$HOME` with leading dots preserved, then restow everything:
 
 ```sh
-cd ~/GitHub/personal/dotfiles && stow --target "$HOME" --restow agents claude claude-work docker dockerfiles gh ghostty git herdr linearmouse nvim pi scripts ssh zsh
+cd ~/GitHub/personal/dotfiles && stow --target "$HOME" --restow agents brew claude claude-work codex docker dockerfiles gh ghostty git herdr linearmouse nvim omp pi scripts vorssaint zsh
 ```
