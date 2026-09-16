@@ -2,67 +2,51 @@
 
 ## Non-Negotiables
 
-- **Commits are mine.** Never `git add`, `git commit`, or `git push` unless I explicitly ask. Never push to trunk or production.
-- **No PRs/tickets** unless I explicitly ask.
-- **Look before you destroy.** Check for existing assets before any `rm -rf xyz; mkdir -p xyz`.
-- **No code documentation.** I write my own docs.
-- **No em-dashes anywhere.** - not in code, responses, documentation, or comments.
+- **Commits are mine.** Never run `git add`, `git commit`, or `git push` unless I explicitly ask. Never push to trunk or production.
+- **No PRs or tickets.** Never create or modify pull requests or tickets unless I explicitly ask.
+- **Inspect before destructive changes.** Inspect existing files and user changes before deleting, replacing, regenerating, or overwriting anything.
+- **No documentation.** Never create or edit README files, guides, changelogs, API documentation, docstrings, or documentation comments unless I explicitly ask.
+- Never use em dashes in code, comments, documentation, or responses.
 
 ## How to respond
 
-- **Lead with the answer.** Yes/no questions start with "Yes" or "No".
-- **Present clearly.** Lists and tables when prose gets wordy. Self-contained HTML artifacts for visual info.
-- **Don't assume I read everything.** Don't expect me to remember something from 3 responses ago.
-- **File path & line numbers** - when referring to code, provide file path and line numbers
-- **Summary**: 1–3 sentence "Summary" section per response, skip if the response is already short.
+- **Lead with the answer.** Start yes-or-no answers with "Yes" or "No".
+- **Present clearly.** Use lists or tables when prose gets wordy. Create self-contained HTML artifacts only when requested or when visual presentation materially improves the answer.
+- **Be self-contained.** Restate any prior context required to understand the response.
+- **Cite code precisely.** Use `path/to/file.ext:line` when referring to repository code.
+- **Summarize substantial responses.** End substantial, multi-part responses with a one-to-three-sentence "Summary" section. Omit it for short responses.
 
 ## Modes
 
-### Co-developer mode
-
-I explicitly say we're doing this. Peer-programming: you plan, I execute. I'm a junior engineer, explain slowly with examples. One step per message, then stop and wait for my response (e.g. "I ran it"). Never batch major steps; break into numbered sub-steps if needed, but send only one step.
-
-### Auto mode (default)
-
-Do everything. No hand-holding. No waiting between steps.
+- **Co-developer mode:** Active only when I explicitly request it. You plan and I execute. Explain for a junior engineer, provide exactly one actionable step per response, and wait for my result. It remains active until I end it.
+- **Auto mode (default):** Otherwise, complete the work without hand-holding or pauses between steps.
 
 ## Shell Command Execution
 
-- **One command per shell call.** When an agent is executing commands, don't bundle with `;` or `&&`. `|` is fine when the pipe is the command. Claude matches permissions against command strings; Codex can split simple compound commands, but separate calls remain easier to review.
-- If the copy-and-pastable command is too long to give me, use `\` to separate the long lines
-- If the command requires multiple processes to run (e.g. running a backend and frontend), run tmux sessions. Then also give me commands to kill all the tmux sessions. Ensure that these test environments are ephemeral, so if you are running docker containers use `--rm`, for example.
-- **Handoff commands.** Copy-pasteable shell commands chained with `&&` (`;` only where failure shouldn't stop the chain). Include setup steps like `cd /abs/path && dart pub get`.
-  - **Absolute directories** in any `cd` commands you give me.
-  - **Fresh:** full teardown, then run.
-  - **Quick:** run only, assuming clean state.
+- **Agent-executed commands:** Run one command per shell call. Do not combine commands with `;` or `&&`. Pipelines are allowed.
+- **Concurrent processes:** When a workflow requires multiple processes, run them in tmux, provide commands to stop every session, and keep test environments ephemeral, including `docker run --rm`.
+- **Handoff commands:** Make commands copy-pasteable. Chain dependent steps with `&&`; use `;` only when failure should not stop later commands. Break long commands across lines with `\`.
+- **Handoff paths:** Use absolute paths in every `cd` command.
+- **Fresh and Quick:** Provide both for workflow handoffs. Fresh includes complete teardown and setup; Quick assumes clean state and runs only what is required.
 
-## Writing code preferences
+## Writing Code Preferences
 
 ### Dart
 
-```
-Prefer explicit types.
-// Don't like
-(x, y) = getValues();
+Prefer explicit types, including destructured records:
 
-// Prefer
+```dart
 final (int x, double y) = getValues();
 ```
 
 ### TypeScript
 
-Prefer functional expressions over declarations (no hoisting), explicit type annotations even when inferred, exports at bottom of file, semicolons after expressions/variables/returns.
+Prefer function expressions over declarations, explicit type annotations even when inferred, exports at the bottom of the file, and semicolons after expressions, variables, and return statements.
 
-```
-// Don't like
-export default function Button() {
-    return <div></div>
-}
-
-// Prefer
-const button: ReactComponent = () => {
-    return (<div>abc</div>);
+```tsx
+const Button = (): React.JSX.Element => {
+    return <div>abc</div>;
 };
 
-export default button;
+export default Button;
 ```
