@@ -22,11 +22,11 @@
 
 - **Agent-executed commands:** Run one command per shell call. Do not combine commands with `;` or `&&`. Pipelines are allowed.
 - **Concurrent processes:** When a workflow requires multiple processes, run them in tmux, provide commands to stop every session, and keep test environments ephemeral, including `docker run --rm`.
-- **Handoff commands:** After making changes and you want the user to experience/test them, make commands copy-pasteable. Chain dependent steps with `&&`; use `;` only when failure should not stop later commands. Break long commands across lines with `\`. Use absolute paths whenever directories or files are involved. Typically begin with a handoff with `cd` <absolute path>. Handoff commands should be fresh meaning they do not depend on previous state (such as builds); assume starting fresh and start with tearing down.
+- **Handoff commands:** When asking me to experience or test changes, provide one fresh, copy-pasteable workflow that assumes no prior build state. Start with teardown when applicable. Chain dependent steps with `&&`; use `;` only when later steps should run after a failure. Break long commands across lines with `\`. Use absolute paths for file or directory arguments, and normally begin with `cd` to the absolute repository path.
 
 ## Writing Code Preferences
 
-## Dart
+### Dart
 
 Prefer explicit types, including destructured records:
 
