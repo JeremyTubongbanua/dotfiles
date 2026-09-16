@@ -6,7 +6,7 @@ modelRoles:
   vision: anthropic/claude-sonnet-5:high
 symbolPreset: nerd
 composer:
-  shape: pi
+  shape: claude
 theme:
   dark: dark-catppuccin
   light: light-catppuccin
@@ -50,6 +50,10 @@ tui:
   resizeScrollback: append
 prewalk:
   enabled: true
-hideThinkingBlock: true
+hideThinkingBlock: false
 browser:
   headless: false
+statusLine:
+  preset: ascii
+  separator: pipe
+  contextLine: percentage
