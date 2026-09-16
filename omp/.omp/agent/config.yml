@@ -1,34 +1,33 @@
 modelRoles:
-  default: openai-codex/gpt-5.6-sol:high
-  plan: anthropic/claude-opus-4-6:high
-  smol: openai-codex/gpt-5.6-sol:low
+  default: openai-codex/gpt-5.6-sol:xhigh
+  smol: openai-codex/gpt-5.6-luna:low
+  plan: openai-codex/gpt-6-astra:xhigh
+  slow: anthropic/claude-opus-4-6:high
+  vision: anthropic/claude-sonnet-5:high
 symbolPreset: nerd
 composer:
-  shape: rail
+  shape: pi
 theme:
   dark: dark-catppuccin
   light: light-catppuccin
 setupVersion: 2
 enabledProviders:
   - claude
-  - codex
+  - openai-codex
 extendedContext: true
 disabledProviders:
-  - claude-plugins
-  - agents-md
-  - codex
-  - claude
-  - builtin-defaults
-disabledExtensions:
-  - skill:find-skills
+  - google-vertex
 goal:
   enabled: false
   statusInFooter: false
-statusLine:
-  preset: ascii
-  separator: powerline-thin
-  sessionAccent: true
-  transparent: true
+# statusLine:
+#   preset: default
+#   separator: powerline-thin
+#   sessionAccent: true
+#   transparent: false
+#   contextLine: embedded
+#   compactThinkingLevel: true
+#   showHookStatus: true
 providers:
   webSearchOrder:
     - perplexity
@@ -39,21 +38,24 @@ task:
     []
   agentPrewalk:
     task: "off"
-display:
-  showTokenUsage: false
-edit:
-  mode: hashline
-tools:
-  approvalMode: yolo
 secrets:
   enabled: true
 cycleOrder:
   - default
+  - plan
 retry:
   fallbackChains:
-    plan:
-      - openai-codex/gpt-5.6-sol
+    {}
 web_search:
   enabled: true
 dev:
   autoqaConsent: denied
+compaction:
+  enabled: false
+autoResume: true
+colorBlindMode: false
+tui:
+  resizeScrollback: append
+prewalk:
+  enabled: true
+hideThinkingBlock: true
