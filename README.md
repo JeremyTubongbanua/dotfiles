@@ -1,103 +1,109 @@
 # dotfiles
 
-My personal dotfiles, installed with [GNU stow](https://www.gnu.org/software/stow/). Files live in this repo; stow creates symlinks from `$HOME` into the matching paths here.
+My macOS development environment, managed with [GNU Stow](https://www.gnu.org/software/stow/). The main workflow is Ghostty, Herdr, Neovim, and Oh My Pi (OMP).
 
-## Layout
+## Daily Workflow
 
-Each top-level directory is a stow *package* whose contents mirror a subtree of `$HOME`:
+| Tool | Role | Configuration |
+|------|------|---------------|
+| [Ghostty](https://ghostty.org/) | Terminal emulator | Fira Code, automatic Catppuccin light and dark themes, transparent background, and split navigation |
+| [Herdr](https://herdr.dev/) | Workspace and agent multiplexer | Vim-style workspace navigation, agent labels, and a custom project launcher |
+| [Neovim](https://neovim.io/) | Editor | Native LSP, Treesitter, Snacks picker, Oil, Harpoon, Fugitive, and mini.diff |
+| [OMP](https://github.com/can1357/oh-my-pi) | AI coding agent | OpenAI Codex and Claude providers, web search, Figma MCP, and hashline editing |
 
-```text
-agents/      →  ~/.agents/
-brew/        →  ~/Brewfile
-claude/      →  ~/.claude/
-claude-work/ →  ~/.claude-work/
-codex/       →  ~/.codex/
-docker/      →  ~/.docker/daemon.json
-dockerfiles/ →  ~/.dockerfiles/
-gh/          →  ~/.config/gh/config.yml
-ghostty/     →  ~/.config/ghostty/
-git/         →  ~/.gitconfig
-herdr/       →  ~/.config/herdr/
-linearmouse/ →  ~/.config/linearmouse/linearmouse.json
-nvim/        →  ~/.config/nvim/
-omp/         →  ~/.omp/agent/
-pi/          →  ~/.pi/{agent/, web-search.json}, ~/.pi-lens/config.json
-scripts/     →  ~/.scripts/
-vorssaint/   →  ~/Vorssaint Settings.plist
-zsh/         →  ~/.zshrc, ~/.config/spaceship.zsh
-```
+Ghostty hosts Herdr, and Herdr organizes each project into three tabs:
 
-`AGENTS.md` has the operational details (adding files, packages, conflicts, folding behavior).
+1. `zsh` for the shell
+2. `nvim` for the editor
+3. `omp` for the coding agent
 
-## Homebrew
+In Herdr, `Ctrl+b` followed by `Shift+m` opens the custom workspace launcher. It prompts for a directory and workspace name, then creates the three-tab layout.
 
-`brew/Brewfile` is stowed as `~/Brewfile`. Install its formulae and casks with:
+For an existing directory, the launcher performs no Git operations. For a new directory inside a detected worktree collection, it prunes and updates the sibling `trunk`, hard-resets it to `upstream/trunk` or `origin/trunk`, and creates a worktree for the requested branch.
 
-```sh
-brew bundle --file "$HOME/Brewfile"
-```
+Relevant files:
 
-Run `./update-brewfile.sh` from the repo root to replace it with a snapshot of the currently installed Homebrew packages.
-
-## Pi Provider Failover
-
-Pi defaults to **Anthropic Claude Opus 4.6** and automatically fails over through two configured **OpenAI Codex GPT-5.6** accounts when Anthropic hits a rate or usage limit. It switches back when Anthropic becomes healthy again.
-
-How it works:
-
-1. An error matches a configured quota or rate-limit pattern.
-2. Pi continues the interrupted task on the next model in the fallback chain.
-3. Pi can probe Anthropic every 5 minutes, with rechecks capped at a 10-minute interval.
-4. Once Anthropic is healthy again, Pi returns to it as the preferred provider.
-
-Relevant config files:
-
-| File | What it controls |
-|------|------------------|
-| `pi/.pi/agent/settings.json` | Default provider, model, thinking level, enabled models, packages, and subagent discovery |
-| `pi/.pi/agent/provider-failover.json` | Fallback chain, provider priority, cooldowns, error patterns, recovery, and continuation behavior |
-
-Pi discovers skills from `~/.agents/skills/`, scans `~/.agents/agents/` for subagents, and links `~/.pi/agent/AGENTS.md` to the shared `~/.agents/AGENTS.md` instructions.
-
-The `pi` package excludes credentials, sessions, logs, caches, installed packages, and Pi Lens runtime data.
+| File | Purpose |
+|------|---------|
+| `ghostty/.config/ghostty/config` | Terminal appearance, shell integration, clipboard bindings, and split navigation |
+| `herdr/.config/herdr/config.toml` | Workspace keys, labels, theme, and launcher binding |
+| `herdr/.config/herdr/new-workspace.zsh` | Project workspace and Git worktree creation |
+| `nvim/.config/nvim/` | Editor configuration and plugin definitions |
+| `nvim/.config/nvim/README.md` | Neovim notes, keymaps, and plugin usage |
+| `omp/.omp/agent/config.yml` | Models, providers, interface, tools, and agent behavior |
+| `omp/.omp/agent/mcp.json` | MCP server configuration |
 
 ## Install
 
-Install or repair every package:
+Run these commands from the repository root.
+
+Install the tracked Homebrew formulae and applications:
 
 ```sh
-brew install stow && cd ~/GitHub/personal/dotfiles && stow --target "$HOME" --restow agents brew claude claude-work codex docker dockerfiles gh ghostty git herdr linearmouse nvim omp pi scripts vorssaint zsh
+brew bundle --file brew/Brewfile
 ```
 
-Stow packages are the top-level directories in this repo. Each package mirrors the path it should create under `$HOME`.
-
-Useful commands:
+Install or repair every dotfiles package:
 
 ```sh
-# Preview every package before attempting a full restow.
-cd ~/GitHub/personal/dotfiles && stow --target "$HOME" --simulate --verbose --restow agents brew claude claude-work codex docker dockerfiles gh ghostty git herdr linearmouse nvim omp pi scripts vorssaint zsh
-
-# Preview one or more packages without changing anything.
-cd ~/GitHub/personal/dotfiles && stow --target "$HOME" --simulate --verbose --restow codex git gh
-
-# Install or repair a subset of packages.
-cd ~/GitHub/personal/dotfiles && stow --target "$HOME" --restow codex git gh
-
-# Remove one package's symlinks from $HOME.
-cd ~/GitHub/personal/dotfiles && stow --target "$HOME" --delete git
+stow --target "$HOME" --restow agents brew claude claude-work codex docker dockerfiles gh ghostty git herdr linearmouse nvim omp pi scripts vorssaint zsh
 ```
 
-If a target path is already a real file, stow refuses to clobber it. Compare it with the repo copy, move the real file aside, then restow the package:
+To restow only the core terminal workflow:
 
 ```sh
-diff -u ~/.gitconfig ~/GitHub/personal/dotfiles/git/.gitconfig
-mkdir -p ~/.dotfiles-backup && mv ~/.gitconfig ~/.dotfiles-backup/.gitconfig && cd ~/GitHub/personal/dotfiles && stow --target "$HOME" --restow git
+stow --target "$HOME" --restow ghostty herdr nvim omp
 ```
 
-## Adding or Changing Tracked Files
-
-See [AGENTS.md](AGENTS.md). Short version: drop the file into the right package directory at the path it would have under `$HOME` with leading dots preserved, then restow everything:
+Stow refuses to overwrite a real file or an unexpected symlink. Preview changes before resolving a conflict:
 
 ```sh
-cd ~/GitHub/personal/dotfiles && stow --target "$HOME" --restow agents brew claude claude-work codex docker dockerfiles gh ghostty git herdr linearmouse nvim omp pi scripts vorssaint zsh
+stow --target "$HOME" --simulate --verbose --restow ghostty herdr nvim omp
 ```
+
+## Packages
+
+Each top-level package mirrors the path it owns under `$HOME`.
+
+| Package | Installed path |
+|---------|----------------|
+| `agents` | `~/.agents/` |
+| `brew` | `~/Brewfile` |
+| `claude` | `~/.claude/` |
+| `claude-work` | `~/.claude-work/` |
+| `codex` | `~/.codex/` |
+| `docker` | `~/.docker/daemon.json` |
+| `dockerfiles` | `~/.dockerfiles/` |
+| `gh` | `~/.config/gh/config.yml` |
+| `ghostty` | `~/.config/ghostty/` |
+| `git` | `~/.gitconfig` |
+| `herdr` | `~/.config/herdr/` |
+| `linearmouse` | `~/.config/linearmouse/linearmouse.json` |
+| `nvim` | `~/.config/nvim/` |
+| `omp` | `~/.omp/agent/` |
+| `pi` | `~/.pi/agent/`, `~/.pi/web-search.json`, and `~/.pi-lens/config.json` |
+| `scripts` | `~/.scripts/` |
+| `vorssaint` | `~/Vorssaint Settings.plist` |
+| `zsh` | `~/.zshrc` and `~/.config/spaceship.zsh` |
+
+## Maintenance
+
+Refresh `brew/Brewfile` from the currently installed Homebrew packages:
+
+```sh
+./update-brewfile.sh
+```
+
+Preview every package:
+
+```sh
+stow --target "$HOME" --simulate --verbose --restow agents brew claude claude-work codex docker dockerfiles gh ghostty git herdr linearmouse nvim omp pi scripts vorssaint zsh
+```
+
+Remove one package's managed links:
+
+```sh
+stow --target "$HOME" --delete <package>
+```
+
+See [AGENTS.md](AGENTS.md) for package conventions, adding or removing tracked files, tree folding, and conflict handling.
