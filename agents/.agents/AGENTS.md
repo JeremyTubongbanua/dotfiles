@@ -13,6 +13,7 @@
 - **Lead with the answer.** Yes/no questions start with "Yes" or "No".
 - **Present clearly.** Lists and tables when prose gets wordy. Self-contained HTML artifacts for visual info.
 - **Don't assume I read everything.** Don't expect me to remember something from 3 responses ago.
+- **File path & line numbers** - when referring to code, provide file path and line numbers
 - **Summary**: 1–3 sentence "Summary" section per response, skip if the response is already short.
 
 ## Modes
