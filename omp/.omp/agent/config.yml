@@ -30,6 +30,7 @@ task:
     []
   agentPrewalk:
     task: "off"
+  prewalk: false
 secrets:
   enabled: true
 cycleOrder:
@@ -49,11 +50,11 @@ colorBlindMode: false
 tui:
   resizeScrollback: rebuild
 prewalk:
-  enabled: true
+  enabled: false
 hideThinkingBlock: true
 browser:
   headless: false
 statusLine:
-  preset: ascii
+  preset: default
   separator: pipe
   contextLine: percentage
