@@ -1,19 +1,6 @@
 {
   "description": "Codex-specific command policy hooks.",
   "hooks": {
-    "PreToolUse": [
-      {
-        "hooks": [
-          {
-            "command": "python3 ~/.codex/hooks/command-policy.py",
-            "statusMessage": "Checking publish command",
-            "timeout": 5,
-            "type": "command"
-          }
-        ],
-        "matcher": "^Bash$"
-      }
-    ],
     "SessionStart": [
       {
         "hooks": [

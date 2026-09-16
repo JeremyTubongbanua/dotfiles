@@ -54,25 +54,5 @@ status_line = [
 [tui.model_availability_nux]
 gpt-6-astra = 4
 
-[projects."/Users/jeremytubongbanua/GitHub/personal/dotfiles"]
-trust_level = "trusted"
-
-[projects."/Users/jeremytubongbanua/GitHub/atsign/at_client_sdk/trunk"]
-trust_level = "trusted"
-
-[projects."/Users/jeremytubongbanua/GitHub/atsign"]
-trust_level = "trusted"
-
-[projects."/Users/jeremytubongbanua/GitHub/align/align/trunk"]
-trust_level = "trusted"
-
-[hooks.state]
-
-[hooks.state."/Users/jeremytubongbanua/.codex/hooks.json:pre_tool_use:0:0"]
-trusted_hash = "sha256:55ee5b65da47f89e53a8bad98882d27d10630d197577dd94d89dfb4ecf7bfe5b"
-
-[hooks.state."/Users/jeremytubongbanua/.codex-jl/hooks.json:pre_tool_use:0:0"]
-trusted_hash = "sha256:55ee5b65da47f89e53a8bad98882d27d10630d197577dd94d89dfb4ecf7bfe5b"
-
 [mcp_servers.figma]
 url = "https://mcp.figma.com/mcp"
