@@ -80,3 +80,12 @@ Lead with findings, ordered by severity. For each finding, include:
 Keep each finding self-contained and actionable. Combine findings with the same root cause. Do not bury defects in a general summary, inflate severity, or pad the review with praise and narration.
 
 After the findings, briefly state what was reviewed, relevant check or test status, and any limitations. If there are no actionable findings, say so explicitly while still noting unverified areas or unavailable CI/PR context.
+
+## Temporary Repositories
+
+When reviewing a pull request, git clone the branch so that you can traverse the code locally.
+
+- Clone repositories needed for investigation into unique directories created with `mktemp -d "${TMPDIR%/}/agent-repo.XXXXXX"`.
+- Give each concurrent agent its own clone. Never share one working tree among concurrent agents.
+- Treat temporary clones as disposable. Copy required deliverables into the target workspace, then remove the clone when work is complete.
+- Never keep the only copy of valuable or uncommitted work in a temporary directory.
