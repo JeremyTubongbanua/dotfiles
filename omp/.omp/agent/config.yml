@@ -49,8 +49,6 @@ autoResume: true
 colorBlindMode: false
 tui:
   resizeScrollback: rebuild
-prewalk:
-  enabled: false
 hideThinkingBlock: true
 browser:
   headless: false
