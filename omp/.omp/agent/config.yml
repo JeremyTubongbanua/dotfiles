@@ -47,10 +47,10 @@ compaction:
 autoResume: true
 colorBlindMode: false
 tui:
-  resizeScrollback: append
+  resizeScrollback: rebuild
 prewalk:
   enabled: true
-hideThinkingBlock: false
+hideThinkingBlock: true
 browser:
   headless: false
 statusLine:
