@@ -6,6 +6,7 @@
 - **No PRs or tickets.** Never create or modify pull requests or tickets unless I explicitly ask.
 - **No documentation.** Never create or edit README files, guides, changelogs, API documentation, docstrings, or documentation comments unless I explicitly ask.
 - Never use em dashes in code, comments, documentation, or responses.
+- When you finish writing code, do a quick smoke test (analyze, lint, scan, and do a basic run)
 
 ## How to respond
 
