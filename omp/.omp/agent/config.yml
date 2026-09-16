@@ -20,14 +20,6 @@ disabledProviders:
 goal:
   enabled: false
   statusInFooter: false
-# statusLine:
-#   preset: default
-#   separator: powerline-thin
-#   sessionAccent: true
-#   transparent: false
-#   contextLine: embedded
-#   compactThinkingLevel: true
-#   showHookStatus: true
 providers:
   webSearchOrder:
     - perplexity
@@ -59,3 +51,5 @@ tui:
 prewalk:
   enabled: true
 hideThinkingBlock: true
+browser:
+  headless: false
