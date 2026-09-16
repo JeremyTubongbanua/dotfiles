@@ -1,4 +1,0 @@
-# Track only portable Pi Lens preferences. Binaries, caches, logs, project data, and session state stay local.
-*
-!.gitignore
-!config.json
