@@ -14,6 +14,7 @@
     "mermaid": "streaming"
   },
   "tuiMode": "regular",
+  "treeFilterMode": "no-tools",
   "doubleEscapeAction": "tree",
   "hideThinkingBlock": true,
   "warnings": {
