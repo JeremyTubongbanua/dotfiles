@@ -22,6 +22,12 @@ agent-browser skills get core --full      # include full command reference and t
 
 The CLI serves skill content that always matches the installed version, so instructions never go stale. The content in this stub cannot change between releases, which is why it just points at `skills get core`.
 
+## Authenticated browsing policy
+
+When a task requires access to the user's authenticated account, launch and operate the browser in headed mode with `--headed` so the user can see the session and complete login, consent, CAPTCHA, or 2FA steps manually. Keep using the same headed session for all subsequent commands in that task.
+
+Prefer a dedicated persistent agent-browser profile over the user's primary Chrome profile. Reuse an existing authenticated profile when the user has identified one, or ask which profile to use when this is unclear. Never request that passwords, session cookies, API keys, or recovery codes be pasted into chat.
+
 ## Specialized skills
 
 Load a specialized skill when the task falls outside browser web pages:
