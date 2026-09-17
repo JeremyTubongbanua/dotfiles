@@ -13,6 +13,40 @@ import { Text, truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
 import { homedir } from "node:os";
 
 const MAX_LABEL_LENGTH: number = 88;
+const ANSI_SGR_PATTERN: RegExp = /\x1b\[([0-9;]*)m/g;
+const ANSI_BACKGROUND_RESET: string = "\x1b[49m";
+const OSC133_ZONE_END: string = "\x1b]133;B\x07";
+const OSC133_ZONE_FINAL: string = "\x1b]133;C\x07";
+const STYLE_RESET_PARAMS: readonly number[] = [39, 22, 23, 24, 25, 27, 28, 29, 59];
+
+const sanitizeForBackground = (text: string): string => {
+    return text.replace(ANSI_SGR_PATTERN, (_sequence: string, rawParams: string): string => {
+        const params: number[] = (rawParams || "0")
+            .split(";")
+            .map((value: string): number => Number.parseInt(value, 10))
+            .filter((value: number): boolean => Number.isFinite(value));
+        const sanitized: number[] = [];
+
+        for (let index: number = 0; index < params.length; index++) {
+            const param: number = params[index] ?? 0;
+            if (param === 0) {
+                sanitized.push(...STYLE_RESET_PARAMS);
+                continue;
+            }
+            if (param === 49 || (param >= 40 && param <= 47) || (param >= 100 && param <= 107)) {
+                continue;
+            }
+            if (param === 48) {
+                const colorMode: number | undefined = params[index + 1];
+                index += colorMode === 2 ? 4 : colorMode === 5 ? 2 : 0;
+                continue;
+            }
+            sanitized.push(param);
+        }
+
+        return sanitized.length > 0 ? `\x1b[${sanitized.join(";")}m` : "";
+    });
+};
 
 const shortenPath = (path: string): string => {
     const home: string = homedir();
@@ -79,8 +113,27 @@ const createTools = (cwd: string) => ({
 type BuiltInTools = ReturnType<typeof createTools>;
 type AssistantRender = (this: AssistantMessageComponent, width: number) => string[];
 type AssistantTheme = {
-    bg: (color: "userMessageBg", text: string) => string;
-    fg: (color: "borderAccent", text: string) => string;
+    fg: (color: "accent" | "borderAccent", text: string) => string;
+    bold: (text: string) => string;
+    getBgAnsi: (color: "userMessageBg") => string;
+};
+type AssistantContent = {
+    type?: string;
+    text?: string;
+};
+type Renderable = {
+    render: (width: number) => string[];
+};
+type AssistantRuntimeState = {
+    hasToolCalls?: boolean;
+    isStreaming?: boolean;
+    lastMessage?: {
+        content?: AssistantContent[];
+        stopReason?: string;
+    };
+    contentContainer?: {
+        children?: Renderable[];
+    };
 };
 type PatchableAssistantPrototype = {
     render: AssistantRender;
@@ -98,7 +151,7 @@ const toolsFor = (cwd: string): BuiltInTools => {
     return tools;
 };
 
-const chatDisplay = (pi: ExtensionAPI): void => {
+const betterChatDisplay = (pi: ExtensionAPI): void => {
     const initial: BuiltInTools = toolsFor(process.cwd());
     // SAFETY: Pi exports this component class, and its prototype owns the render method being wrapped.
     const prototype: PatchableAssistantPrototype = AssistantMessageComponent.prototype as unknown as PatchableAssistantPrototype;
@@ -107,21 +160,43 @@ const chatDisplay = (pi: ExtensionAPI): void => {
 
     const renderWithBackground: AssistantRender = function (width: number): string[] {
         const safeWidth: number = Math.max(0, Math.floor(width));
-        // SAFETY: Pi's AssistantMessageComponent runtime state includes the private hasToolCalls flag.
-        const state: { hasToolCalls?: boolean } = this as unknown as { hasToolCalls?: boolean };
+        const lines: string[] = originalRender.call(this, safeWidth);
+        // SAFETY: Pi's AssistantMessageComponent runtime state provides the message and rendered child list.
+        const state: AssistantRuntimeState = this as unknown as AssistantRuntimeState;
         const assistantTheme: AssistantTheme | undefined = activeTheme;
-        if (!assistantTheme || state.hasToolCalls || safeWidth < 4) {
-            return originalRender.call(this, safeWidth);
+        const messageContent: AssistantContent[] = state.lastMessage?.content ?? [];
+        const finalContent: AssistantContent | undefined = messageContent.at(-1);
+        const stopReason: string | undefined = state.lastMessage?.stopReason;
+        const children: Renderable[] = state.contentContainer?.children ?? [];
+        const finalChild: Renderable | undefined = children.at(-1);
+        const isFailed: boolean = stopReason === "aborted" || stopReason === "error" || stopReason === "length";
+
+        if (
+            !assistantTheme
+            || state.hasToolCalls
+            || state.isStreaming
+            || isFailed
+            || finalContent?.type !== "text"
+            || !finalContent.text?.trim()
+            || !finalChild
+            || safeWidth < 8
+        ) {
+            return lines;
         }
 
+        const finalLinesAtFullWidth: string[] = finalChild.render(safeWidth);
+        const prefixLength: number = Math.max(0, lines.length - finalLinesAtFullWidth.length);
+        const prefixLines: string[] = lines.slice(0, prefixLength);
         const innerWidth: number = safeWidth - 2;
-        const lines: string[] = originalRender.call(this, innerWidth);
-        if (lines.length === 0) {
+        const finalLines: string[] = finalChild.render(innerWidth);
+        if (finalLines.length === 0) {
             return lines;
         }
 
         const border = (text: string): string => assistantTheme.fg("borderAccent", text);
-        const background = (text: string): string => assistantTheme.bg("userMessageBg", text);
+        const background = (text: string): string => {
+            return `${assistantTheme.getBgAnsi("userMessageBg")}${sanitizeForBackground(text)}${ANSI_BACKGROUND_RESET}`;
+        };
         const wrapLine = (line: string): string => {
             const content: string = visibleWidth(line) > innerWidth
                 ? truncateToWidth(line, innerWidth, "")
@@ -130,9 +205,20 @@ const chatDisplay = (pi: ExtensionAPI): void => {
             return background(`${border("│")}${content}${padding}${border("│")}`);
         };
 
-        const topBorder: string = background(`${border("╭")}${border("─".repeat(innerWidth))}${border("╮")}`);
+        const titleText: string = truncateToWidth(" agent ", innerWidth, "");
+        const title: string = assistantTheme.fg("accent", assistantTheme.bold(titleText));
+        const topBorderFill: string = "─".repeat(Math.max(0, innerWidth - visibleWidth(titleText)));
+        const topBorder: string = background(`${border("╭")}${title}${border(topBorderFill)}${border("╮")}`);
         const bottomBorder: string = background(`${border("╰")}${border("─".repeat(innerWidth))}${border("╯")}`);
-        return [topBorder, ...lines.map(wrapLine), wrapLine(""), bottomBorder];
+        const completedBottomBorder: string = `${OSC133_ZONE_END}${OSC133_ZONE_FINAL}${bottomBorder}`;
+        return [
+            ...prefixLines,
+            topBorder,
+            wrapLine(""),
+            ...finalLines.map(wrapLine),
+            wrapLine(""),
+            completedBottomBorder,
+        ];
     };
 
     prototype.render = renderWithBackground;
@@ -339,4 +425,4 @@ const chatDisplay = (pi: ExtensionAPI): void => {
     });
 };
 
-export default chatDisplay;
+export default betterChatDisplay;
