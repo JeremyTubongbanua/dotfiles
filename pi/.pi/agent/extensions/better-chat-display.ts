@@ -190,7 +190,6 @@ const betterChatDisplay = (pi: ExtensionAPI): void => {
             return lines;
         }
 
-        const border = (text: string): string => assistantTheme.fg("borderAccent", text);
         const background = (text: string): string => {
             return `${assistantTheme.getBgAnsi("userMessageBg")}${sanitizeForBackground(text)}${ANSI_BACKGROUND_RESET}`;
         };
@@ -199,22 +198,19 @@ const betterChatDisplay = (pi: ExtensionAPI): void => {
                 ? truncateToWidth(line, innerWidth, "")
                 : line;
             const padding: string = " ".repeat(Math.max(0, innerWidth - visibleWidth(content)));
-            return background(`${border("│")}${content}${padding}${border("│")}`);
+            return background(`${content}${padding}`);
         };
 
-        const titleText: string = truncateToWidth(" agent ", innerWidth, "");
-        const title: string = assistantTheme.fg("accent", assistantTheme.bold(titleText));
-        const topBorderFill: string = "─".repeat(Math.max(0, innerWidth - visibleWidth(titleText)));
-        const topBorder: string = background(`${border("╭")}${title}${border(topBorderFill)}${border("╮")}`);
-        const bottomBorder: string = background(`${border("╰")}${border("─".repeat(innerWidth))}${border("╯")}`);
-        const completedBottomBorder: string = `${OSC133_ZONE_END}${OSC133_ZONE_FINAL}${bottomBorder}`;
+        const finalWrappedLines: string[] = finalLines.map(wrapLine);
+        const lastIndex: number = finalWrappedLines.length - 1;
+        if (lastIndex >= 0) {
+            finalWrappedLines[lastIndex] = `${OSC133_ZONE_END}${OSC133_ZONE_FINAL}${finalWrappedLines[lastIndex]}`;
+        }
         return [
             ...prefixLines,
-            topBorder,
             wrapLine(""),
-            ...finalLines.map(wrapLine),
+            ...finalWrappedLines,
             wrapLine(""),
-            completedBottomBorder,
         ];
     };
 
