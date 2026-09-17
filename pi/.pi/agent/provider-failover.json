@@ -3,12 +3,6 @@
   "autoContinue": true,
   "autoDiscover": true,
   "autoDiscoverModels": true,
-  "maxAccountsPerProvider": 10,
-  "includeQwen": true,
-  "qwenProvider": "alibaba",
-  "includeOllama": true,
-  "includeOtherProviders": true,
-  "includeCursor": true,
   "childProxy": true,
   "neverFailoverProviders": [],
   "providerOrder": [
