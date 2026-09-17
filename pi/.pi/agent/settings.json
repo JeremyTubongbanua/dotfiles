@@ -1,6 +1,6 @@
 {
   "lastChangelogVersion": "0.85.1",
-  "theme": "light/dark",
+  "theme": "catppuccin-latte/catppuccin-mocha",
   "packages": [
     "npm:@narumitw/pi-usage",
     "npm:pi-lens",
