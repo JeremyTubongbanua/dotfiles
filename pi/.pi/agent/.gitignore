@@ -4,7 +4,6 @@
 !.gitignore
 !AGENTS.md
 !keybindings.json
-!models.json
 !provider-failover.json
 !settings.json
 !extensions/
