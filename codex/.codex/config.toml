@@ -48,7 +48,6 @@ status_line = [
     "context-remaining",
     "five-hour-limit",
     "weekly-limit",
-    "used-tokens",
 ]
 
 [tui.model_availability_nux]
