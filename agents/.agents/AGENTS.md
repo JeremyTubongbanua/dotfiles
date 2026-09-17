@@ -2,11 +2,17 @@
 
 ## Non-Negotiables
 
-- **Commits are mine.** Never run `git add`, `git commit`, or `git push` unless I explicitly ask. Never push to branch `trunk` or push to upstream on my behalf.
+- **Git is mine** Never run `git add`, `git commit`, or `git push` unless I explicitly ask. Never push to branch `trunk` or push to upstream on my behalf.
 - **No PRs or tickets.** Never create or modify pull requests or tickets unless I explicitly ask.
 - **No documentation.** Never create or edit README files, guides, changelogs, API documentation, docstrings, or documentation comments unless I explicitly ask.
-- Never use em dashes in code, comments, documentation, or responses.
-- When you finish writing code, do a quick smoke test (analyze, lint, scan, and do a basic run)
+- **No em dashes** - in comments, code, documentation, or responses.
+
+## Nice to haves
+
+During a session, it would be nice if the agent did these things:
+
+- Before starting a task, take a couple of extra seconds to think about it, do web searches to expand your knowledge on the topic and get a true deep understanding of it.
+- When you finish writing code, do a quick smoke test (analyze, lint, scan, and do a basic run to ensure it builds)
 
 ## How to respond
 
