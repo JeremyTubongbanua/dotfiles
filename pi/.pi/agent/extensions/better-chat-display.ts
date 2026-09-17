@@ -94,10 +94,7 @@ const expandedOutput = (output: string, theme: { fg: (color: "toolOutput", text:
 };
 
 const toolText = (content: string): Text => {
-    const indented: string = content
-        ? content.split("\n").map((line: string): string => `    ${line}`).join("\n")
-        : "";
-    return new Text(indented, 0, 0);
+    return new Text(content, 0, 0);
 };
 
 const createTools = (cwd: string) => ({
