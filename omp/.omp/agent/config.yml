@@ -1,5 +1,5 @@
 modelRoles:
-  default: openai-codex/gpt-5.6-sol:xhigh
+  default: anthropic/claude-opus-4-6
   smol: openai-codex/gpt-5.6-luna:low
   plan: openai-codex/gpt-6-astra:xhigh
   slow: anthropic/claude-opus-4-6:high
@@ -56,3 +56,4 @@ statusLine:
   preset: default
   separator: pipe
   contextLine: percentage
+defaultThinkingLevel: auto
