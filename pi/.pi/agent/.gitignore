@@ -8,6 +8,8 @@
 !settings.json
 !extensions/
 !extensions/**
+!skills/
+!skills/**
 !prompts/
 !prompts/**
 !themes/
