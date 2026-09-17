@@ -35,6 +35,8 @@ brew "harfbuzz"
 brew "libtiff"
 # Interpreter for PostScript and PDF
 brew "ghostscript"
+# Quickly rewrite git repository history
+brew "git-filter-repo"
 # GNU Transport Layer Security (TLS) Library
 brew "gnutls"
 # Open source programming language to build simple/reliable/efficient software
@@ -43,6 +45,8 @@ brew "go"
 brew "herdr"
 # Tools and libraries to manipulate images in select formats
 brew "imagemagick"
+# Terminal Markdown previewer with a GUI-like experience
+brew "leaf-markdown-viewer"
 # Library for quantum-safe cryptography
 brew "liboqs"
 # Next-gen compiler infrastructure
