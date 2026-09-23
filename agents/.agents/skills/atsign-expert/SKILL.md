@@ -78,7 +78,7 @@ At each step, identify the sending process, receiving process, identity used, ke
 
 Use the environment that matches the task:
 
-- **Virtual environment (VE)**: pre-provisioned identities and reusable fixtures. Prefer it for fast local development when stable test identities are useful.
+- **Virtual environment (VE)**: pre-provisioned identities and reusable fixtures. Prefer it for fast local development when stable test identities are useful. A VE can run Atsign Server code from a local `at_server` working tree: `tools/build_virtual_environment/buildve.sh` compiles the local directory and secondary binaries into `at_virtual_env:local`. Rebuild after server changes. The `at_server` functional runner builds that image before testing; the `at_client_sdk` functional runner uses the existing image and does not rebuild it. Check the current scripts before relying on these defaults, and distinguish this VE image from the separate EE image.
 - **Ephemeral environment (EE)**: freshly generated identities and secrets. Prefer it for clean-room integration tests, CI, isolation, and custom deployment settings.
 
 Before starting either environment, verify its current setup guide, image tag, port mapping, DNS requirements, identity provisioning flow, and cleanup procedure. Do not copy historical values from memory.
