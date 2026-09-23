@@ -92,7 +92,7 @@ const getSelectorState = (selector: ModelSelectorComponent): SelectorState => {
     }
 
     const input: Input = selector.getSearchInput();
-    const state: SelectorState = { mode: "normal", label: new Text("", 0, 0) };
+    const state: SelectorState = { mode: "insert", label: new Text("", 0, 0) };
     const inputIndex: number = selector.children.indexOf(input);
     const labelIndex: number = inputIndex >= 0 ? inputIndex + 1 : selector.children.length;
     selector.children.splice(labelIndex, 0, state.label);
