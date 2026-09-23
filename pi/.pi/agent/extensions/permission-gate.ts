@@ -5,16 +5,48 @@
  * Patterns checked: rm -rf, sudo, chmod/chown 777
  */
 
-import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import type { ExtensionAPI, ExtensionCommandContext } from "@earendil-works/pi-coding-agent";
+import type { AutocompleteItem } from "@earendil-works/pi-tui";
 
-export default function (pi: ExtensionAPI) {
-	const dangerousPatterns = [/\brm\s+(-rf?|--recursive)/i, /\bsudo\b/i, /\b(chmod|chown)\b.*777/i];
+const DANGEROUS_PATTERNS: RegExp[] = [/\brm\s+(-rf?|--recursive)/i, /\bsudo\b/i, /\b(chmod|chown)\b.*777/i];
+
+const COMMAND_ARGS: string[] = ["on", "off", "status"];
+
+const permissionGate = (pi: ExtensionAPI): void => {
+	let enabled: boolean = true;
+
+	pi.registerCommand("permission-gate", {
+		description: "Toggle the dangerous bash command prompt (on, off, status)",
+		getArgumentCompletions: (prefix: string): AutocompleteItem[] | null => {
+			const items: AutocompleteItem[] = COMMAND_ARGS.filter((arg: string): boolean => {
+				return arg.startsWith(prefix.trim().toLowerCase());
+			}).map((arg: string): AutocompleteItem => {
+				return { value: arg, label: arg };
+			});
+			return items.length > 0 ? items : null;
+		},
+		handler: async (args: string, ctx: ExtensionCommandContext): Promise<void> => {
+			const requested: string = args.trim().toLowerCase();
+			if (requested === "on") {
+				enabled = true;
+			} else if (requested === "off") {
+				enabled = false;
+			} else if (requested === "") {
+				enabled = !enabled;
+			} else if (requested !== "status") {
+				ctx.ui.notify(`Unknown argument "${requested}". Use on, off, or status.`, "error");
+				return;
+			}
+			ctx.ui.notify(`Permission gate is ${enabled ? "on" : "off"}`, enabled ? "info" : "warning");
+		},
+	});
 
 	pi.on("tool_call", async (event, ctx) => {
+		if (!enabled) return undefined;
 		if (event.toolName !== "bash") return undefined;
 
-		const command = event.input.command as string;
-		const isDangerous = dangerousPatterns.some((p) => p.test(command));
+		const command: string = event.input.command as string;
+		const isDangerous: boolean = DANGEROUS_PATTERNS.some((p: RegExp): boolean => p.test(command));
 
 		if (isDangerous) {
 			if (!ctx.hasUI) {
@@ -37,4 +69,6 @@ export default function (pi: ExtensionAPI) {
 
 		return undefined;
 	});
-}
+};
+
+export default permissionGate;
