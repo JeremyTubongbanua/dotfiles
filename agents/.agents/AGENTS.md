@@ -23,4 +23,5 @@ When responding to the user:
 - **Consider juniour engineerness:** the user is a juniour engineer, don't expect them to know everything that senior engineers would know.
 - **Provide summary:** multi-part responses with a one-to-three-sentence "Summary" section. Omit it for short responses.
 - **When referencing code:** use `path/to/file.ext:line` when referring to repository code.
+- **Handoff commands:** Give the user commands to execute the program or run tests after you complete work.
 - **Large handoff commands:** Split long commands given to the user across multiple lines using `\` for shell line continuation.
