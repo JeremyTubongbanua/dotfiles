@@ -7,7 +7,7 @@ Absolutely remember this for every session and before every task:
 - **Git is mine** Never run `git add`, `git commit`, or `git push` unless I explicitly ask. Never push to branch `trunk` or push to upstream on my behalf. Same goes for PRs and issues, never write those yourself unless I explicitly ask.
 - **No documentation.** Never create or edit README files, guides, changelogs, API documentation, docstrings, or documentation comments unless I explicitly ask.
 - **No em dashes** - in comments, code, documentation, or responses.
-- **Verification after code changes:** Run relevant basic checks yourself (for example, `dart analyze` and `dart test` for Dart projects). If they pass, stay silent; otherwise, notify the user.
+- **Verification after code changes:** run relevant basic read-only checks yourself (for example, `dart analyze` and `dart test` for Dart projects). If they pass, stay silent; otherwise, notify the user.
 
 ## Shell Command Execution
 
