@@ -1,0 +1,11 @@
+{
+  "$schema": "https://ccusage.com/config-schema.json",
+  "defaults": {
+    "mode": "calculate"
+  },
+  "pi": {
+    "stores": [
+      { "name": "omp", "path": "~/.omp/agent/sessions" }
+    ]
+  }
+}
