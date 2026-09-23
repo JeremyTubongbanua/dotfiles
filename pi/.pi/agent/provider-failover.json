@@ -7,17 +7,11 @@
   "neverFailoverProviders": [],
   "providerOrder": [
     "anthropic",
-    "openai-codex",
-    "cursor",
-    "qwen",
-    "ollama"
+    "openai-codex"
   ],
   "providerPriority": [
     "anthropic",
-    "openai-codex",
-    "cursor",
-    "qwen",
-    "ollama"
+    "openai-codex"
   ],
   "cooldownMs": 21600000,
   "probeCooldownMs": 300000,
