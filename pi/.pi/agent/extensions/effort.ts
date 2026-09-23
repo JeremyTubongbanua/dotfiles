@@ -1,6 +1,11 @@
 import { getSupportedThinkingLevels } from "@earendil-works/pi-ai";
-import type { ExtensionAPI, ExtensionCommandContext } from "@earendil-works/pi-coding-agent";
-import type { AutocompleteItem } from "@earendil-works/pi-tui";
+import {
+	ThinkingSelectorComponent,
+	type ExtensionAPI,
+	type ExtensionCommandContext,
+	type Theme,
+} from "@earendil-works/pi-coding-agent";
+import type { AutocompleteItem, KeybindingsManager, TUI } from "@earendil-works/pi-tui";
 
 type ThinkingLevel = ReturnType<ExtensionAPI["getThinkingLevel"]>;
 
@@ -11,6 +16,35 @@ const getAvailableLevels = (ctx: ExtensionCommandContext | undefined): ThinkingL
 		return ALL_LEVELS;
 	}
 	return getSupportedThinkingLevels(ctx.model) as ThinkingLevel[];
+};
+
+const pickLevel = (
+	ctx: ExtensionCommandContext,
+	current: ThinkingLevel,
+	availableLevels: ThinkingLevel[],
+): Promise<ThinkingLevel | undefined> => {
+	return ctx.ui.custom<ThinkingLevel | undefined>(
+		(
+			_tui: TUI,
+			_theme: Theme,
+			_keybindings: KeybindingsManager,
+			done: (result: ThinkingLevel | undefined) => void,
+		): ThinkingSelectorComponent => {
+			return new ThinkingSelectorComponent(
+				current,
+				availableLevels,
+				(level: ThinkingLevel): void => {
+					done(level);
+				},
+				(): void => {
+					done(undefined);
+				},
+				(): void => {
+					ctx.ui.notify("Use /thinking to save a default thinking level.", "info");
+				},
+			);
+		},
+	);
 };
 
 const effortExtension = (pi: ExtensionAPI): void => {
@@ -28,15 +62,11 @@ const effortExtension = (pi: ExtensionAPI): void => {
 			const availableLevels: ThinkingLevel[] = getAvailableLevels(ctx);
 			let requested: string | undefined = args.trim().toLowerCase();
 			if (!requested) {
-				const current: ThinkingLevel = pi.getThinkingLevel();
-				const options: string[] = availableLevels.map((level: ThinkingLevel): string => {
-					return level === current ? `${level} (current)` : level;
-				});
-				const choice: string | undefined = await ctx.ui.select("Thinking level", options);
+				const choice: ThinkingLevel | undefined = await pickLevel(ctx, pi.getThinkingLevel(), availableLevels);
 				if (!choice) {
 					return;
 				}
-				requested = choice.replace(" (current)", "");
+				requested = choice;
 			}
 			const level: ThinkingLevel | undefined = availableLevels.find((candidate: ThinkingLevel): boolean => {
 				return candidate === requested;
