@@ -25,13 +25,13 @@
     "anthropicExtraUsage": false
   },
   "enabledModels": [
-    "openai-codex/gpt-5.6-sol",
-    "openai-codex-account-2/gpt-5.6-sol",
     "openai-codex/gpt-6-astra",
     "openai-codex-account-2/gpt-6-astra",
     "anthropic/claude-opus-5-5",
-    "anthropic/claude-sonnet-5"
+    "anthropic/claude-sonnet-5",
+    "openai-codex/gpt-6-sol",
+    "openai-codex-account-2/gpt-6-sol"
   ],
-  "defaultProvider": "anthropic",
-  "defaultModel": "claude-opus-5-5"
+  "defaultProvider": "openai-codex-account-2",
+  "defaultModel": "gpt-6-sol"
 }
