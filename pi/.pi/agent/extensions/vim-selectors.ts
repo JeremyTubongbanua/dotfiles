@@ -131,10 +131,18 @@ const placeLabelAfter = (container: Container, anchor: Component | undefined, la
     container.children.splice(labelIndex, 0, label);
 };
 
-const placeLabelAfterSearchInput = (component: SelectorComponent, label: Text): void => {
-    if (component instanceof Container) {
-        placeLabelAfter(component, getOwnedSearchInput(component), label);
+const appendLabelToInput = (input: Input | undefined, label: Text): void => {
+    if (!input) {
+        return;
     }
+    const renderInput: (width: number) => string[] = input.render;
+    input.render = (width: number): string[] => {
+        return [...renderInput.call(input, width), ...label.render(width)];
+    };
+};
+
+const placeLabelAfterSearchInput = (component: SelectorComponent, label: Text): void => {
+    appendLabelToInput(getOwnedSearchInput(component), label);
 };
 
 const MODEL_SELECTOR_TARGET: VimTarget = {
@@ -226,14 +234,7 @@ const SESSION_SELECTOR_TARGET: VimTarget = {
     },
     getInput: getSessionSearchInput,
     placeLabel: (component: SelectorComponent, label: Text): void => {
-        const input: Input | undefined = getSessionSearchInput(component);
-        if (!input) {
-            return;
-        }
-        const renderInput: (width: number) => string[] = input.render;
-        input.render = (width: number): string[] => {
-            return [...renderInput.call(input, width), ...label.render(width)];
-        };
+        appendLabelToInput(getSessionSearchInput(component), label);
     },
 };
 
