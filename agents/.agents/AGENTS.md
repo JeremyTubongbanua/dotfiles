@@ -13,7 +13,6 @@ Absolutely remember this for every session and before every task:
 When agent is executing commands autonomously:
 
 - **Agent-executed commands:** Run one command per shell call. Do not combine commands with `;` or `&&`. Pipelines are allowed.
-- **Concurrent processes:** When a workflow requires multiple processes, run them in `tmux`, provide commands to stop every session, and keep test environments ephemeral, including `docker run --rm`.
 
 ## How to respond
 
