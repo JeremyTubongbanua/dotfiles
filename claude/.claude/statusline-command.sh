@@ -41,8 +41,8 @@ if [ "$(( now_epoch - mtime_epoch ))" -ge "$refresh_ttl" ]; then
   # Detached background refresh; current render does not wait on it.
   (
     tmp="$cache_file.$$"
-    val=$(CLAUDE_CONFIG_DIR="$config_dir" npx ccusage@latest daily --json 2>/dev/null \
-      | jq -r --arg day "$today" '.daily[] | select(.period == $day) | .totalCost' 2>/dev/null)
+    val=$(CLAUDE_CONFIG_DIR="$config_dir" npx ccusage@latest claude daily --json 2>/dev/null \
+      | jq -r --arg day "$today" '[.daily[] | select(.date == $day) | .totalCost] | add // 0' 2>/dev/null)
     [ -n "$val" ] && printf '%s' "$val" > "$tmp" && mv "$tmp" "$cache_file"
   ) >/dev/null 2>&1 &
 fi
