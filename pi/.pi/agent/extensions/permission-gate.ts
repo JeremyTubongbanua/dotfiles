@@ -22,7 +22,13 @@ export default function (pi: ExtensionAPI) {
 				return { block: true, reason: "Dangerous command blocked (no UI for confirmation)" };
 			}
 
-			const choice = await ctx.ui.select(`⚠️ Dangerous command:\n\n  ${command}\n\nAllow?`, ["Yes", "No"]);
+			pi.events.emit("herdr:blocked", { active: true, label: "Waiting for permission to run a dangerous command" });
+			let choice: string | undefined;
+			try {
+				choice = await ctx.ui.select(`⚠️ Dangerous command:\n\n  ${command}\n\nAllow?`, ["Yes", "No"]);
+			} finally {
+				pi.events.emit("herdr:blocked", { active: false });
+			}
 
 			if (choice !== "Yes") {
 				return { block: true, reason: "Blocked by user" };
