@@ -8,7 +8,11 @@
     "npm:pi-multi-account",
     "npm:pi-tool-display@0.5.0",
     "npm:pi-web-access@0.29.0",
-    "npm:pi-btw"
+    "npm:pi-btw",
+    "git:github.com/badlogic/pi-skills"
+  ],
+  "skills": [
+    "./git/github.com/badlogic/pi-skills"
   ],
   "markdown": {
     "mermaid": "streaming"
@@ -21,12 +25,12 @@
     "anthropicExtraUsage": false
   },
   "enabledModels": [
-    "anthropic/claude-opus-4-6",
-    "anthropic/claude-sonnet-5",
     "openai-codex/gpt-5.6-sol",
     "openai-codex-account-2/gpt-5.6-sol",
-    "openai-codex/gpt-6-astra"
+    "openai-codex/gpt-6-astra",
+    "openai-codex-account-2/gpt-6-astra",
+    "anthropic/claude-opus-5-5"
   ],
-  "defaultProvider": "openai-codex-account-2",
-  "defaultModel": "gpt-5.6-sol"
+  "defaultProvider": "anthropic",
+  "defaultModel": "claude-opus-5-5"
 }
