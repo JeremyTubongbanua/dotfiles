@@ -29,7 +29,8 @@
     "openai-codex-account-2/gpt-5.6-sol",
     "openai-codex/gpt-6-astra",
     "openai-codex-account-2/gpt-6-astra",
-    "anthropic/claude-opus-5-5"
+    "anthropic/claude-opus-5-5",
+    "anthropic/claude-sonnet-5"
   ],
   "defaultProvider": "anthropic",
   "defaultModel": "claude-opus-5-5"
