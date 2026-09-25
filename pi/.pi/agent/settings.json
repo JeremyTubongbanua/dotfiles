@@ -18,7 +18,7 @@
   "markdown": {
     "mermaid": "streaming"
   },
-  "tuiMode": "regular",
+  "tuiMode": "fullscreen",
   "treeFilterMode": "no-tools",
   "doubleEscapeAction": "tree",
   "hideThinkingBlock": true,
