@@ -28,6 +28,9 @@ import {
 const ORIGINALS_KEY: unique symbol = Symbol.for("dotfiles.pi.vim-selectors.originals");
 const ADD_CHILD_KEY: unique symbol = Symbol.for("dotfiles.pi.vim-selectors.add-child");
 const REGISTRY_KEY: unique symbol = Symbol.for("dotfiles.pi.vim-selectors.registry");
+const CUSTOM_KEY: unique symbol = Symbol.for("dotfiles.pi.vim-selectors.custom");
+const ASK_USER_BLOCKED_EVENT: string = "rpiv:ask-user:blocked";
+const PI_TUI_KIT_SCREEN_KEY: string = "__piTuiKitScreen";
 const SCOPED_MODELS_SELECTOR_NAME: string = "ScopedModelsSelectorComponent";
 const TREE_SEARCH_LINE_NAME: string = "SearchLine";
 const DOWN_KEY: string = "\x1b[B";
@@ -92,6 +95,15 @@ type PatchRegistry = {
     [REGISTRY_KEY]?: Set<PatchablePrototype>;
 };
 
+type CustomMethod = ExtensionUIContext["custom"];
+type CustomFactory = Parameters<CustomMethod>[0];
+type CustomOptions = Parameters<CustomMethod>[1];
+type CustomComponent = Awaited<ReturnType<CustomFactory>>;
+
+type PatchableUi = ExtensionUIContext & {
+    [CUSTOM_KEY]?: CustomMethod;
+};
+
 // SAFETY: ModelSelectorComponent owns handleInput and inherits render from Container.
 const modelSelectorPrototype: PatchablePrototype = ModelSelectorComponent.prototype as unknown as PatchablePrototype;
 // SAFETY: TreeSelectorComponent owns handleInput and inherits render from Container.
@@ -107,6 +119,7 @@ const containerPrototype: PatchableContainerPrototype = Container.prototype as u
 
 const selectorStates: WeakMap<SelectorComponent, SelectorState> = new WeakMap<SelectorComponent, SelectorState>();
 let activeUi: ExtensionUIContext | undefined;
+let isAskUserBlocked: boolean = false;
 
 const getRegistry = (): Set<PatchablePrototype> => {
     // SAFETY: globalThis survives extension reloads, so a reloaded module can restore earlier patches.
@@ -421,6 +434,69 @@ const patchAddChild = (): void => {
     };
 };
 
+const addListKeys = (component: CustomComponent): CustomComponent => {
+    const handleInput: ((data: string) => void) | undefined = component.handleInput?.bind(component);
+    if (!handleInput) {
+        return component;
+    }
+    const render: (width: number) => string[] = component.render.bind(component);
+    let isTyping: boolean = false;
+    component.render = (width: number): string[] => {
+        const lines: string[] = render(width);
+        isTyping = lines.some((line: string): boolean => {
+            return line.includes(CURSOR_MARKER);
+        });
+        return lines;
+    };
+    component.handleInput = (data: string): void => {
+        if (!isTyping && matchesKey(data, "j")) {
+            handleInput(DOWN_KEY);
+            return;
+        }
+        if (!isTyping && matchesKey(data, "k")) {
+            handleInput(UP_KEY);
+            return;
+        }
+        handleInput(data);
+    };
+    return component;
+};
+
+const isPiTuiKitScreen = (component: CustomComponent): boolean => {
+    // SAFETY: pi-tui-kit marks its menu screens with a non-enumerable boolean property.
+    return (component as unknown as Record<string, unknown>)[PI_TUI_KIT_SCREEN_KEY] === true;
+};
+
+const restoreCustom = (ui: ExtensionUIContext): void => {
+    const patchable: PatchableUi = ui as PatchableUi;
+    const original: CustomMethod | undefined = patchable[CUSTOM_KEY];
+    if (!original) {
+        return;
+    }
+    patchable.custom = original;
+    Reflect.deleteProperty(patchable, CUSTOM_KEY);
+};
+
+const patchCustom = (ui: ExtensionUIContext): void => {
+    restoreCustom(ui);
+    const patchable: PatchableUi = ui as PatchableUi;
+    const original: CustomMethod = patchable.custom;
+    patchable[CUSTOM_KEY] = original;
+    const custom = (factory: CustomFactory, options?: CustomOptions): Promise<unknown> => {
+        const isQuestionnaire: boolean = isAskUserBlocked;
+        const decorate = (component: CustomComponent): CustomComponent => {
+            return isQuestionnaire || isPiTuiKitScreen(component) ? addListKeys(component) : component;
+        };
+        const wrappedFactory: CustomFactory = (...args: Parameters<CustomFactory>): ReturnType<CustomFactory> => {
+            const result: ReturnType<CustomFactory> = factory(...args);
+            return result instanceof Promise ? result.then(decorate) : decorate(result);
+        };
+        return original.call(ui, wrappedFactory, options);
+    };
+    // SAFETY: the wrapper forwards the caller's factory and options unchanged, so its result type matches.
+    patchable.custom = custom as CustomMethod;
+};
+
 const restoreSelectors = (): void => {
     const registry: Set<PatchablePrototype> = getRegistry();
     for (const prototype of registry) {
@@ -428,6 +504,9 @@ const restoreSelectors = (): void => {
     }
     registry.clear();
     restoreAddChild();
+    if (activeUi) {
+        restoreCustom(activeUi);
+    }
 };
 
 const patchSelectors = (): void => {
@@ -438,13 +517,22 @@ const patchSelectors = (): void => {
     patchPrototype(sessionSelectorPrototype, SESSION_SELECTOR_TARGET);
     patchPrototype(thinkingSelectorPrototype, THINKING_SELECTOR_TARGET);
     patchAddChild();
+    if (activeUi) {
+        patchCustom(activeUi);
+    }
 };
 
 const vimSelectors = (pi: ExtensionAPI): void => {
+    pi.events.on(ASK_USER_BLOCKED_EVENT, (data: unknown): void => {
+        // SAFETY: rpiv-ask-user-question documents this payload as { active: boolean }.
+        isAskUserBlocked = (data as { active?: unknown } | undefined)?.active === true;
+    });
+
     pi.on("session_start", (_event: SessionStartEvent, ctx: ExtensionContext): void => {
         if (ctx.mode !== "tui") {
             return;
         }
+        restoreSelectors();
         activeUi = ctx.ui;
         patchSelectors();
     });
