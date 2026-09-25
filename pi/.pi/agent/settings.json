@@ -6,14 +6,11 @@
     "npm:pi-lens",
     "npm:pi-mcp-adapter",
     "npm:pi-multi-account",
-    "npm:pi-tool-display@0.5.0",
     "npm:pi-web-access@0.29.0",
     "npm:pi-btw",
-    "git:github.com/badlogic/pi-skills",
-    "npm:pi-subagents"
-  ],
-  "skills": [
-    "./git/github.com/badlogic/pi-skills"
+    "npm:pi-subagents",
+    "npm:pi-tool-display@0.5.0",
+    "npm:@juicesharp/rpiv-ask-user-question"
   ],
   "markdown": {
     "mermaid": "streaming"
@@ -28,10 +25,9 @@
   "enabledModels": [
     "openai-codex/gpt-6-astra",
     "openai-codex-account-2/gpt-6-astra",
-    "anthropic/claude-opus-5-5",
-    "anthropic/claude-sonnet-5",
     "openai-codex/gpt-6-sol",
-    "openai-codex-account-2/gpt-6-sol"
+    "openai-codex-account-2/gpt-6-sol",
+    "anthropic/claude-opus-5-5"
   ],
   "defaultProvider": "openai-codex-account-2",
   "defaultModel": "gpt-6-sol"
