@@ -38,9 +38,7 @@ ssh() {
 }
 
 # Aliases
-alias python='python3'
-alias pip='pip3'
-alias h='herdr'
+alias pi='pi update --extensions && pi'
 alias ccusage='CLAUDE_CONFIG_DIR="$HOME/.claude,$HOME/.claude-work" CODEX_HOME="$HOME/.codex,$HOME/.codex-jl" ccusage' # tracks all claude and codex accounts
 
 bindkey -M viins '^[b' backward-word
