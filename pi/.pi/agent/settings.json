@@ -9,7 +9,8 @@
     "npm:pi-tool-display@0.5.0",
     "npm:pi-web-access@0.29.0",
     "npm:pi-btw",
-    "git:github.com/badlogic/pi-skills"
+    "git:github.com/badlogic/pi-skills",
+    "npm:pi-subagents"
   ],
   "skills": [
     "./git/github.com/badlogic/pi-skills"
