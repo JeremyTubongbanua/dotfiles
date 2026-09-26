@@ -126,7 +126,20 @@
     ]
   },
   "model": "claude-opus-4-6",
-  "hooks": {"SessionStart":[{"matcher":"*","hooks":[{"type":"command","command":"bash '/Users/jeremytubongbanua/.claude/hooks/herdr-agent-state.sh' session","timeout":10}]}]},
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/Users/jeremytubongbanua/.claude/hooks/herdr-agent-state.sh' session",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
   "statusLine": {
     "type": "command",
     "command": "bash /Users/jeremytubongbanua/.claude/statusline-command.sh"
@@ -144,11 +157,11 @@
     }
   },
   "effortLevel": "high",
-  "theme": "auto",
-  "editorMode": "normal",
   "modelSettings": {
     "claude-opus-4-6": {
       "effortLevel": "high"
     }
-  }
+  },
+  "theme": "auto",
+  "editorMode": "normal"
 }
