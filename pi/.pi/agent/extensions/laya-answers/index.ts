@@ -5,10 +5,6 @@ const STATE_TYPE: string = "laya-answers-state";
 const layaAnswers = (pi: ExtensionAPI): void => {
     let enabled: boolean = true;
 
-    const updateStatus = (ctx: ExtensionContext): void => {
-        ctx.ui.setStatus("laya-answers", enabled ? "Laya answers on" : undefined);
-    };
-
     pi.registerCommand("laya-answers", {
         description: "Toggle Laya suggestions for structured questions (on/off/status)",
         handler: async (args: string, ctx: ExtensionContext): Promise<void> => {
@@ -24,7 +20,6 @@ const layaAnswers = (pi: ExtensionAPI): void => {
 
             enabled = action === "" ? !enabled : action === "on";
             pi.appendEntry(STATE_TYPE, { enabled });
-            updateStatus(ctx);
             ctx.ui.notify(`Laya answers ${enabled ? "on" : "off"}.`);
         },
     });
@@ -36,7 +31,7 @@ const layaAnswers = (pi: ExtensionAPI): void => {
         const hasSavedState: boolean = entry?.type === "custom" && entry.data !== null
             && typeof entry.data === "object" && "enabled" in entry.data;
         enabled = hasSavedState ? (entry?.data as { enabled: unknown }).enabled === true : true;
-        updateStatus(ctx);
+        ctx.ui.setStatus("laya-answers", undefined);
     });
 
     pi.on("before_agent_start", () => {
