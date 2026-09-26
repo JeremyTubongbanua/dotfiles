@@ -6,11 +6,13 @@
   "childProxy": true,
   "neverFailoverProviders": [],
   "providerOrder": [
-    "anthropic",
+    "claude-bridge",
+    "openai-codex-account-2",
     "openai-codex"
   ],
   "providerPriority": [
-    "anthropic",
+    "claude-bridge",
+    "openai-codex-account-2",
     "openai-codex"
   ],
   "cooldownMs": 21600000,
@@ -72,7 +74,10 @@
     "no api key",
     "missing api key",
     "revoked",
-    "oauth token"
+    "oauth token",
+    "failed to authenticate",
+    "oauth session expired",
+    "could not be refreshed"
   ],
   "transientErrorPatterns": [
     "408",
@@ -94,6 +99,7 @@
     "connection reset",
     "econnreset",
     "econnrefused",
+    "connection error",
     "enetunreach",
     "fetch failed",
     "network error",
