@@ -11,7 +11,7 @@ Absolutely remember this for every session and before every task:
 - **Use herdr tabs when:**
   - running a local server
   - using subagents
-  - runnng Docker containers with docker logs tailing
+  - run Docker containers, Ctrl+C will close the container and delete it; unless otherwise stated
 
 ## Shell Command Execution
 
