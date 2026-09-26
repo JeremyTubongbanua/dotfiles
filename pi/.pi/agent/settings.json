@@ -30,8 +30,8 @@
     "openai-codex-account-2/gpt-6-sol",
     "openai-codex/gpt-6-luna",
     "openai-codex-account-2/gpt-6-luna",
-    "anthropic/claude-opus-5-5",
-    "anthropic/claude-sonnet-5"
+    "claude-bridge/claude-sonnet-5",
+    "claude-bridge/claude-opus-5-5"
   ],
   "defaultProvider": "openai-codex-account-2",
   "defaultModel": "gpt-6-sol",
