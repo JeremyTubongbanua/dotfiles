@@ -10,7 +10,9 @@
     "npm:pi-btw",
     "npm:pi-subagents",
     "npm:pi-tool-display@0.5.0",
-    "npm:@juicesharp/rpiv-ask-user-question"
+    "npm:@juicesharp/rpiv-ask-user-question",
+    "npm:pi-claude-bridge",
+    "npm:@y0usaf/pi-jev"
   ],
   "markdown": {
     "mermaid": "streaming"
@@ -27,8 +29,13 @@
     "openai-codex-account-2/gpt-6-astra",
     "openai-codex/gpt-6-sol",
     "openai-codex-account-2/gpt-6-sol",
-    "anthropic/claude-opus-5-5"
+    "anthropic/claude-opus-5-5",
+    "openai-codex-account-2/gpt-6-luna",
+    "openai-codex/gpt-6-luna"
   ],
   "defaultProvider": "openai-codex-account-2",
-  "defaultModel": "gpt-6-sol"
+  "defaultModel": "gpt-6-sol",
+  "skills": [
+    "-/Users/jeremytubongbanua/.agents/skills/agent-browser"
+  ]
 }
