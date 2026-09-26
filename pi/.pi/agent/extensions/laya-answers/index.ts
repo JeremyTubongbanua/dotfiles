@@ -3,7 +3,7 @@ import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-a
 const STATE_TYPE: string = "laya-answers-state";
 
 const layaAnswers = (pi: ExtensionAPI): void => {
-    let enabled: boolean = false;
+    let enabled: boolean = true;
 
     const updateStatus = (ctx: ExtensionContext): void => {
         ctx.ui.setStatus("laya-answers", enabled ? "Laya answers on" : undefined);
@@ -33,9 +33,9 @@ const layaAnswers = (pi: ExtensionAPI): void => {
         const entry = ctx.sessionManager.getBranch()
             .filter((item) => item.type === "custom" && item.customType === STATE_TYPE)
             .pop();
-        enabled = entry?.type === "custom" && entry.data !== null
-            && typeof entry.data === "object" && "enabled" in entry.data
-            && entry.data.enabled === true;
+        const hasSavedState: boolean = entry?.type === "custom" && entry.data !== null
+            && typeof entry.data === "object" && "enabled" in entry.data;
+        enabled = hasSavedState ? (entry?.data as { enabled: unknown }).enabled === true : true;
         updateStatus(ctx);
     });
 
