@@ -8,6 +8,10 @@ Absolutely remember this for every session and before every task:
 - **No documentation.** Never create or edit README files, guides, changelogs, API documentation, docstrings, or documentation comments unless I explicitly ask.
 - **No em dashes** - in comments, code, documentation, or responses.
 - **Verification after code changes:** run relevant basic read-only checks yourself (for example, `dart analyze` and `dart test` for Dart projects). If they pass, stay silent; otherwise, notify the user.
+- **Use herdr tabs when:**
+  - running a local server
+  - using subagents
+  - runnng Docker containers with docker logs tailing
 
 ## Shell Command Execution
 
