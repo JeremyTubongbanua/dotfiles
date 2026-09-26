@@ -9,7 +9,6 @@
     "npm:pi-web-access@0.29.0",
     "npm:pi-btw",
     "npm:pi-subagents",
-    "npm:pi-tool-display@0.5.0",
     "npm:@juicesharp/rpiv-ask-user-question",
     "npm:pi-claude-bridge"
   ],
