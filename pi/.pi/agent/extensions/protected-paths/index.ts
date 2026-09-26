@@ -5,7 +5,10 @@
  * Useful for preventing accidental modifications to sensitive files.
  */
 
+import { basename } from "node:path";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+
+const ALLOWED_FILE_NAMES: string[] = [".env.template"];
 
 export default function (pi: ExtensionAPI) {
 	const protectedPaths = [".env", ".git/", "node_modules/"];
@@ -16,7 +19,8 @@ export default function (pi: ExtensionAPI) {
 		}
 
 		const path = event.input.path as string;
-		const isProtected = protectedPaths.some((p) => path.includes(p));
+		const isAllowed: boolean = ALLOWED_FILE_NAMES.includes(basename(path));
+		const isProtected = !isAllowed && protectedPaths.some((p) => path.includes(p));
 
 		if (isProtected) {
 			if (ctx.hasUI) {
