@@ -11,8 +11,7 @@
     "npm:pi-subagents",
     "npm:pi-tool-display@0.5.0",
     "npm:@juicesharp/rpiv-ask-user-question",
-    "npm:pi-claude-bridge",
-    "npm:@y0usaf/pi-jev"
+    "npm:pi-claude-bridge"
   ],
   "markdown": {
     "mermaid": "streaming"
@@ -29,9 +28,10 @@
     "openai-codex-account-2/gpt-6-astra",
     "openai-codex/gpt-6-sol",
     "openai-codex-account-2/gpt-6-sol",
-    "anthropic/claude-opus-5-5",
+    "openai-codex/gpt-6-luna",
     "openai-codex-account-2/gpt-6-luna",
-    "openai-codex/gpt-6-luna"
+    "anthropic/claude-opus-5-5",
+    "anthropic/claude-sonnet-5"
   ],
   "defaultProvider": "openai-codex-account-2",
   "defaultModel": "gpt-6-sol",
