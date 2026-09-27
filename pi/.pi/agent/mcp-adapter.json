@@ -1,0 +1,23 @@
+{
+  "settings": {
+    "mcpFooterStatus": "compact",
+    "showStatusIcon": false
+  },
+  "mcpServers": {
+    "figma": {
+      "url": "https://mcp.figma.com/mcp",
+      "auth": "oauth",
+      "oauth": {
+        "clientName": "Codex",
+        "scope": "mcp:connect"
+      }
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest",
+        "--cdp-endpoint=chrome"
+      ]
+    }
+  }
+}

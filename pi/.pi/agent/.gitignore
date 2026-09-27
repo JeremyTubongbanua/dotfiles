@@ -4,6 +4,7 @@
 !.gitignore
 !AGENTS.md
 !keybindings.json
+!mcp-adapter.json
 !provider-failover.json
 !settings.json
 !extensions/
