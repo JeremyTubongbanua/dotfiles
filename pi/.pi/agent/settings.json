@@ -18,7 +18,7 @@
   "tuiMode": "fullscreen",
   "treeFilterMode": "no-tools",
   "doubleEscapeAction": "tree",
-  "hideThinkingBlock": true,
+  "hideThinkingBlock": false,
   "warnings": {
     "anthropicExtraUsage": false
   },
