@@ -9,6 +9,8 @@
 !settings.json
 !extensions/
 !extensions/**
+!opt-extensions/
+!opt-extensions/**
 !prompts/
 !prompts/**
 !themes/
