@@ -1,5 +1,8 @@
 {
   "widget": {
     "visible": false
+  },
+  "autofix": {
+    "enabled": false
   }
 }
