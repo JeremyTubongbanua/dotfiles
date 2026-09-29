@@ -36,6 +36,7 @@ const TREE_SEARCH_LINE_NAME: string = "SearchLine";
 const DOWN_KEY: string = "\x1b[B";
 const UP_KEY: string = "\x1b[A";
 const ENTER_KEY: string = "\r";
+const CTRL_D_KEY: string = "\x04";
 const PASTE_START: string = "\x1b[200~";
 const REVERSE_VIDEO_PATTERN: RegExp = /\x1b\[(?:7|27)m/g;
 
@@ -56,6 +57,7 @@ type VimMode = "normal" | "insert";
 type SelectorState = {
     mode: VimMode;
     label: Text;
+    pendingKey?: string;
 };
 
 type SelectorComponent = Component & Record<string, unknown>;
@@ -64,6 +66,7 @@ type VimTarget = {
     normalHelp: string;
     normalBindings: readonly Keybinding[];
     normalRemaps: Readonly<Record<string, string>>;
+    normalSequences: Readonly<Record<string, string>>;
     isActive: (component: SelectorComponent) => boolean;
     getInput: (component: SelectorComponent) => Input | undefined;
     placeLabel: (component: SelectorComponent, label: Text) => void;
@@ -162,6 +165,7 @@ const MODEL_SELECTOR_TARGET: VimTarget = {
     normalHelp: "j/k move · i search · enter select · esc cancel",
     normalBindings: [],
     normalRemaps: {},
+    normalSequences: {},
     isActive: (): boolean => {
         return true;
     },
@@ -173,6 +177,7 @@ const THINKING_SELECTOR_TARGET: VimTarget = {
     normalHelp: "j/k move \u00b7 i search \u00b7 enter select \u00b7 esc cancel",
     normalBindings: [],
     normalRemaps: {},
+    normalSequences: {},
     isActive: (): boolean => {
         return true;
     },
@@ -184,6 +189,7 @@ const SCOPED_MODELS_TARGET: VimTarget = {
     normalHelp: "j/k move · i search · enter toggle · esc cancel",
     normalBindings: [],
     normalRemaps: {},
+    normalSequences: {},
     isActive: (): boolean => {
         return true;
     },
@@ -195,6 +201,7 @@ const TREE_SELECTOR_TARGET: VimTarget = {
     normalHelp: "j/k move · i search · enter select · esc clear search or cancel",
     normalBindings: ["app.tree.editLabel", "app.tree.toggleLabelTimestamp"],
     normalRemaps: {},
+    normalSequences: {},
     isActive: (component: SelectorComponent): boolean => {
         return readField<unknown>(component, "labelInput") == null;
     },
@@ -216,6 +223,7 @@ const SETTINGS_LIST_TARGET: VimTarget = {
     normalHelp: "j/k move · i search · enter/space change · esc cancel",
     normalBindings: [],
     normalRemaps: { " ": ENTER_KEY },
+    normalSequences: {},
     isActive: (component: SelectorComponent): boolean => {
         const searchEnabled: boolean = readField<boolean>(component, "searchEnabled") === true;
         return searchEnabled && readField<unknown>(component, "submenuComponent") == null;
@@ -237,9 +245,10 @@ const getSessionSearchInput = (component: SelectorComponent): Input | undefined 
 };
 
 const SESSION_SELECTOR_TARGET: VimTarget = {
-    normalHelp: "j/k move \u00b7 i search \u00b7 enter resume \u00b7 esc cancel",
-    normalBindings: ["app.session.deleteNoninvasive"],
+    normalHelp: "j/k move \u00b7 i search \u00b7 enter resume \u00b7 dd delete \u00b7 esc cancel",
+    normalBindings: ["app.session.delete", "app.session.deleteNoninvasive"],
     normalRemaps: {},
+    normalSequences: { dd: CTRL_D_KEY },
     isActive: (component: SelectorComponent): boolean => {
         const sessionList: SelectorComponent | undefined = getSessionList(component);
         const isConfirmingDelete: boolean = sessionList !== undefined && sessionList["confirmingDeletePath"] != null;
@@ -333,6 +342,23 @@ const createHandleInput = (original: InputHandler, target: VimTarget): InputHand
                 return;
             }
             original.call(this, data);
+            return;
+        }
+
+        const pendingKey: string | undefined = state.pendingKey;
+        state.pendingKey = undefined;
+        if (pendingKey !== undefined) {
+            const sequenced: string | undefined = target.normalSequences[pendingKey + data];
+            if (sequenced !== undefined) {
+                original.call(this, sequenced);
+                return;
+            }
+        }
+        const startsSequence: boolean = Object.keys(target.normalSequences).some((sequence: string): boolean => {
+            return sequence.length > data.length && sequence.startsWith(data);
+        });
+        if (startsSequence) {
+            state.pendingKey = data;
             return;
         }
 
