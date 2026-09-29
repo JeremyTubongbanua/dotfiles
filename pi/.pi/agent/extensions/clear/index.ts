@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { existsSync, writeFileSync } from "node:fs";
+import { writeFileSync } from "node:fs";
 import type {
 	ExtensionAPI,
 	ExtensionCommandContext,
@@ -24,7 +24,12 @@ const startBlankSession = async (ctx: ExtensionCommandContext, name: string | un
 	});
 };
 
-const truncateSessionFile = (sessionFile: string, header: SessionHeader, name: string): void => {
+const truncateSessionFile = (sessionFile: string, header: SessionHeader, name: string | undefined): void => {
+	if (!name) {
+		writeFileSync(sessionFile, `${JSON.stringify(header)}\n`);
+		return;
+	}
+
 	const nameEntry: SessionInfoEntry = {
 		type: "session_info",
 		id: randomUUID().slice(0, 8),
@@ -35,11 +40,11 @@ const truncateSessionFile = (sessionFile: string, header: SessionHeader, name: s
 	writeFileSync(sessionFile, `${JSON.stringify(header)}\n${JSON.stringify(nameEntry)}\n`);
 };
 
-const clearNamedSession = async (
+const clearCurrentSession = async (
 	ctx: ExtensionCommandContext,
 	sessionFile: string,
 	header: SessionHeader,
-	name: string,
+	name: string | undefined,
 ): Promise<void> => {
 	// Leave the session first so nothing still holds the old file while it is rewritten.
 	await ctx.newSession({
@@ -47,7 +52,7 @@ const clearNamedSession = async (
 			truncateSessionFile(sessionFile, header, name);
 			await blankContext.switchSession(sessionFile, {
 				withSession: async (clearedContext: ReplacedSessionContext): Promise<void> => {
-					clearedContext.ui.notify(`Cleared session "${name}"`, "info");
+					clearedContext.ui.notify(name ? `Cleared session "${name}"` : "Cleared session", "info");
 				},
 			});
 		},
@@ -56,21 +61,17 @@ const clearNamedSession = async (
 
 const clearExtension = (pi: ExtensionAPI): void => {
 	pi.registerCommand("clear", {
-		description: "Clear the current named session, or start a blank one",
+		description: "Clear context while keeping the current session",
 		handler: async (_args: string, ctx: ExtensionCommandContext): Promise<void> => {
 			await ctx.waitForIdle();
 			const name: string | undefined = ctx.sessionManager.getSessionName();
 			const sessionFile: string | undefined = ctx.sessionManager.getSessionFile();
 			const header: SessionHeader | null = ctx.sessionManager.getHeader();
-			if (!name) {
-				await startBlankSession(ctx, undefined);
-				return;
-			}
-			if (!sessionFile || !header || !existsSync(sessionFile)) {
+			if (!sessionFile || !header) {
 				await startBlankSession(ctx, name);
 				return;
 			}
-			await clearNamedSession(ctx, sessionFile, header, name);
+			await clearCurrentSession(ctx, sessionFile, header, name);
 		},
 	});
 };
