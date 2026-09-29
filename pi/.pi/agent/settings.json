@@ -29,19 +29,19 @@
     "openai-codex-account-2/gpt-6-sol",
     "openai-codex/gpt-6-luna",
     "openai-codex-account-2/gpt-6-luna",
-    "claude-bridge/claude-sonnet-5",
-    "claude-bridge/claude-opus-5-5"
+    "anthropic/claude-opus-5-5",
+    "anthropic/claude-sonnet-5"
   ],
-  "defaultProvider": "claude-bridge",
+  "defaultProvider": "anthropic",
   "defaultModel": "claude-opus-5-5",
   "skills": [
     "-/Users/jeremytubongbanua/.agents/skills/agent-browser"
   ],
   "defaultThinkingLevel": "xhigh",
   "modelThinkingLevels": {
-    "claude-bridge/claude-opus-5-5": "high",
-    "claude-bridge/claude-sonnet-5": "xhigh",
-    "openai-codex/gpt-6-sol": "xhigh",
-    "openai-codex-account-2/gpt-6-sol": "xhigh"
+    "anthropic/claude-opus-5-5": "high",
+    "anthropic/claude-sonnet-5": "xhigh",
+    "openai-codex-account-2/gpt-6-sol": "xhigh",
+    "openai-codex/gpt-6-sol": "xhigh"
   }
 }
