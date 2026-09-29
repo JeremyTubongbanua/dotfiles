@@ -1,0 +1,522 @@
+#!/usr/bin/env python3
+import argparse
+import base64
+import hashlib
+import json
+import math
+import os
+import select
+import shutil
+import signal
+import subprocess
+import sys
+import termios
+import threading
+import time
+import tty
+import urllib.error
+import urllib.request
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+
+HOME = Path.home()
+CACHE_DIR = HOME / ".cache" / "limits"
+API_INTERVAL_SECONDS = 300
+LOCAL_INTERVAL_SECONDS = 5
+STALE_SECONDS = 3600
+WINDOWS = ("5h", "7d")
+
+
+@dataclass
+class Account:
+    name: str
+    provider: str
+    home: Path
+
+
+ACCOUNTS = [
+    Account("claude-work", "claude", HOME / ".claude-work"),
+    Account("codex", "codex", HOME / ".codex"),
+    Account("codex-jl", "codex", HOME / ".codex-jl"),
+]
+
+
+@dataclass
+class Window:
+    used: float
+    resets_at: float | None
+
+
+@dataclass
+class Snapshot:
+    source: str
+    captured_at: float
+    windows: dict[str, Window]
+
+
+class FetchError(Exception):
+    pass
+
+
+def window_key(seconds: float | None) -> str | None:
+    if not seconds:
+        return None
+    if abs(seconds - 5 * 3600) <= 60:
+        return "5h"
+    if abs(seconds - 7 * 86400) <= 3600:
+        return "7d"
+    return None
+
+
+def parse_time(value) -> float | None:
+    if value is None:
+        return None
+    if isinstance(value, (int, float)):
+        return float(value)
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00")).timestamp()
+    except ValueError:
+        return None
+
+
+def fetch_json(url: str, headers: dict[str, str]) -> dict:
+    request = urllib.request.Request(url, headers={"Accept": "application/json", **headers})
+    with urllib.request.urlopen(request, timeout=15) as response:
+        return json.load(response)
+
+
+def jwt_expired(token: str) -> bool:
+    try:
+        payload = token.split(".")[1]
+        payload += "=" * (-len(payload) % 4)
+        return json.loads(base64.urlsafe_b64decode(payload))["exp"] <= time.time()
+    except (IndexError, ValueError, KeyError):
+        return False
+
+
+def claude_windows(limits: dict, percent_field: str) -> dict[str, Window]:
+    windows = {}
+    for key, field in (("5h", "five_hour"), ("7d", "seven_day")):
+        entry = limits.get(field)
+        if entry and entry.get(percent_field) is not None:
+            windows[key] = Window(float(entry[percent_field]), parse_time(entry.get("resets_at")))
+    return windows
+
+
+def claude_token(account: Account) -> str:
+    # Claude Code names the Keychain item after a hash of CLAUDE_CONFIG_DIR.
+    suffix = hashlib.sha256(str(account.home).encode()).hexdigest()[:8]
+    services = [f"Claude Code-credentials-{suffix}"]
+    if account.home == HOME / ".claude":
+        services.append("Claude Code-credentials")
+    blobs = []
+    for service in services:
+        result = subprocess.run(
+            ["security", "find-generic-password", "-s", service, "-w"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        if result.returncode == 0:
+            blobs.append(result.stdout)
+    credentials_file = account.home / ".credentials.json"
+    if credentials_file.exists():
+        blobs.append(credentials_file.read_text())
+    for blob in blobs:
+        try:
+            oauth = json.loads(blob)["claudeAiOauth"]
+        except (ValueError, KeyError):
+            continue
+        if oauth.get("expiresAt", math.inf) / 1000 <= time.time():
+            raise FetchError(f"token expired, run {account.name}")
+        return oauth["accessToken"]
+    raise FetchError("no token")
+
+
+def claude_api(account: Account) -> Snapshot:
+    data = fetch_json(
+        "https://api.anthropic.com/api/oauth/usage",
+        {
+            "Authorization": f"Bearer {claude_token(account)}",
+            "anthropic-beta": "oauth-2025-04-20",
+            "User-Agent": "claude-code",
+        },
+    )
+    return Snapshot("api", time.time(), claude_windows(data, "utilization"))
+
+
+def claude_local(account: Account) -> Snapshot | None:
+    path = CACHE_DIR / f"{account.home.name.lstrip('.')}.json"
+    if not path.exists():
+        return None
+    data = json.loads(path.read_text())
+    windows = claude_windows(data.get("rate_limits") or {}, "used_percentage")
+    return Snapshot("statusline", float(data["captured_at"]), windows)
+
+
+def codex_api(account: Account) -> Snapshot:
+    auth = json.loads((account.home / "auth.json").read_text())
+    tokens = auth.get("tokens") or {}
+    token = tokens.get("access_token")
+    if not token:
+        raise FetchError("no token")
+    if jwt_expired(token):
+        raise FetchError(f"token expired, run {account.name}")
+    headers = {"Authorization": f"Bearer {token}", "User-Agent": "codex-cli"}
+    if tokens.get("account_id"):
+        headers["ChatGPT-Account-Id"] = tokens["account_id"]
+    data = fetch_json("https://chatgpt.com/backend-api/wham/usage", headers)
+    windows = {}
+    rate_limit = data.get("rate_limit") or {}
+    for field in ("primary_window", "secondary_window"):
+        entry = rate_limit.get(field)
+        key = window_key(entry.get("limit_window_seconds")) if entry else None
+        if key:
+            windows[key] = Window(float(entry.get("used_percent") or 0), parse_time(entry.get("reset_at")))
+    return Snapshot("api", time.time(), windows)
+
+
+def codex_log_snapshot(path: Path) -> Snapshot | None:
+    with path.open("rb") as handle:
+        handle.seek(0, os.SEEK_END)
+        handle.seek(max(0, handle.tell() - 512 * 1024))
+        lines = handle.read().splitlines()
+    for line in reversed(lines):
+        if b'"rate_limits"' not in line:
+            continue
+        try:
+            event = json.loads(line)
+        except ValueError:
+            continue
+        limits = (event.get("payload") or {}).get("rate_limits")
+        if not limits or limits.get("limit_id") not in (None, "codex"):
+            continue
+        captured_at = parse_time(event.get("timestamp")) or path.stat().st_mtime
+        windows = {}
+        for field in ("primary", "secondary"):
+            entry = limits.get(field)
+            key = window_key((entry.get("window_minutes") or 0) * 60) if entry else None
+            if not key:
+                continue
+            resets_at = entry.get("resets_at")
+            if resets_at is None and entry.get("resets_in_seconds") is not None:
+                resets_at = captured_at + entry["resets_in_seconds"]
+            windows[key] = Window(float(entry.get("used_percent") or 0), parse_time(resets_at))
+        return Snapshot("log", captured_at, windows)
+    return None
+
+
+def codex_local(account: Account) -> Snapshot | None:
+    # Sessions live in sessions/YYYY/MM/DD. A long session can keep writing to
+    # an older day's file, so check the newest few days and sort by mtime.
+    day_dirs = sorted((account.home / "sessions").glob("*/*/*"), reverse=True)[:7]
+    files = [file for day_dir in day_dirs for file in day_dir.glob("rollout-*.jsonl")]
+    files.sort(key=lambda file: file.stat().st_mtime, reverse=True)
+    for file in files[:20]:
+        snapshot = codex_log_snapshot(file)
+        if snapshot:
+            return snapshot
+    return None
+
+
+def read_local(account: Account) -> Snapshot | None:
+    return claude_local(account) if account.provider == "claude" else codex_local(account)
+
+
+def fetch_api(account: Account) -> Snapshot:
+    return claude_api(account) if account.provider == "claude" else codex_api(account)
+
+
+class State:
+    def __init__(self, use_api: bool):
+        self.use_api = use_api
+        self.lock = threading.Lock()
+        self.local: dict[str, Snapshot | None] = {}
+        self.api: dict[str, Snapshot] = {}
+        self.api_error: dict[str, str] = {}
+        self.api_due = {account.name: 0.0 for account in ACCOUNTS}
+
+    def best(self, account: Account) -> Snapshot | None:
+        with self.lock:
+            snapshots = [self.local.get(account.name), self.api.get(account.name)]
+        snapshots = [snapshot for snapshot in snapshots if snapshot]
+        return max(snapshots, key=lambda snapshot: snapshot.captured_at, default=None)
+
+    def force_api(self):
+        with self.lock:
+            for name in self.api_due:
+                self.api_due[name] = 0.0
+
+    def refresh_local(self):
+        for account in ACCOUNTS:
+            try:
+                snapshot = read_local(account)
+            except (OSError, ValueError, KeyError, TypeError):
+                snapshot = None
+            with self.lock:
+                self.local[account.name] = snapshot
+
+    def refresh_api_account(self, account: Account):
+        delay = API_INTERVAL_SECONDS
+        snapshot = None
+        error = None
+        try:
+            snapshot = fetch_api(account)
+        except FetchError as exception:
+            error = str(exception)
+        except urllib.error.HTTPError as exception:
+            error = f"HTTP {exception.code}"
+            if exception.code == 429:
+                delay *= 2
+        except Exception as exception:
+            error = type(exception).__name__
+        with self.lock:
+            if snapshot:
+                self.api[account.name] = snapshot
+            self.api_error[account.name] = error
+            self.api_due[account.name] = time.time() + delay
+
+    def refresh_api(self):
+        if not self.use_api:
+            return
+        now = time.time()
+        with self.lock:
+            due = [account for account in ACCOUNTS if self.api_due[account.name] <= now]
+        if due:
+            with ThreadPoolExecutor(max_workers=len(due)) as pool:
+                list(pool.map(self.refresh_api_account, due))
+
+
+def refresh_loop(state: State, stop: threading.Event, wake: threading.Event):
+    while not stop.is_set():
+        state.refresh_local()
+        state.refresh_api()
+        wake.wait(LOCAL_INTERVAL_SECONDS)
+        wake.clear()
+
+
+class Painter:
+    def __init__(self, enabled: bool):
+        self.enabled = enabled
+
+    def __call__(self, text: str, code: str) -> str:
+        return f"\033[{code}m{text}\033[0m" if self.enabled and code else text
+
+
+def duration(seconds: float) -> str:
+    seconds = max(0, int(seconds))
+    days, rest = divmod(seconds, 86400)
+    hours, rest = divmod(rest, 3600)
+    minutes, seconds = divmod(rest, 60)
+    clock = f"{hours:02}:{minutes:02}:{seconds:02}"
+    return f"{days}d {clock}" if days else clock
+
+
+def age(seconds: float) -> str:
+    seconds = max(0, int(seconds))
+    for unit, size in (("d", 86400), ("h", 3600), ("m", 60)):
+        if seconds >= size:
+            return f"{seconds // size}{unit}"
+    return f"{seconds}s"
+
+
+def clock_time(timestamp: float, now: float) -> str:
+    moment = datetime.fromtimestamp(timestamp)
+    if timestamp - now < 20 * 3600:
+        return moment.strftime("%-I:%M %p")
+    return moment.strftime("%a %-I:%M %p")
+
+
+def left_color(left: int) -> str:
+    if left <= 0:
+        return "1;31"
+    if left < 20:
+        return "31"
+    if left < 50:
+        return "33"
+    return "32"
+
+
+@dataclass
+class Row:
+    account: Account
+    snapshot: Snapshot | None
+    blocked_until: float | None
+    next_reset: float | None
+
+    def sort_key(self):
+        if self.blocked_until:
+            return (2, self.blocked_until)
+        if self.snapshot:
+            return (0, self.next_reset or math.inf)
+        return (1, 0)
+
+
+def build_row(account: Account, snapshot: Snapshot | None, now: float) -> Row:
+    blocked_until = None
+    next_reset = None
+    if snapshot:
+        for window in snapshot.windows.values():
+            if not window.resets_at or window.resets_at <= now:
+                continue
+            next_reset = min(next_reset or math.inf, window.resets_at)
+            if window.used >= 100:
+                blocked_until = max(blocked_until or 0, window.resets_at)
+    return Row(account, snapshot, blocked_until, next_reset)
+
+
+BAR_WIDTH = 10
+
+
+def percent_width(bars: bool) -> int:
+    return BAR_WIDTH + 5 if bars else 7
+
+
+def window_cells(window: Window | None, now: float, paint: Painter, bars: bool) -> str:
+    if window is None:
+        return paint("n/a".rjust(percent_width(bars)), "90") + "  " + paint("-".ljust(12), "90")
+    reset_passed = window.resets_at is not None and window.resets_at <= now
+    left = 100 if reset_passed else min(100, max(0, math.ceil(100 - window.used)))
+    color = left_color(left)
+    if bars:
+        filled = round(left / 10)
+        bar = paint("█" * filled, color) + paint("░" * (BAR_WIDTH - filled), "90")
+        percent = f"{bar} {paint(f'{left:>3}%', color)}"
+    else:
+        percent = paint(f"{left}%".rjust(percent_width(bars)), color)
+    if reset_passed:
+        timer = paint("reset".ljust(12), "32")
+    elif window.resets_at is None:
+        timer = paint("not started".ljust(12), "90")
+    else:
+        timer = paint(duration(window.resets_at - now).ljust(12), "1" if left <= 0 else "")
+    return f"{percent}  {timer}"
+
+
+def render(state: State, now: float, width: int, paint: Painter) -> list[str]:
+    bars = width >= 96
+    rows = sorted(
+        (build_row(account, state.best(account), now) for account in ACCOUNTS),
+        key=Row.sort_key,
+    )
+    with state.lock:
+        errors = dict(state.api_error)
+
+    lines = [
+        paint(" limits", "1") + paint(f"  {datetime.fromtimestamp(now).strftime('%a %-I:%M:%S %p')}", "90"),
+    ]
+    blocked = [row for row in rows if row.blocked_until]
+    upcoming = [row for row in rows if row.next_reset]
+    if blocked:
+        row = blocked[0]
+        lines.append(
+            paint(f" ● {row.account.name} unblocks in {duration(row.blocked_until - now)}", "1;31")
+            + paint(f" at {clock_time(row.blocked_until, now)}", "90")
+        )
+    elif upcoming:
+        row = min(upcoming, key=lambda row: row.next_reset)
+        lines.append(
+            paint(" ✓ all accounts available", "32")
+            + paint(f" · next reset: {row.account.name} in {duration(row.next_reset - now)}", "")
+            + paint(f" at {clock_time(row.next_reset, now)}", "90")
+        )
+    else:
+        lines.append(paint(" no usage data yet", "90"))
+    lines.append("")
+
+    header = "   " + "ACCOUNT".ljust(13)
+    for key in WINDOWS:
+        header += f"{key.upper()} LEFT".ljust(percent_width(bars)) + "  " + "RESETS IN".ljust(12) + "  "
+    header += "UPDATED"
+    lines.append(paint(header, "90"))
+
+    for row in rows:
+        marker = paint(" ● ", "1;31") if row.blocked_until else "   "
+        name = paint(row.account.name.ljust(13), "1;31" if row.blocked_until else "1")
+        cells = [
+            window_cells(row.snapshot.windows.get(key) if row.snapshot else None, now, paint, bars)
+            for key in WINDOWS
+        ]
+        if row.snapshot:
+            staleness = now - row.snapshot.captured_at
+            updated = paint(
+                f"{row.snapshot.source} {age(staleness)} ago",
+                "33" if staleness > STALE_SECONDS else "90",
+            )
+        else:
+            updated = paint("no data", "33")
+        error = errors.get(row.account.name)
+        if error and (not row.snapshot or row.snapshot.source != "api"):
+            updated += paint(f" · api: {error}", "90")
+        lines.append(marker + name + "  ".join(cells) + "  " + updated)
+
+    lines.append("")
+    lines.append(paint(" r refresh · q quit", "90"))
+    return lines
+
+
+def run_live(state: State):
+    stop = threading.Event()
+    wake = threading.Event()
+    state.refresh_local()
+    threading.Thread(target=refresh_loop, args=(state, stop, wake), daemon=True).start()
+    signal.signal(signal.SIGTERM, lambda *_: sys.exit(0))
+
+    paint = Painter(os.environ.get("NO_COLOR") is None)
+    stdin = sys.stdin.fileno()
+    saved_tty = termios.tcgetattr(stdin)
+    out = sys.stdout
+    out.write("\033[?1049h\033[?25l\033[?7l")
+    try:
+        tty.setcbreak(stdin)
+        while True:
+            now = time.time()
+            width = shutil.get_terminal_size().columns
+            frame = "\033[K\n".join(render(state, now, width, paint))
+            out.write(f"\033[H{frame}\033[K\033[J")
+            out.flush()
+            ready, _, _ = select.select([stdin], [], [], 1 - (time.time() % 1))
+            if not ready:
+                continue
+            keys = os.read(stdin, 32)
+            if b"q" in keys:
+                break
+            if b"r" in keys:
+                state.force_api()
+                wake.set()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        termios.tcsetattr(stdin, termios.TCSADRAIN, saved_tty)
+        out.write("\033[?7h\033[?25h\033[?1049l")
+        out.flush()
+        stop.set()
+        wake.set()
+
+
+def run_once(state: State):
+    state.refresh_local()
+    state.refresh_api()
+    paint = Painter(sys.stdout.isatty() and os.environ.get("NO_COLOR") is None)
+    width = shutil.get_terminal_size().columns
+    lines = render(state, time.time(), width, paint)
+    print("\n".join(lines[:-2]))
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Live usage limits for Claude and Codex accounts.")
+    parser.add_argument("--once", action="store_true", help="print one snapshot and exit")
+    parser.add_argument("--offline", action="store_true", help="only read local caches and logs")
+    args = parser.parse_args()
+
+    state = State(use_api=not args.offline)
+    if args.once or not (sys.stdin.isatty() and sys.stdout.isatty()):
+        run_once(state)
+    else:
+        run_live(state)
+
+
+if __name__ == "__main__":
+    main()
