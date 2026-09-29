@@ -19,6 +19,17 @@ resets_at=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty')
 config_dir="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 email=$(jq -r '.oauthAccount.emailAddress // ""' "$config_dir/.claude.json" 2>/dev/null)
 
+# Snapshot rate limits for the `limits` command (~/.scripts/limits), one file
+# per account dir, e.g. ~/.cache/limits/claude-work.json.
+rate_limits_json=$(echo "$input" | jq -c '.rate_limits // empty' 2>/dev/null)
+if [ -n "$rate_limits_json" ]; then
+  limits_dir="$HOME/.cache/limits"
+  limits_file="$limits_dir/$(basename "$config_dir" | sed 's/^\.//').json"
+  mkdir -p "$limits_dir" 2>/dev/null
+  printf '{"captured_at":%s,"rate_limits":%s}' "$(date +%s)" "$rate_limits_json" > "$limits_file.$$" 2>/dev/null \
+    && mv "$limits_file.$$" "$limits_file"
+fi
+
 # Daily cost via ccusage, scoped to the ACTIVE account dir ($config_dir).
 # ccusage is slow (cold Node + log parsing), so we never call it inline: a
 # cached number is read instantly and refreshed in the background when stale
