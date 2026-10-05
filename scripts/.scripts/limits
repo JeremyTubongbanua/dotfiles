@@ -39,7 +39,6 @@ class Account:
 ACCOUNTS = [
     Account("claude-work", "claude", HOME / ".claude-work"),
     Account("codex", "codex", HOME / ".codex"),
-    Account("codex-jl", "codex", HOME / ".codex-jl"),
 ]
 
 
