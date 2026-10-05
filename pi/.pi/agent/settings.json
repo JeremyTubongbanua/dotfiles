@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.87.1",
+  "lastChangelogVersion": "1.0.1",
   "theme": "catppuccin-latte/catppuccin-mocha",
   "packages": [
     "npm:@narumitw/pi-usage",
@@ -23,12 +23,8 @@
     "anthropicExtraUsage": false
   },
   "enabledModels": [
-    "openai-codex/gpt-6-astra",
-    "openai-codex-account-2/gpt-6-astra",
     "anthropic/claude-opus-5-5",
-    "anthropic/claude-sonnet-5-5",
-    "openai-codex/gpt-6.1-sol",
-    "openai-codex-account-2/gpt-6.1-sol"
+    "openai-codex/gpt-6.1-sol"
   ],
   "defaultProvider": "anthropic",
   "defaultModel": "claude-opus-5-5",
@@ -41,5 +37,8 @@
     "anthropic/claude-sonnet-5": "xhigh",
     "openai-codex-account-2/gpt-6-sol": "xhigh",
     "openai-codex/gpt-6-sol": "xhigh"
-  }
+  },
+  "extensions": [
+    "-builtin:mcp"
+  ]
 }
