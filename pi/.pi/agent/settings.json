@@ -8,9 +8,7 @@
     "npm:pi-multi-account",
     "npm:pi-web-access@0.29.0",
     "npm:pi-btw",
-    "npm:pi-subagents",
-    "npm:@juicesharp/rpiv-ask-user-question",
-    "npm:pi-claude-bridge"
+    "npm:@juicesharp/rpiv-ask-user-question"
   ],
   "markdown": {
     "mermaid": "streaming"
