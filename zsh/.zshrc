@@ -48,3 +48,11 @@ bindkey -M viins '^A' beginning-of-line
 bindkey -M viins '^E' end-of-line
 
 [ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
+
+# Herdr: auto-start pi in the first pane of a new tab labelled "pi"
+if [[ -o interactive && -n $HERDR_TAB_ID && -z $HERDR_PI_AUTOSTARTED ]] && (( $+commands[jq] )); then
+  export HERDR_PI_AUTOSTARTED=1
+  if [[ "$(herdr tab get "$HERDR_TAB_ID" 2>/dev/null | jq -r '.result.tab | "\(.label) \(.pane_count)"')" == 'pi 1' ]]; then
+    pi
+  fi
+fi
