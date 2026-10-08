@@ -9,11 +9,7 @@ Absolutely remember this for every session and before every task:
 - **No em dashes** - in comments, code, documentation, or responses.
 - **Browser tabs:** When navigating in a browser, open a new tab instead of navigating away from a tab that is already open. Leave existing tabs intact unless I explicitly ask you to use one. Use playwright. Only use playwright for ComeAlign-related stuff; unless otherwise specified.
 - **Verification after code changes:** run relevant basic read-only checks yourself (for example, `dart analyze` and `dart test` for Dart projects). If they pass, stay silent; otherwise, notify the user.
-- **Use herdr tabs when:**
-  - running a local server
-  - using subagents
-  - run Docker containers, Ctrl+C will close the container and delete it; unless otherwise stated
-  - each herdr tab should be a running process, otherwise use a `tmp` tab and later tear it down
+- **Use herdr tabs when** running a local server, using subagents, running Docker containers, etc,. Nothing should run in the background so that when I tear down the workspace, everything is torn down. Run containers such that Ctrl+C will close and delete the container unless otherwise stated. Open an entirely new workspace for spinning up environments.
 
 ## Shell Command Execution
 
