@@ -19,10 +19,7 @@
         "--extension",
         "--profile-dir-name",
         "Profile 8"
-      ],
-      "env": {
-        "PLAYWRIGHT_MCP_EXTENSION_TOKEN": "_K-24dGirDOGZQwgLG3zVCL75vM45ByyW8tH3xQdtiQ"
-      }
+      ]
     }
   }
 }
