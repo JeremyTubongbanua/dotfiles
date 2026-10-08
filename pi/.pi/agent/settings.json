@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "1.0.3",
+  "lastChangelogVersion": "1.0.4",
   "theme": "catppuccin-latte/catppuccin-mocha",
   "packages": [
     "npm:@narumitw/pi-usage",
@@ -13,7 +13,7 @@
   "markdown": {
     "mermaid": "streaming"
   },
-  "tuiMode": "fullscreen",
+  "tuiMode": "regular",
   "treeFilterMode": "no-tools",
   "doubleEscapeAction": "tree",
   "hideThinkingBlock": true,
@@ -29,12 +29,9 @@
   "skills": [
     "-/Users/jeremytubongbanua/.agents/skills/agent-browser"
   ],
-  "defaultThinkingLevel": "xhigh",
   "modelThinkingLevels": {
-    "anthropic/claude-opus-5-5": "high",
-    "anthropic/claude-sonnet-5": "xhigh",
-    "openai-codex-account-2/gpt-6-sol": "xhigh",
-    "openai-codex/gpt-6-sol": "xhigh"
+    "anthropic/claude-opus-5-5": "xhigh",
+    "openai-codex/gpt-6.1-sol": "xhigh"
   },
   "extensions": [
     "-builtin:mcp"

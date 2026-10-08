@@ -39,7 +39,7 @@ ssh() {
 }
 
 # Aliases
-alias pi='pi update --extensions && CLAUDE_CONFIG_DIR="$HOME/.claude-work" pi'
+alias pi='CLAUDE_CONFIG_DIR="$HOME/.claude-work" pi'
 alias ccusage='CLAUDE_CONFIG_DIR="$HOME/.claude,$HOME/.claude-work" CODEX_HOME="$HOME/.codex,$HOME/.codex-jl" ccusage' # tracks all claude and codex accounts
 
 bindkey -M viins '^[b' backward-word
@@ -49,10 +49,11 @@ bindkey -M viins '^E' end-of-line
 
 [ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
 
-# Herdr: auto-start pi in the first pane of a new tab labelled "pi"
-if [[ -o interactive && -n $HERDR_TAB_ID && -z $HERDR_PI_AUTOSTARTED ]] && (( $+commands[jq] )); then
-  export HERDR_PI_AUTOSTARTED=1
-  if [[ "$(herdr tab get "$HERDR_TAB_ID" 2>/dev/null | jq -r '.result.tab | "\(.label) \(.pane_count)"')" == 'pi 1' ]]; then
-    pi
-  fi
+# Herdr: auto-start an agent in the first pane of a new tab labelled "pi" or "claude-work"
+if [[ -o interactive && -n $HERDR_TAB_ID && -z $HERDR_AGENT_AUTOSTARTED ]] && (( $+commands[jq] )); then
+  export HERDR_AGENT_AUTOSTARTED=1
+  case "$(herdr tab get "$HERDR_TAB_ID" 2>/dev/null | jq -r '.result.tab | "\(.label) \(.pane_count)"')" in
+    'pi 1') pi ;;
+    'claude-work 1') claude-work ;;
+  esac
 fi

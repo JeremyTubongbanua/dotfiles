@@ -1,1 +1,170 @@
-../.claude/settings.json
+{
+  "permissions": {
+    "allow": [
+      "Grep",
+      "Glob",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(grep *)",
+      "Bash(sort *)",
+      "Bash(strings *)",
+      "Bash(find *)",
+      "Bash(which *)",
+      "Bash(cd *)",
+      "Bash(echo *)",
+      "Bash(jq *)",
+      "Bash(rg *)",
+      "Bash(uniq *)",
+      "Bash(cut *)",
+      "Bash(tr *)",
+      "Bash(df *)",
+      "Bash(tree *)",
+      "Bash(realpath *)",
+      "Bash(readlink *)",
+      "Bash(dirname *)",
+      "Bash(basename *)",
+      "Bash(uname *)",
+      "Bash(git status*)",
+      "Bash(git log*)",
+      "Bash(git diff*)",
+      "Bash(git branch*)",
+      "Bash(git show*)",
+      "Bash(git remote -v)",
+      "Bash(git worktree list)",
+      "Bash(git stash list)",
+      "Bash(git ls-files *)",
+      "Bash(git rev-parse *)",
+      "Bash(git blame *)",
+      "Bash(git describe *)",
+      "Bash(git shortlog *)",
+      "Bash(git reflog *)",
+      "Bash(git tag -l *)",
+      "Bash(git config --get *)",
+      "Bash(git config --list *)",
+      "Bash(gh repo view *)",
+      "Bash(gh issue view *)",
+      "Bash(gh issue list *)",
+      "Bash(gh run view *)",
+      "Bash(gh run list *)",
+      "Bash(gh workflow list *)",
+      "Bash(gh release list *)",
+      "Bash(gh pr view *)",
+      "Bash(gh pr list *)",
+      "Bash(gh pr checks *)",
+      "Bash(gh pr diff *)",
+      "Bash(stow -nv *)",
+      "Bash(stow --simulate *)",
+      "Bash(brew list *)",
+      "Bash(brew info *)",
+      "Bash(npm ls *)",
+      "Bash(dart --version)",
+      "Bash(dart analyze *)",
+      "Bash(dart test *)",
+      "Bash(dart pub deps *)",
+      "Bash(dart pub publish --dry-run*)",
+      "Bash(dart fix --dry-run*)",
+      "Bash(dart format --output=none *)",
+      "Bash(dart format --output=show *)",
+      "Bash(flutter --version)",
+      "Bash(flutter analyze *)",
+      "Bash(flutter test *)",
+      "Bash(tsc --noEmit *)",
+      "Bash(npx tsc --noEmit *)",
+      "Bash(eslint *)",
+      "Bash(npx eslint *)",
+      "Bash(prettier --check *)",
+      "Bash(npx prettier --check *)",
+      "WebSearch",
+      "WebFetch(domain:code.claude.com)",
+      "WebFetch(domain:docs.claude.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:*.github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:pub.dev)",
+      "WebFetch(domain:api.dart.dev)",
+      "WebFetch(domain:api.flutter.dev)",
+      "WebFetch(domain:docs.flutter.dev)",
+      "WebFetch(domain:developer.mozilla.org)",
+      "WebFetch(domain:stackoverflow.com)",
+      "WebFetch(domain:*.npmjs.com)",
+      "WebFetch(domain:atsign.com)",
+      "WebFetch(domain:*.atsign.com)",
+      "WebFetch(domain:developers.cloudflare.com)"
+    ],
+    "deny": [
+      "Bash(sudo*)",
+      "Bash(/usr/bin/sudo*)",
+      "Bash(git push*)",
+      "Bash(gh repo delete*)",
+      "Bash(dart pub publish)",
+      "Bash(npm publish*)",
+      "Bash(* ~/.ssh/*)",
+      "Bash(* ~/.aws/*)",
+      "Bash(* ~/.config/gh/*)",
+      "Bash(*id_rsa*)",
+      "Bash(*id_ed25519*)",
+      "Bash(*.pem*)",
+      "Bash(*.env*)",
+      "Bash(* .env)",
+      "Read(**/.env*)",
+      "Read(**/*.pem)",
+      "Read(**/id_rsa*)",
+      "Read(**/id_ed25519*)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Read(~/.config/gh/**)",
+      "Edit(**/.env*)",
+      "Edit(~/.ssh/**)",
+      "Edit(~/.aws/**)"
+    ],
+    "ask": [],
+    "defaultMode": "auto",
+    "additionalDirectories": [
+      "/Users/jeremytubongbanua"
+    ]
+  },
+  "model": "opus",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/Users/jeremytubongbanua/.claude/hooks/herdr-agent-state.sh' session",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash /Users/jeremytubongbanua/.claude/statusline-command.sh"
+  },
+  "enabledPlugins": {
+    "claude-mem@thedotmack": true,
+    "clangd-lsp@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "thedotmack": {
+      "source": {
+        "source": "github",
+        "repo": "thedotmack/claude-mem"
+      }
+    }
+  },
+  "effortLevel": "high",
+  "modelSettings": {
+    "claude-opus-4-6": {
+      "effortLevel": "high"
+    },
+    "claude-opus-5-5": {
+      "effortLevel": "xhigh"
+    }
+  },
+  "theme": "auto",
+  "editorMode": "normal"
+}

@@ -6,14 +6,12 @@
   "childProxy": true,
   "neverFailoverProviders": [],
   "providerOrder": [
-    "claude-bridge",
-    "openai-codex-account-2",
+    "anthropic",
     "openai-codex"
   ],
   "providerPriority": [
-    "claude-bridge",
-    "openai-codex-account-2",
-    "openai-codex"
+    "openai-codex",
+    "anthropic"
   ],
   "cooldownMs": 21600000,
   "probeCooldownMs": 300000,
