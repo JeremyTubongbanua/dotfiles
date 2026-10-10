@@ -24,14 +24,14 @@
     "anthropic/claude-opus-5-5",
     "openai-codex/gpt-6.1-sol"
   ],
-  "defaultProvider": "anthropic",
-  "defaultModel": "claude-opus-5-5",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-6.1-sol",
   "skills": [
     "-/Users/jeremytubongbanua/.agents/skills/agent-browser"
   ],
   "modelThinkingLevels": {
     "anthropic/claude-opus-5-5": "xhigh",
-    "openai-codex/gpt-6.1-sol": "xhigh"
+    "openai-codex/gpt-6.1-sol": "high"
   },
   "extensions": [
     "-builtin:mcp"
