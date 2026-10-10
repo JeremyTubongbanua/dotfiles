@@ -7,12 +7,20 @@ tap "supabase/tap"
 brew "node"
 # Browser automation CLI for AI agents
 brew "agent-browser"
-# Native mobile app automation server
+# Core application library for C
+brew "glib"
+# TIFF library and utilities
+brew "libtiff"
+# GNU Transport Layer Security (TLS) Library
+brew "gnutls"
+# OpenType text shaping engine
+brew "harfbuzz"
+# Tools and libraries to manipulate images in select formats
+brew "imagemagick"
+# Automation for Apps
 brew "appium"
 # Incredibly fast JavaScript runtime, bundler, test runner, and package manager
 brew "bun"
-# Core application library for C
-brew "glib"
 # CLI tool for analyzing Claude Code usage from local JSONL files
 brew "ccusage"
 # CLI tool for Cloudflare Workers
@@ -31,22 +39,14 @@ brew "fd"
 brew "ffmpeg"
 # GitHub command-line tool
 brew "gh"
-# OpenType text shaping engine
-brew "harfbuzz"
-# TIFF library and utilities
-brew "libtiff"
 # Interpreter for PostScript and PDF
 brew "ghostscript"
 # Quickly rewrite git repository history
 brew "git-filter-repo"
-# GNU Transport Layer Security (TLS) Library
-brew "gnutls"
 # Open source programming language to build simple/reliable/efficient software
 brew "go"
 # Agent multiplexer that lives in your terminal
 brew "herdr"
-# Tools and libraries to manipulate images in select formats
-brew "imagemagick"
 # Terminal Markdown previewer with a GUI-like experience
 brew "leaf-markdown-viewer"
 # Library for quantum-safe cryptography
@@ -97,15 +97,13 @@ cask "codex"
 cask "discord"
 # UI toolkit for building applications for mobile, web and desktop
 cask "flutter"
+# Set of tools to manage resources and applications hosted on Google Cloud
+cask "gcloud-cli"
 # Terminal emulator that uses platform-native UI and GPU acceleration
 cask "ghostty"
-# Desktop client for GitHub repositories
-cask "github"
 # Customise mouse behavior
 cask "linearmouse"
 cask "noports"
-# Get up and running with large language models locally
-cask "ollama-app"
 # Imaging utility to install operating systems to a microSD card
 cask "raspberry-pi-imager"
 # Move and resize windows using keyboard shortcuts or snap areas
@@ -116,8 +114,5 @@ cask "spotify"
 cask "tg-pro"
 # Menu bar toolkit with keep-awake, system monitor and volume mixer
 cask "vorssaint"
-npm "clerk"
-npm "expo"
 npm "pnpm"
-npm "tree-sitter-cli"
 npm "typescript"
