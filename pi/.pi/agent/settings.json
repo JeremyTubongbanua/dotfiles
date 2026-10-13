@@ -22,7 +22,8 @@
   },
   "enabledModels": [
     "anthropic/claude-opus-5-5",
-    "openai-codex/gpt-6.1-sol"
+    "openai-codex/gpt-6.1-sol",
+    "anthropic/claude-sonnet-5-5"
   ],
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-6.1-sol",
