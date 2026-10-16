@@ -107,5 +107,6 @@ nvim_pane="$(print -r -- "$nvim_json" | jq -r '.result.root_pane.pane_id')"
 herdr pane run "$nvim_pane" nvim >/dev/null
 
 herdr tab create --workspace "$ws_id" --cwd "$dir" --label pi --no-focus >/dev/null
+herdr tab create --workspace "$ws_id" --cwd "$dir" --label claude-work --no-focus >/dev/null
 
 herdr tab focus "$sh_tab" >/dev/null
