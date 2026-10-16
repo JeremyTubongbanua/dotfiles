@@ -53,6 +53,7 @@ bindkey -M viins '^E' end-of-line
 if [[ -o interactive && -n $HERDR_TAB_ID && -z $HERDR_AGENT_AUTOSTARTED ]] && (( $+commands[jq] )); then
   export HERDR_AGENT_AUTOSTARTED=1
   case "$(herdr tab get "$HERDR_TAB_ID" 2>/dev/null | jq -r '.result.tab | "\(.label) \(.pane_count)"')" in
+    'nvim 1') nvim ;;
     'pi 1') pi ;;
     'claude-work 1') claude-work ;;
   esac
