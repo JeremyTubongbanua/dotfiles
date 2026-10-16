@@ -102,9 +102,7 @@ sh_tab="$(print -r -- "$ws_json" | jq -r '.result.tab.tab_id')"
 
 herdr tab rename "$sh_tab" zsh >/dev/null
 
-nvim_json="$(herdr tab create --workspace "$ws_id" --cwd "$dir" --label nvim --no-focus)"
-nvim_pane="$(print -r -- "$nvim_json" | jq -r '.result.root_pane.pane_id')"
-herdr pane run "$nvim_pane" nvim >/dev/null
+herdr tab create --workspace "$ws_id" --cwd "$dir" --label nvim --no-focus >/dev/null
 
 herdr tab create --workspace "$ws_id" --cwd "$dir" --label pi --no-focus >/dev/null
 herdr tab create --workspace "$ws_id" --cwd "$dir" --label claude-work --no-focus >/dev/null
