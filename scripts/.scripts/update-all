@@ -1,0 +1,4 @@
+#!/bin/bash
+brew upgrade -y &
+pi update --extensions &
+brew upgrade claude-code@latest &
