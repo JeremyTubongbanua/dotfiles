@@ -33,6 +33,21 @@ The containers share the Docker network `telemetry-demo`. atServers send signed 
 
 Each `demo_service.sh` tab runs its container in the foreground with `--rm` and removes it on Ctrl+C or when the tab closes. Closing the workspace sends SIGHUP to every tab, so it removes every demo container. Volumes are never removed, so Loki history survives. Host processes (apps, log tails) die with their tab.
 
+## Keep the data
+
+The telemetry history in Loki belongs to the user and outlives every demo run. Tearing down, restarting, rebuilding, switching worktrees and troubleshooting all keep it. Delete it only when the user explicitly asks, in the current request, to drop the history. Without that request:
+
+- never pass `--wipe-loki` to `demo_start.sh` or `demo_up.sh`;
+- never run `docker volume rm telemetry-demo-loki-data`, `docker volume prune`, `docker system prune --volumes` or `docker compose ... down --volumes`;
+- never run `reboot.sh --wipe-loki` or `reset_loki_and_build.sh`; both delete the older stack's Loki volume (`telemetry-ee_loki-data`);
+- never use Docker Desktop's Clean / Purge data or Reset to factory defaults; both delete every volume.
+
+An empty dashboard, a failed start or a stuck Loki is not a reason to wipe. Restart the component instead, for example `demo_start.sh --only loki --restart loki`. If wiping really looks like the only fix, explain why and ask first.
+
+Loki keeps everything. `loki-config.yaml` turns no retention on, and the write-ahead log is in the volume (`/loki/wal`), so logs Loki had not flushed when it stopped come back on the next start.
+
+Other demo state is not kept, and that is expected. The atServers' storage lives in the EE container, so an EE restart onboards every Atsign again with new keys. It also replaces `.work/demo/keys`, `.work/demo/certs` and `.work/demo/storage`, and the collector starts with empty client storage. None of this touches Loki, and the dashboard keeps each Atsign's history because it looks producers up by Atsign name. A plain `demo_start.sh` restarts the EE when `atsigncompany/ephemeral:latest` changed upstream. When the user wants the EE and its keys left alone, pass `--only` without `ee`.
+
 ## Before starting
 
 1. **Pick the inputs.** Ask the user for anything you cannot infer:
@@ -52,7 +67,7 @@ Each `demo_service.sh` tab runs its container in the foreground with `--rm` and 
      <this worktree>/packages/monitoring/web_service/.env
    ```
 
-5. **Ports 2700-2799, 8080, 13100 and 18090 are free or held by the demo.** `demo_up.sh` checks each component's ports just before starting it. The older `tools/deploy/local/reboot.sh` stack uses the same ports as compose project `telemetry-ee`; tell the user before stopping it, then stop it with `docker compose -p telemetry-ee -f tools/deploy/local/compose.yaml -f tools/deploy/local/ee.compose.yaml down` (this keeps its volumes).
+5. **Ports 2700-2799, 8080, 13100 and 18090 are free or held by the demo.** `demo_up.sh` checks each component's ports just before starting it. The older `tools/deploy/local/reboot.sh` stack uses the same ports as compose project `telemetry-ee`; tell the user before stopping it, then stop it with `docker compose -p telemetry-ee -f tools/deploy/local/compose.yaml -f tools/deploy/local/ee.compose.yaml down`. That keeps its volumes; never add `--volumes`.
 
 ## Applications
 
@@ -94,7 +109,7 @@ tools/deploy/local/demo_start.sh \
   [--apps <apps file>] [--only <components>] [--restart <components>] [--wipe-loki]
 ```
 
-Components are `loki`, `ee`, `collector`, `registrar`, `web` and `apps`, comma-separated.
+Components are `loki`, `ee`, `collector`, `registrar`, `web` and `apps`, comma-separated. `--wipe-loki` deletes all Loki history before starting; pass it only when the user explicitly asks (see [Keep the data](#keep-the-data)).
 
 `demo_start.sh` never starts a second demo. It looks for herdr workspaces labelled `telemetry demo`:
 
@@ -147,14 +162,16 @@ Swap the selector for `{tenant_id="atsign", service_name!="at_secondary_server"}
 
 ## Tear down
 
-Close the `telemetry demo` workspace; every container goes and the Loki volume stays. If a container survives (for example after a forced kill), `tools/deploy/local/demo_down.sh` removes every container labelled `telemetry-demo` and nothing else. To also drop Loki history, `docker volume rm telemetry-demo-loki-data`, or pass `--wipe-loki` on the next start. The `telemetry-demo` network is left in place and reused.
+Close the `telemetry demo` workspace. Every container goes, and the Loki volume stays with all the telemetry history. If a container survives (for example after a forced kill), `tools/deploy/local/demo_down.sh` removes every container labelled `telemetry-demo` and nothing else. The `telemetry-demo` network is left in place and reused. A teardown never deletes data.
+
+Drop the Loki history only when the user explicitly asks for it: `docker volume rm telemetry-demo-loki-data` once the demo is down, or `--wipe-loki` on the next start. Before doing either, tell the user it deletes every record shown on the dashboard.
 
 ## Troubleshooting
 
 - **`web` exits with `Missing settings: GOOGLE_OAUTH_CLIENT_ID, ...`:** the mounted settings file lacks them; ask the user to fix it. Do not open it.
 - **Google sign-in works but the dashboard shows no Atsigns:** the email the user signed in with is not in `.work/demo/config/registrar_atsigns.json`; the `registrar` tab logs each lookup.
 - **No heartbeats:** read the `atserver @<name>` tab. An atServer without the telemetry code ignores `AT_TELEMETRY_ENDPOINT`; atServers older than 3.17.0+gha6797 reject `--telemetry_endpoint`. The `collector` tab logs rejected producers.
-- **Docker hangs after the disk filled up:** `docker` commands and the engine socket stop answering. Ask the user to free space and restart Docker Desktop; containers do not survive it, so run `demo_start.sh` afterwards.
+- **Docker hangs after the disk filled up:** `docker` commands and the engine socket stop answering. Ask the user to free space and restart Docker Desktop; containers do not survive it, so run `demo_start.sh` afterwards. Volumes do survive. Free space with `docker image prune` or `docker builder prune`, never with anything that removes volumes.
 - **`build_ee.sh` copies only `at_secondary_server`, `at_persistence_secondary_server` and `at_server_spec`** from the at_server worktree, and its `pubspec_overrides.yaml` replaces that worktree's `dependency_overrides`. Changes to other packages, such as a local `at_telemetry`, need `tools/deploy/local/ee_secondary.Dockerfile` changed too.
 - **`build_ee.sh` pulls `atsigncompany/ephemeral:latest` on every build**, so a new upstream EE image restarts the EE (and re-onboards) even when the at_server code did not change. Use `--only` to leave the EE alone.
 - **Control Center images ignore `pubspec_overrides.yaml`** and copy only `packages/` (see `.dockerignore`), so local path overrides to sibling repositories do not reach the collector or web service images.
