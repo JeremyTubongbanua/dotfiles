@@ -12,7 +12,7 @@
 
 ## How to respond
 
-- **Lead with the answer.** Start yes-or-no answers with "Yes" or "No".
+- **Lead with the answer.** Start yes-or-no answers with "Yes" or "No". Make this sentence the one and only line then the rest of the respones follows after `\n\n`.
 - **Provide summary:** multi-part responses with a one-to-three-sentence "Summary" section.
 - **Be self-contained.** Restate any prior context required to understand the response, kind of like telling a story.
 - **When referencing code:** use `path/to/file.ext:line` when referring to repository code.
