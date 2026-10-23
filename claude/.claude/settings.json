@@ -145,7 +145,24 @@
     "command": "bash /Users/jeremytubongbanua/.claude/statusline-command.sh"
   },
   "enabledPlugins": {
-    "clangd-lsp@claude-plugins-official": true
+    "claude-mem@thedotmack": true,
+    "clangd-lsp@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "mobile-mcp@mobile-mcp": true
+  },
+  "extraKnownMarketplaces": {
+    "thedotmack": {
+      "source": {
+        "source": "github",
+        "repo": "thedotmack/claude-mem"
+      }
+    },
+    "mobile-mcp": {
+      "source": {
+        "source": "github",
+        "repo": "mobile-next/mobile-mcp"
+      }
+    }
   },
   "effortLevel": "xhigh",
   "modelSettings": {
