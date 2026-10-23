@@ -17,7 +17,7 @@
 - **Update the changelog when making changes** in a repo that has one, under the right version. First find the version in production, meaning the latest published package, release, or deployment (for example `gh release list`, `npm view <pkg> version`, or pub.dev), and compare it with the version on trunk. If trunk's version is newer than production and not yet released, add the changes under that version. If trunk's version matches production, bump the version everywhere the repo declares it, following the project's versioning scheme, and add the changes under a new section for the new version.
 - **When executing as the agent,** run one command per bash call. Do not combine commands with `;` or `&&`.
 - **When initializing beads,** run `bd init --stealth --skip-agents --role maintainer`. Never let beads add `AGENTS.md`, `CLAUDE.md`, `.claude/`, `.agents/`, or tracked `.beads/` files to a repo, and never run `bd setup <tool>` inside a repo.
-- **After a plan is approved in plan mode** in a repo that uses beads, file it with the `use-beads` skill and stop. The planning session orchestrates; the user dispatches each step to a worker subagent with `/use-beads next`.
+- **After a plan is approved in plan mode** in a repo that uses beads, file it with the `beads` skill and stop. The planning session orchestrates; the user dispatches each step to a worker subagent with `/beads next`.
 - **Be self-improving**, when the user doesn't like how an agent skill, mcp server, script, or tool works, go and change it yourself. Only things in ~/GitHub/personal/dotfiles should be editable in that sense.
 
 ## How to respond

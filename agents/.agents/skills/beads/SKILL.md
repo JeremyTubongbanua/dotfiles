@@ -1,6 +1,6 @@
 ---
-name: use-beads
-description: Do anything with beads issue tracking from a plain-language request, so the user never has to remember a bd command. Covers setting beads up in a repository, listing what is open, ready, blocked, or closed, creating, updating, closing, reopening, and deleting issues, filing an approved plan as an epic, dispatching ready issues to worker subagents, and working one issue end to end. Use when the user runs /use-beads, mentions beads or bd, asks to file, track, list, change, close, or delete an issue or asks what is left, right after a plan is approved in a repository that uses beads, or when started as a worker on a beads issue.
+name: beads
+description: Do anything with beads issue tracking from a plain-language request, so the user never has to remember a bd command. Covers setting beads up in a repository, listing what is open, ready, blocked, or closed, creating, updating, closing, reopening, and deleting issues, filing an approved plan as an epic, dispatching ready issues to worker subagents, and working one issue end to end. Use when the user runs /beads, mentions beads or bd, asks to file, track, list, change, close, or delete an issue or asks what is left, right after a plan is approved in a repository that uses beads, or when started as a worker on a beads issue.
 argument-hint: [what you want, in plain words]
 ---
 
@@ -10,7 +10,7 @@ Read `$ARGUMENTS`, together with the conversation, as a plain-language request, 
 
 | The user wants to | Action | For example |
 |---|---|---|
-| See what is there. This is the default when `$ARGUMENTS` is empty. | [List](#list) | `/use-beads`, `list closed`, `what's left in dot-12` |
+| See what is there. This is the default when `$ARGUMENTS` is empty. | [List](#list) | `/beads`, `list closed`, `what's left in dot-12` |
 | Track new work | [Create](#create) | `add fix the login redirect`, `file a bug that ...` |
 | Change an existing issue | [Update](#update) | `bump dot-4 to P1`, `dot-4 waits on dot-2`, `defer dot-7 to Monday` |
 | Finish, drop, or bring back an issue | [Close](#close) | `close dot-4`, `dot-5 duplicates dot-3`, `reopen dot-4` |
@@ -147,7 +147,7 @@ Do not add work the plan does not contain. Where the plan is ambiguous, record t
 
 Run `bd graph <epic-id>` and `bd show` a few children. Fix vague titles, missing acceptance criteria, and dependencies that are missing or that serialize work which could run in parallel.
 
-Report the epic ID, the number of children, the `bd graph <epic-id> --compact` output, and which issues are ready first. Then stop: this session is the orchestrator. Tell the user the epic is ready for `/use-beads next <epic-id>` (the next step) or `/use-beads next <count>` (several independent steps at once). Implement in this session only when the user explicitly asks, one child at a time as [Work](#work) describes.
+Report the epic ID, the number of children, the `bd graph <epic-id> --compact` output, and which issues are ready first. Then stop: this session is the orchestrator. Tell the user the epic is ready for `/beads next <epic-id>` (the next step) or `/beads next <count>` (several independent steps at once). Implement in this session only when the user explicitly asks, one child at a time as [Work](#work) describes.
 
 ## Next
 
@@ -168,7 +168,7 @@ If nothing is ready, say so, show `bd blocked`, and stop.
 For each chosen issue:
 
 1. Claim it with `bd update <id> --claim` so the next dispatch skips it. If another actor already holds it, skip it.
-2. Start a background subagent whose prompt is to invoke the `use-beads` skill with `work <id>` and to end with the report that skill's Work section describes. Start every chosen issue's subagent at once so they run in parallel.
+2. Start a background subagent whose prompt is to invoke the `beads` skill with `work <id>` and to end with the report that skill's Work section describes. Start every chosen issue's subagent at once so they run in parallel.
 3. If a subagent cannot be started, run `bd unclaim <id>` and tell the user.
 
 ### Report
