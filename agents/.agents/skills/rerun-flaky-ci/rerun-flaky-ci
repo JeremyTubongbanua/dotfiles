@@ -1,0 +1,233 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+name=${0##*/}
+max_reruns=15
+interval=60
+round_timeout=$((180 * 60))
+required=false
+dry_run=false
+pr=
+
+usage() {
+  printf 'usage: %s <pr url | number | branch> [--max-reruns N] [--interval SECONDS] [--round-timeout MINUTES] [--required] [--dry-run]\n' "$name" >&2
+  exit 2
+}
+
+while (($#)); do
+  case $1 in
+    --max-reruns | --interval | --round-timeout)
+      [[ $# -ge 2 && $2 =~ ^[0-9]+$ ]] || usage
+      case $1 in
+        --max-reruns) max_reruns=$2 ;;
+        --interval) interval=$2 ;;
+        --round-timeout) round_timeout=$(($2 * 60)) ;;
+      esac
+      shift 2
+      ;;
+    --required)
+      required=true
+      shift
+      ;;
+    --dry-run)
+      dry_run=true
+      shift
+      ;;
+    -*)
+      usage
+      ;;
+    *)
+      [[ -z $pr ]] || usage
+      pr=$1
+      shift
+      ;;
+  esac
+done
+[[ -n $pr ]] || usage
+
+err=$(mktemp)
+history=$(mktemp)
+trap 'rm -f "$err" "$history"' EXIT
+
+pr_url=
+head_sha=
+checks=
+reruns=0
+rerun_runs=()
+
+log() {
+  printf '[%s] %s\n' "$(date +%H:%M:%S)" "$*"
+}
+
+retry() {
+  local tries=1 out
+  until out=$("$@" 2>"$err"); do
+    if ((tries >= 5)); then
+      cat "$err" >&2
+      return 1
+    fi
+    sleep 15
+    tries=$((tries + 1))
+  done
+  printf '%s\n' "$out"
+}
+
+summary() {
+  jq -r 'if length == 0 then "no checks" else (group_by(.bucket) | map("\(length) \(.[0].bucket)") | join(", ")) end' <<<"$1"
+}
+
+failing_checks() {
+  jq -r '.[] | select(.bucket == "fail" or .bucket == "cancel") | "  \(.name) [\(.workflow // "")]: \(.link // "no link")"' <<<"$1"
+}
+
+finish() {
+  local code=$1 message=$2
+  log "$message"
+  if [[ -n $checks ]]; then
+    printf 'checks: %s\n' "$(summary "$checks")"
+    if [[ -n $(failing_checks "$checks") ]]; then
+      printf 'failing now:\n%s\n' "$(failing_checks "$checks")"
+    fi
+  fi
+  if [[ -s $history ]]; then
+    printf 'failures per check across all rounds:\n'
+    sort "$history" | uniq -c | sort -rn
+  fi
+  printf 'RESULT: %s | reruns: %s/%s | %s\n' "$message" "$reruns" "$max_reruns" "$pr_url"
+  exit "$code"
+}
+
+fetch_checks() {
+  local tries=1 out
+  local args=(pr checks "$number" -R "$repo" --json name,bucket,link,workflow)
+  if $required; then
+    args+=(--required)
+  fi
+  until out=$(gh "${args[@]}" 2>"$err"); do
+    if grep -q 'checks reported' "$err"; then
+      printf '[]\n'
+      return 0
+    fi
+    if ((tries >= 5)); then
+      cat "$err" >&2
+      return 1
+    fi
+    sleep 15
+    tries=$((tries + 1))
+  done
+  printf '%s\n' "$out"
+}
+
+pr_state() {
+  retry gh pr view "$number" -R "$repo" --json state,headRefOid --jq '"\(.state) \(.headRefOid)"'
+}
+
+check_pr() {
+  local info state sha
+  info=$(pr_state) || finish 2 "could not read the PR state"
+  read -r state sha <<<"$info"
+  [[ $state == OPEN ]] || finish 3 "PR is $state, stopping"
+  [[ $sha == "$head_sha" ]] || finish 3 "PR head moved from ${head_sha:0:7} to ${sha:0:7}, so CI restarted on new code; stopping"
+}
+
+wait_for_checks() {
+  local start=$SECONDS last= now total pending
+  while :; do
+    check_pr
+    checks=$(fetch_checks) || finish 2 "could not read the PR checks"
+    total=$(jq length <<<"$checks")
+    pending=$(jq '[.[] | select(.bucket == "pending")] | length' <<<"$checks")
+    if ((total > 0 && pending == 0)); then
+      return 0
+    fi
+    if ((total == 0 && SECONDS - start >= 600)); then
+      finish 2 "no checks reported on the PR after 10 minutes"
+    fi
+    now=$(summary "$checks")
+    if [[ $now != "$last" ]]; then
+      log "waiting: $now"
+      last=$now
+    fi
+    if ((SECONDS - start >= round_timeout)); then
+      finish 2 "checks still not finished after $((round_timeout / 60)) minutes"
+    fi
+    sleep "$interval"
+  done
+}
+
+rerun_failed() {
+  local runs run_repo id attempt
+  runs=$(jq -r '[.[] | select(.bucket == "fail" or .bucket == "cancel") | (.link // "") | capture("^https://(?<host>[^/]+)/(?<repo>[^/]+/[^/]+)/actions/runs/(?<id>[0-9]+)")? | "\(.host)/\(.repo) \(.id)"] | unique | .[]' <<<"$checks")
+  [[ -n $runs ]] || finish 2 "found no GitHub Actions runs to rerun"
+  rerun_runs=()
+  while read -r run_repo id; do
+    attempt=$(retry gh run view "$id" -R "$run_repo" --json attempt --jq .attempt) || finish 2 "could not read run $id in $run_repo"
+    if ! gh run rerun "$id" -R "$run_repo" --failed >/dev/null 2>"$err"; then
+      finish 2 "could not rerun run $id in $run_repo: $(tr '\n' ' ' <"$err")"
+    fi
+    rerun_runs+=("$run_repo $id $attempt")
+    log "rerun $reruns/$max_reruns: rerunning failed jobs of https://$run_repo/actions/runs/$id (attempt $((attempt + 1)))"
+  done <<<"$runs"
+}
+
+wait_for_runs() {
+  local start=$SECONDS entry run_repo id prev info status attempt finished
+  while :; do
+    check_pr
+    finished=true
+    for entry in "${rerun_runs[@]}"; do
+      read -r run_repo id prev <<<"$entry"
+      info=$(retry gh run view "$id" -R "$run_repo" --json status,attempt --jq '"\(.status) \(.attempt)"') || finish 2 "could not read run $id in $run_repo"
+      read -r status attempt <<<"$info"
+      if [[ $status != completed ]] || ((attempt <= prev)); then
+        finished=false
+      fi
+    done
+    if $finished; then
+      return 0
+    fi
+    if ((SECONDS - start >= round_timeout)); then
+      finish 2 "rerun $reruns still not finished after $((round_timeout / 60)) minutes"
+    fi
+    sleep "$interval"
+  done
+}
+
+pr_url=$(retry gh pr view "$pr" --json url --jq .url) || finish 2 "could not find pull request $pr"
+url_pattern='^https://([^/]+)/([^/]+/[^/]+)/pull/([0-9]+)'
+[[ $pr_url =~ $url_pattern ]] || finish 2 "cannot parse pull request URL: $pr_url"
+repo=${BASH_REMATCH[1]}/${BASH_REMATCH[2]}
+number=${BASH_REMATCH[3]}
+info=$(pr_state) || finish 2 "could not read the PR state"
+read -r state head_sha <<<"$info"
+[[ $state == OPEN ]] || finish 3 "PR is $state, stopping"
+
+if $dry_run; then
+  checks=$(fetch_checks) || finish 2 "could not read the PR checks"
+  log "dry run for $pr_url at ${head_sha:0:7}: $(summary "$checks")"
+  if [[ -n $(failing_checks "$checks") ]]; then
+    printf 'would rerun failed jobs for:\n%s\n' "$(failing_checks "$checks")"
+  fi
+  exit 0
+fi
+
+log "watching $pr_url at ${head_sha:0:7}, up to $max_reruns reruns"
+while :; do
+  wait_for_checks
+  failing=$(failing_checks "$checks")
+  if [[ -z $failing ]]; then
+    finish 0 "all checks passed after $reruns rerun(s)"
+  fi
+  jq -r '.[] | select(.bucket == "fail" or .bucket == "cancel") | .name' <<<"$checks" >>"$history"
+  log "failing:"$'\n'"$failing"
+  if ((reruns >= max_reruns)); then
+    finish 1 "still failing after $reruns rerun(s)"
+  fi
+  stuck=$(jq -r '.[] | select((.bucket == "fail" or .bucket == "cancel") and ((.link // "") | test("/actions/runs/[0-9]+") | not)) | "  \(.name): \(.link // "no link")"' <<<"$checks")
+  if [[ -n $stuck ]]; then
+    finish 2 "failing checks that are not GitHub Actions runs cannot be rerun:"$'\n'"$stuck"
+  fi
+  reruns=$((reruns + 1))
+  rerun_failed
+  wait_for_runs
+done

@@ -90,7 +90,7 @@ When the workspace you were invoked from uses beads (`bd where` finds a project)
 - Use the finding title as the issue title. Put the triggering scenario, impact, `path/to/file.ext:line`, and the reviewed PR number or base and head revisions in the description, and what a fix must achieve in `--acceptance`.
 - Add `-l review`. When the change implements an existing beads issue, also pass `--deps discovered-from:<id>`.
 
-Show each issue ID next to its finding in the report so fixes can be picked up with `/bd-next`.
+Show each issue ID next to its finding in the report so fixes can be picked up with `/use-beads next`.
 
 ## Temporary Repositories
 
