@@ -39,3 +39,6 @@ resize-overlay = always
 keybind = cmd+d=new_split:right
 keybind = super+[=goto_split:left
 keybind = super+]=goto_split:right
+
+window-padding-x=10
+window-padding-y=10

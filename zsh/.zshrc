@@ -33,14 +33,13 @@ togglemode() { osascript -e 'tell app "System Events" to tell appearance prefere
 claude() { CLAUDE_CONFIG_DIR="$HOME/.claude" command claude "$@"; }
 claude-work() { CLAUDE_CONFIG_DIR="$HOME/.claude-work" command claude "$@"; }
 claude-work-x() { claude-work --model claude-opus-4-6[1m] --reasoning-effort high "$@"; }
-codex-jl() { CODEX_HOME="$HOME/.codex-jl" command codex "$@"; }
 ssh() {
     TERM=xterm-256color command ssh "$@"
 }
 
 # Aliases
 alias pi='CLAUDE_CONFIG_DIR="$HOME/.claude-work" pi'
-alias ccusage='CLAUDE_CONFIG_DIR="$HOME/.claude,$HOME/.claude-work" CODEX_HOME="$HOME/.codex,$HOME/.codex-jl" ccusage' # tracks all claude and codex accounts
+alias ccusage='CLAUDE_CONFIG_DIR="$HOME/.claude,$HOME/.claude-work" ccusage' # tracks all claude and codex accounts
 
 bindkey -M viins '^[b' backward-word
 bindkey -M viins '^[f' forward-word

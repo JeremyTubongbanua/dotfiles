@@ -1,5 +1,4 @@
 tap "atsign-foundation/tap"
-tap "can1357/tap"
 tap "dart-lang/dart"
 tap "stripe/stripe-cli"
 tap "supabase/tap"
@@ -19,6 +18,8 @@ brew "harfbuzz"
 brew "imagemagick"
 # Automation for Apps
 brew "appium"
+# Memory upgrade for your coding agent
+brew "beads"
 # Incredibly fast JavaScript runtime, bundler, test runner, and package manager
 brew "bun"
 # CLI tool for analyzing Claude Code usage from local JSONL files
@@ -75,8 +76,6 @@ brew "ripgrep"
 brew "stow"
 # Terminal multiplexer
 brew "tmux"
-# Coding agent with the IDE wired in
-brew "can1357/tap/omp", trusted: true
 # Stripe CLI utility
 brew "stripe/stripe-cli/stripe", trusted: true
 # Supabase CLI

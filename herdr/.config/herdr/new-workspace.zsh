@@ -1,10 +1,11 @@
 #!/usr/bin/env zsh
 #
-# Prompt for a directory and a workspace name, then build a 3-tab workspace:
+# Prompt for a directory and a workspace name, then build a 4-tab workspace:
 #
-#   tab 1  "zsh"      shell in <dir>
-#   tab 2  "nvim"    shell in <dir>, runs nvim
-#   tab 3  "agent"  shell in <dir>, left idle for `claude` / `claude-work` / `codex` / `omp`
+#   tab 1  "zsh"          shell in <dir>
+#   tab 2  "nvim"         shell in <dir>, runs nvim
+#   tab 3  "pi"           shell in <dir>, runs pi
+#   tab 4  "claude-work"  shell in <dir>, runs claude-work
 #
 # If <dir> already exists, no git work happens at all -- the tabs are just
 # opened there. Otherwise <dir> is created, and if it lands inside a worktree

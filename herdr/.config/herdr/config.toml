@@ -19,7 +19,7 @@ light_name="catppuccin-latte"
 dark_name="catppuccin"
 auto_switch = true
 
-# `Ctrl+b` then `Shift+m`: prompt for a directory + name, then build a 3-tab
+# `Ctrl+b` then `Shift+m`: prompt for a directory + name, then build a 4-tab workspace
 [[keys.command]]
 key = "prefix+shift+m"
 type = "popup"
