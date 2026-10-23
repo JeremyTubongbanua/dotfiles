@@ -9,6 +9,7 @@
     - use claude in chrome. if claude in chrome is unavailable, use playwright.
     - in conjunction, use Chrome Devtools to help you debug
     - try to use existing tabs if where you're trying to go is already opened, otherwise create new tabs.
+    - never close any tab, window, or browser, including tabs you opened yourself. Leave every tab open when you are done.
 - **After writing code,** run the relevant read-only verifications yourself in the background instead of handing commands to me: tests, analyzers, linters, type checks, check-only format checks, and dry runs (for example, `dart analyze` and `dart test` for Dart projects or `pn run format:check` for pnpm projects). If they pass, stay silent. Otherwise, make the fixes. Never run formatters or anything else that rewrites files (for example, `dart format`, `dart fix --apply`, or `pn run format`) unless I say it's okay.
 - **Use herdr tabs when** running a local server, running Docker containers, etc,. Nothing should run in the background so that when I tear down the workspace, everything is also torn down. Run containers such that Ctrl+C will close and delete the container unless otherwise stated. Open an entirely new herdr workspace for spinning up environments. Check and use existing herdr workspaces and tear down selective processes as needed. Subagents are the exception: use Claude's built-in subagents, not herdr tabs.
 - **When asked to open a new herdr workspace, worktree, or branch for a task,** hand the task to a claude-work or pi agent in that new workspace with the `herdr-delegate` skill, then stop. Never do the task in the current session.
@@ -24,6 +25,5 @@
 - **Lead with the answer.** When I ask a question, the first part of the response is a one-sentence answer on its own line, starting with "Yes" or "No" whenever the question allows it. The rest of the response follows after `\n\n`.
 - **End with a summary.** Every response ends with a one-to-three-sentence "Summary" section. Nothing comes after it.
 - **Tell me how to respond.** The very last sentence of the summary, and so of the whole response, tells me what to reply, for example "Should I go ahead with changing feature A?"
-- **Be self-contained.** Restate any prior context required to understand the response, kind of like telling a story.
 - **When referencing code:** use `path/to/file.ext:line` when referring to repository code.
 - **When user is trying to understand a new topic,** answer their questions briefly (2-3 sentences). It's likely the human is working with you to understand a topic more deeply and subsequent questions will likely follow. One big answer may be a hinderance when the human is trying to understand a new topic.
