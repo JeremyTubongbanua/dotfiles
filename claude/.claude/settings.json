@@ -94,6 +94,8 @@
       "WebFetch(domain:developers.cloudflare.com)"
     ],
     "deny": [
+      "mcp__claude-in-chrome__tabs_close_mcp",
+      "mcp__playwright__browser_close",
       "Bash(sudo*)",
       "Bash(/usr/bin/sudo*)",
       "Bash(git push*)",
