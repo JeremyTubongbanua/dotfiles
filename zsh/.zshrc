@@ -51,9 +51,15 @@ bindkey -M viins '^E' end-of-line
 # Herdr: auto-start an agent in the first pane of a new tab labelled "pi" or "claude-work"
 if [[ -o interactive && -n $HERDR_TAB_ID && -z $HERDR_AGENT_AUTOSTARTED ]] && (( $+commands[jq] )); then
   export HERDR_AGENT_AUTOSTARTED=1
+  herdr_agent_prompt=()
+  if [[ -r ${HERDR_AGENT_PROMPT_FILE:-} ]]; then
+    herdr_agent_prompt=("$(<$HERDR_AGENT_PROMPT_FILE)")
+  fi
+  unset HERDR_AGENT_PROMPT_FILE
   case "$(herdr tab get "$HERDR_TAB_ID" 2>/dev/null | jq -r '.result.tab | "\(.label) \(.pane_count)"')" in
     'nvim 1') nvim ;;
-    'pi 1') pi ;;
-    'claude-work 1') claude-work ;;
+    'pi 1') pi "${herdr_agent_prompt[@]}" ;;
+    'claude-work 1') claude-work "${herdr_agent_prompt[@]}" ;;
   esac
+  unset herdr_agent_prompt
 fi

@@ -46,4 +46,4 @@ Run `bd graph <epic-id>` and `bd show` a few children. Fix vague titles, missing
 
 Report the epic ID, the number of children, the `bd graph <epic-id> --compact` output, and which issues are ready first.
 
-Then stop. This session is the orchestrator: tell the user the epic is ready to dispatch with `/bd-next <epic-id>` for the next step or `/bd-next <count>` for several independent steps at once, each in its own worker tab. Implement in this session only when the user explicitly asks, one child at a time as `/bd-work` describes.
+Then stop. This session is the orchestrator: tell the user the epic is ready to dispatch with `/bd-next <epic-id>` for the next step or `/bd-next <count>` for several independent steps at once, each worked by its own subagent. Implement in this session only when the user explicitly asks, one child at a time as `/bd-work` describes.

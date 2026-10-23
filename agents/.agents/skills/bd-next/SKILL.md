@@ -1,12 +1,12 @@
 ---
 name: bd-next
-description: Dispatch the next ready beads issue to a new worker agent in an adjacent herdr tab, keeping this session free to plan and orchestrate. Use when the user runs /bd-next or asks to hand beads work off to agents.
+description: Dispatch the next ready beads issue to a worker subagent, keeping this session free to plan and orchestrate. Use when the user runs /bd-next or asks to hand beads work off to agents.
 argument-hint: [issue id | epic id | label | count]
 ---
 
 # Dispatch the Next Beads Issue
 
-This session is the orchestrator. It chooses work and hands each issue to a worker agent in its own herdr tab; it does not implement issues itself.
+This session is the orchestrator. It chooses work and hands each issue to a worker subagent; it does not implement issues itself.
 
 ## Choose the Issues
 
@@ -21,9 +21,9 @@ This session is the orchestrator. It chooses work and hands each issue to a work
 For each chosen issue:
 
 1. Claim it with `bd update <id> --claim` so the next `/bd-next` skips it. If another actor already holds it, skip it.
-2. Run `bd-dispatch <id>`. It opens a tab labelled with the issue ID directly after this session's tab, in the same herdr workspace and directory, and starts a worker running `/bd-work <id>` with the same Claude profile as this session. It does not change the user's focus.
-3. If `bd-dispatch` fails, for example because this session is not inside herdr, run `bd unclaim <id>` and tell the user to run `/bd-work <id>` in another session.
+2. Start a subagent in the background whose prompt is to work issue `<id>` by following the `bd-work` skill and to end with that skill's report. Start every chosen issue's subagent at once so they run in parallel.
+3. If a subagent cannot be started, run `bd unclaim <id>` and tell the user.
 
 ## Report
 
-List each dispatched issue's ID, title, and tab, then return to the user. Do not wait on workers or read their output unless asked. When asked, check them with `herdr agent list` and `herdr agent read <pane-id> --source recent-unwrapped --lines 80`, and see results with `bd show <id>` or `bd ready`.
+List each dispatched issue's ID and title, then return to the user without waiting. As each worker finishes, relay its report: what changed, how it was verified, issues it filed, and what became ready. If a worker stopped with its issue still in progress, say what is left according to `bd show <id>`. Do not dispatch more work unless the user asks.

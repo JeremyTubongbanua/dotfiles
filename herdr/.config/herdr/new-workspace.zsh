@@ -20,23 +20,49 @@
 #
 # Bound in config.toml as a [[keys.command]] popup. Tab completes directories,
 # Ctrl+C cancels.
+#
+# Agents hand a task to a new workspace without prompts:
+#
+#   new-workspace.zsh --agent <pi|claude-work> <dir> [<name>] < prompt
+#
+# That builds the same workspace without focusing it, refuses to reset a trunk
+# with uncommitted changes, and starts the chosen agent's tab with the prompt.
 
 emulate -L zsh
 setopt err_exit pipe_fail
 
+usage='usage: new-workspace.zsh [--agent <pi|claude-work> <dir> [<name>] < prompt]'
+
+agent=
+if [[ $1 == --agent ]]; then
+  agent="$2"
+  [[ $agent == (pi|claude-work) && -n $3 ]] || { print -u2 -- "$usage"; exit 1 }
+  dir="$3"
+  label="$4"
+  prompt="$(cat)"
+  [[ -n $prompt ]] || { print -u2 -- 'no prompt on stdin'; exit 1 }
+elif (( $# )); then
+  print -u2 -- "$usage"
+  exit 1
+fi
+
 die() {
   print -u2 -- "$@"
-  print -u2 -- '-- press any key --'
-  read -k1 -s
+  if [[ -z $agent ]]; then
+    print -u2 -- '-- press any key --'
+    read -k1 -s
+  fi
   exit 1
 }
 
-autoload -Uz compinit
-compinit -u -d "${XDG_CACHE_HOME:-$HOME/.cache}/herdr-zcompdump"
-zstyle ':completion:*' file-patterns '*(-/):directories'
+if [[ -z $agent ]]; then
+  autoload -Uz compinit
+  compinit -u -d "${XDG_CACHE_HOME:-$HOME/.cache}/herdr-zcompdump"
+  zstyle ':completion:*' file-patterns '*(-/):directories'
 
-dir="$HOME/GitHub/"
-vared -p 'workspace dir: ' dir
+  dir="$HOME/GitHub/"
+  vared -p 'workspace dir: ' dir
+fi
 
 dir="${~dir}"
 dir="${dir%/}"
@@ -64,17 +90,24 @@ done
 if [[ -n $trunk ]]; then
   root="${trunk:h}"
   branch="${dir#$root/}"
-  label="$branch"
+  label="${label:-$branch}"
 else
-  label="${dir:t}"
+  label="${label:-${dir:t}}"
 fi
 
-vared -p 'workspace name: ' label
+if [[ -z $agent ]]; then
+  vared -p 'workspace name: ' label
+fi
 [[ -n $label ]] || die 'no workspace name given'
 
 if (( fresh )) && [[ -n $trunk ]]; then
   print -- "trunk:  $trunk"
   print -- "branch: $branch"
+
+  if [[ -n $agent && -n "$(git -C "$trunk" status --porcelain)" ]]; then
+    rmdir -- "$dir"
+    die "trunk has uncommitted changes, not resetting it: $trunk"
+  fi
 
   remote=upstream
   git -C "$trunk" remote get-url upstream >/dev/null 2>&1 || remote=origin
@@ -97,7 +130,15 @@ fi
 
 # --- tabs ------------------------------------------------------------------
 
-ws_json="$(herdr workspace create --cwd "$dir" --label "$label" --focus)"
+if [[ -n $agent ]]; then
+  prompt_file="$(mktemp -t herdr-prompt)"
+  print -r -- "$prompt" >| "$prompt_file"
+  focus=--no-focus
+else
+  focus=--focus
+fi
+
+ws_json="$(herdr workspace create --cwd "$dir" --label "$label" "$focus")"
 ws_id="$(print -r -- "$ws_json" | jq -r '.result.workspace.workspace_id')"
 sh_tab="$(print -r -- "$ws_json" | jq -r '.result.tab.tab_id')"
 
@@ -105,7 +146,26 @@ herdr tab rename "$sh_tab" zsh >/dev/null
 
 herdr tab create --workspace "$ws_id" --cwd "$dir" --label nvim --no-focus >/dev/null
 
-herdr tab create --workspace "$ws_id" --cwd "$dir" --label pi --no-focus >/dev/null
-herdr tab create --workspace "$ws_id" --cwd "$dir" --label claude-work --no-focus >/dev/null
+agent_tab() {
+  local -a env
+  if [[ $1 == $agent ]]; then
+    env=(--env "HERDR_AGENT_PROMPT_FILE=$prompt_file")
+  fi
+  herdr tab create --workspace "$ws_id" --cwd "$dir" --label "$1" --no-focus "${env[@]}" \
+    | jq -r '.result.tab.tab_id'
+}
 
-herdr tab focus "$sh_tab" >/dev/null
+pi_tab="$(agent_tab pi)"
+claude_tab="$(agent_tab claude-work)"
+
+if [[ -z $agent ]]; then
+  herdr tab focus "$sh_tab" >/dev/null
+  exit 0
+fi
+
+if [[ $agent == pi ]]; then
+  tab="$pi_tab"
+else
+  tab="$claude_tab"
+fi
+print -r -- "dispatched to workspace \"$label\" ($ws_id), tab $tab running $agent in $dir"

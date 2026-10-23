@@ -6,7 +6,7 @@ argument-hint: <issue id>
 
 # Work a Beads Issue
 
-Complete exactly one issue, then stop. Usually an orchestrator session started you with `/bd-next`, in your own herdr tab labelled with the issue ID.
+Complete exactly one issue, then stop. Usually an orchestrator session started you as a subagent with `/bd-next`.
 
 ## Pick Up the Issue
 
@@ -18,7 +18,7 @@ Claim it with `bd update <id> --claim`. The orchestrator usually claimed it alre
 
 ## Implement
 
-Implement only what the acceptance criteria require, following the user's and repository's instructions. Other workers may be running in sibling tabs on the same working tree, so keep changes to the files this issue needs.
+Implement only what the acceptance criteria require, following the user's and repository's instructions. Other workers may be running on the same working tree at the same time, so keep changes to the files this issue needs.
 
 When you find work outside the issue's scope, such as a bug, a follow-up, or a missing test, file it instead of doing it:
 
@@ -27,7 +27,7 @@ bd create "<title>" -t <type> -p <priority> -d "<what and why>" \
   --deps discovered-from:<id>
 ```
 
-If that new work blocks the current issue, link it with `bd dep add <id> <new-id>`, record progress with `bd update <id> --append-notes "<what is done, what is left>"`, run `bd unclaim <id>`, and stop to tell the user.
+If that new work blocks the current issue, link it with `bd dep add <id> <new-id>`, record progress with `bd update <id> --append-notes "<what is done, what is left>"`, run `bd unclaim <id>`, and stop to report it.
 
 ## Verify and Close
 
@@ -43,4 +43,4 @@ If that closed the last open child of an epic, close the epic too.
 
 ## Report
 
-Give the issue ID and title, what changed as `path/to/file.ext:line` references, how it was verified, any issues filed along the way, and what became ready. Then stay idle in this tab for follow-up questions; do not start another issue or close the tab.
+Give the issue ID and title, what changed as `path/to/file.ext:line` references, how it was verified, any issues filed along the way, and what became ready. Then stop; do not start another issue. As a subagent, this report is your final message to the orchestrator.
