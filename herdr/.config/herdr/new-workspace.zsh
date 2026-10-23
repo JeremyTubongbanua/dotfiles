@@ -21,26 +21,35 @@
 # Bound in config.toml as a [[keys.command]] popup. Tab completes directories,
 # Ctrl+C cancels.
 #
-# Agents hand a task to a new workspace without prompts:
+# Agents open the same workspace without prompts, either focused like the
+# popup, or unfocused with a task handed to an agent tab:
 #
+#   new-workspace.zsh --open <dir> [<name>]
 #   new-workspace.zsh --agent <pi|claude-work> <dir> [<name>] < prompt
 #
-# That builds the same workspace without focusing it, refuses to reset a trunk
-# with uncommitted changes, and starts the chosen agent's tab with the prompt.
+# Both refuse to reset a trunk with uncommitted changes. --agent starts the
+# chosen agent's tab with the prompt.
 
 emulate -L zsh
 setopt err_exit pipe_fail
 
-usage='usage: new-workspace.zsh [--agent <pi|claude-work> <dir> [<name>] < prompt]'
+usage='usage: new-workspace.zsh [--open <dir> [<name>] | --agent <pi|claude-work> <dir> [<name>] < prompt]'
 
 agent=
+interactive=1
 if [[ $1 == --agent ]]; then
+  interactive=0
   agent="$2"
   [[ $agent == (pi|claude-work) && -n $3 ]] || { print -u2 -- "$usage"; exit 1 }
   dir="$3"
   label="$4"
   prompt="$(cat)"
   [[ -n $prompt ]] || { print -u2 -- 'no prompt on stdin'; exit 1 }
+elif [[ $1 == --open ]]; then
+  interactive=0
+  [[ -n $2 ]] || { print -u2 -- "$usage"; exit 1 }
+  dir="$2"
+  label="$3"
 elif (( $# )); then
   print -u2 -- "$usage"
   exit 1
@@ -48,14 +57,14 @@ fi
 
 die() {
   print -u2 -- "$@"
-  if [[ -z $agent ]]; then
+  if (( interactive )); then
     print -u2 -- '-- press any key --'
     read -k1 -s
   fi
   exit 1
 }
 
-if [[ -z $agent ]]; then
+if (( interactive )); then
   autoload -Uz compinit
   compinit -u -d "${XDG_CACHE_HOME:-$HOME/.cache}/herdr-zcompdump"
   zstyle ':completion:*' file-patterns '*(-/):directories'
@@ -95,7 +104,7 @@ else
   label="${label:-${dir:t}}"
 fi
 
-if [[ -z $agent ]]; then
+if (( interactive )); then
   vared -p 'workspace name: ' label
 fi
 [[ -n $label ]] || die 'no workspace name given'
@@ -104,7 +113,7 @@ if (( fresh )) && [[ -n $trunk ]]; then
   print -- "trunk:  $trunk"
   print -- "branch: $branch"
 
-  if [[ -n $agent && -n "$(git -C "$trunk" status --porcelain)" ]]; then
+  if (( ! interactive )) && [[ -n "$(git -C "$trunk" status --porcelain)" ]]; then
     rmdir -- "$dir"
     die "trunk has uncommitted changes, not resetting it: $trunk"
   fi
@@ -160,6 +169,9 @@ claude_tab="$(agent_tab claude-work)"
 
 if [[ -z $agent ]]; then
   herdr tab focus "$sh_tab" >/dev/null
+  if (( ! interactive )); then
+    print -r -- "opened workspace \"$label\" ($ws_id) in $dir"
+  fi
   exit 0
 fi
 

@@ -27,6 +27,8 @@ For an existing directory, the launcher performs no Git operations. For a new di
 
 Agents use the same launcher through the `herdr-delegate` skill to hand a task to a new workspace instead of working on it themselves. `new-workspace.zsh --agent <pi|claude-work> <dir> [<name>]` reads the task from stdin, builds the workspace without taking focus, refuses to reset a `trunk` with uncommitted changes, and starts that agent with the task as its first prompt.
 
+The `new-workspace` skill lets an agent open a workspace the way the popup does, with no task attached. `new-workspace.zsh --open <dir> [<name>]` skips the prompts, focuses the new workspace, and also refuses to reset a `trunk` with uncommitted changes.
+
 Relevant files:
 
 | File | Purpose |
