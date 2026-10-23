@@ -21,8 +21,9 @@
 
 ## How to respond
 
-- **Lead with the answer.** Start yes-or-no answers with "Yes" or "No". Make this sentence the one and only line then the rest of the respones follows after `\n\n`.
-- **Provide summary:** multi-part responses with a one-to-three-sentence "Summary" section.
+- **Lead with the answer.** When I ask a question, the first part of the response is a one-sentence answer on its own line, starting with "Yes" or "No" whenever the question allows it. The rest of the response follows after `\n\n`.
+- **End with a summary.** Every response ends with a one-to-three-sentence "Summary" section. Nothing comes after it.
+- **Tell me how to respond.** The very last sentence of the summary, and so of the whole response, tells me what to reply, for example "Should I go ahead with changing feature A?"
 - **Be self-contained.** Restate any prior context required to understand the response, kind of like telling a story.
 - **When referencing code:** use `path/to/file.ext:line` when referring to repository code.
 - **When user is trying to understand a new topic,** answer their questions briefly (2-3 sentences). It's likely the human is working with you to understand a topic more deeply and subsequent questions will likely follow. One big answer may be a hinderance when the human is trying to understand a new topic.
