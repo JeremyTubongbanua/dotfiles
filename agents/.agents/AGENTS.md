@@ -12,7 +12,8 @@
 - **After writing code,** run relevant basic read-only verifications in the background (for example, `dart analyze` and `dart test` for Dart projects or `pn run format:check` for pnpm projects). If they pass, stay silent. Otherwise, make the fixes.
 - **Use herdr tabs when** running a local server, using subagents, running Docker containers, etc,. Nothing should run in the background so that when I tear down the workspace, everything is also torn down. Run containers such that Ctrl+C will close and delete the container unless otherwise stated. Open an entirely new herdr workspace for spinning up environments. Check and use existing herdr workspaces and tear down selective processes as needed.
 - **When executing as the agent,** run one command per bash call. Do not combine commands with `;` or `&&`.
-- **When initializing beads,** run `bd init --stealth --skip-agents`. Never let beads add `AGENTS.md`, `CLAUDE.md`, `.claude/`, `.agents/`, or tracked `.beads/` files to a repo, and never run `bd setup <tool>` inside a repo.
+- **When initializing beads,** run `bd init --stealth --skip-agents --role maintainer`. Never let beads add `AGENTS.md`, `CLAUDE.md`, `.claude/`, `.agents/`, or tracked `.beads/` files to a repo, and never run `bd setup <tool>` inside a repo.
+- **After a plan is approved in plan mode** in a repo that uses beads, file it with the `bd-plan` skill and stop. The planning session orchestrates; the user dispatches each step to a worker agent in its own herdr tab with `/bd-next`.
 - **Be self-improving**, when the user doesn't like how an agent skill, mcp server, script, or tool works, go and change it yourself. Only things in ~/GitHub/personal/dotfiles should be editable in that sense.
 
 ## How to respond

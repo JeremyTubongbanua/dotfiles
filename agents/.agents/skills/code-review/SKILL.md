@@ -81,6 +81,17 @@ Keep each finding self-contained and actionable. Combine findings with the same 
 
 After the findings, briefly state what was reviewed, relevant check or test status, and any limitations. If there are no actionable findings, say so explicitly while still noting unverified areas or unavailable CI/PR context.
 
+## File Findings in Beads
+
+When the workspace you were invoked from uses beads (`bd where` finds a project), file each confirmed finding as a beads issue as you report it. Questions and residual risks stay in the report only.
+
+- Run `bd search "<key words>"` first so a re-review does not file the same finding twice.
+- Map severity to priority (`P0` to `-p 0` through `P3` to `-p 3`). Use `-t bug` for defects and `-t task` for missing tests or other non-defect work.
+- Use the finding title as the issue title. Put the triggering scenario, impact, `path/to/file.ext:line`, and the reviewed PR number or base and head revisions in the description, and what a fix must achieve in `--acceptance`.
+- Add `-l review`. When the change implements an existing beads issue, also pass `--deps discovered-from:<id>`.
+
+Show each issue ID next to its finding in the report so fixes can be picked up with `/bd-next`.
+
 ## Temporary Repositories
 
 When reviewing a pull request, git clone the branch so that you can traverse the code locally.

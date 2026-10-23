@@ -27,9 +27,6 @@
   ],
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-6.1-sol",
-  "skills": [
-    "-/Users/jeremytubongbanua/.agents/skills/agent-browser"
-  ],
   "modelThinkingLevels": {
     "anthropic/claude-opus-5-5": "xhigh",
     "openai-codex/gpt-6.1-sol": "high"
