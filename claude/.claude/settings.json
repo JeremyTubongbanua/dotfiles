@@ -128,6 +128,10 @@
     ]
   },
   "model": "claude-opus-5-5",
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
   "hooks": {
     "SessionStart": [
       {
