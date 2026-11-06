@@ -16,7 +16,7 @@ This session only sets up and hands off. The task runs in the new workspace's ag
 
 ## Choose the Agent
 
-Use the agent the user names. Otherwise use `pi` when this session is pi, and `claude-work` in every other case.
+Use the agent the user names. Otherwise pick by project: `pi` for Align work (repositories under `~/GitHub/align`) and `claude-work` for Atsign work (repositories under `~/GitHub/atsign`). For anything else, use `pi` when this session is pi, and `claude-work` otherwise.
 
 ## Write the Brief
 
