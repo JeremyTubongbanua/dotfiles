@@ -28,8 +28,7 @@ One herdr workspace, labelled `telemetry demo`, with one tab per process:
 | `registrar` | the mock registrar, answering from `.work/demo/config/registrar_atsigns.json` | `telemetry-demo-registrar` | http 127.0.0.1:18090 |
 | `web` | the web service and dashboard | `telemetry-demo-web` | http://localhost:8080 |
 | `app <name>` | one application, on the host | none | |
-| `app management-backend` | the management backend, as the vault Atsign (an app, see [Management](#management)) | none | http://localhost:8090 |
-| `app management-frontend` | the management frontend's Vite dev server | none | http://localhost:5173 |
+| `app management` | the management backend, as the vault Atsign, serving the built management frontend (an app, see [Management](#management)) | none | http://localhost:8090 |
 
 The containers share the Docker network `telemetry-demo`. atServers send signed telemetry to `vip.ve.atsign.zone:2777`, which inside the EE is the collector; applications send telemetry as Atsign notifications to the collector Atsign. The collector forwards both to Loki under tenant `atsign`, which is the tenant the dashboard reads.
 
@@ -69,7 +68,7 @@ Other demo state is not kept, and that is expected. The atServers' storage lives
      <this worktree>/packages/monitoring/web_service/.env
    ```
 
-5. **Ports 2700-2799, 8080, 13100 and 18090 are free or held by the demo**, and 8090 and 5173 too when the apps file runs the management app. `demo_up.sh` checks each component's ports just before starting it. The older `tools/deploy/local/reboot.sh` stack uses the same ports as compose project `telemetry-ee`; tell the user before stopping it, then stop it with `docker compose -p telemetry-ee -f tools/deploy/local/compose.yaml -f tools/deploy/local/ee.compose.yaml down`. That keeps its volumes; never add `--volumes`.
+5. **Ports 2700-2799, 8080, 13100 and 18090 are free or held by the demo**, and 8090 too when the apps file runs the management app. `demo_up.sh` checks each component's ports just before starting it. The older `tools/deploy/local/reboot.sh` stack uses the same ports as compose project `telemetry-ee`; tell the user before stopping it, then stop it with `docker compose -p telemetry-ee -f tools/deploy/local/compose.yaml -f tools/deploy/local/ee.compose.yaml down`. That keeps its volumes; never add `--volumes`.
 
 ## Applications
 
@@ -98,10 +97,15 @@ An apps file is JSON. Each app gets its own Atsign, onboarded in the EE, and its
 - `enrollment` (optional): `{"app": "chat", "device": "phone", "namespaces": {"my_app": "rw", "at_telemetry": "rw"}}`. The app runs as its own APKAM enrollment of `atsign` instead of the onboarded keys. `demo_enroll.sh` creates it in the EE (it sets a semi-permanent passcode with the onboarded keys, runs `at_activate auto` to approve the matching request, then `at_activate enroll`) and saves the keys as `.work/demo/keys/enrollments/<name>.atKeys`. It enrolls again only when the EE restarted or the entry changed. Include `at_telemetry: rw` whenever the app sends telemetry, since its notifications to the collector use that namespace.
 - `telemetry` (optional, default `true`): `false` for apps that send no application telemetry, such as the management app, so the reconcile does not wait 90 seconds for it.
 
-At the top level, two optional lists add Atsigns that no app uses:
+At the top level, five optional lists give Atsigns a role. An Atsign can be in only one of them, and only `dead_atsigns` holds app Atsigns:
 
 - `spare_atsigns`: the EE creates them but the demo never onboards them, so the management app can spawn them. They are in the producers file and the registrar answer, so they show on the dashboard once spawned.
-- `silent_atsigns`: provisioned in the EE (its atServer runs) but never onboarded, so it has no keys at all, and listed as the user's (registrar), to show an Atsign that does not report next to ones that do. Not onboarding alone does not silence it: an unonboarded atServer of this build still sends signed heartbeats, as the spares do. So after onboarding the others, `demo_up.sh` also adds `environment = AT_TELEMETRY_ENDPOINT=""` to its supervisord program in the EE and restarts it (an empty endpoint turns the atServer's telemetry off), and leaves it out of the producers file so the collector refuses the `started` event it sends before that. Loki then holds nothing from it, and the dashboard lists it with no telemetry and the Connections page counts it as not reporting. Check with `docker exec telemetry-demo-ee supervisorctl status`, where it runs like the others. A silent Atsign cannot be an app's `atsign`.
+- `silent_atsigns`: provisioned in the EE (its atServer runs) but never onboarded, so it has no keys at all, and listed as the user's (registrar), to show an Atsign that does not report next to ones that do. Not onboarding alone does not silence it: an unonboarded atServer of this build still sends signed heartbeats, as the spares do. So after onboarding the others, `demo_up.sh` also adds `environment = AT_TELEMETRY_ENDPOINT=""` to its supervisord program in the EE and restarts it (an empty endpoint turns the atServer's telemetry off), and leaves it out of the producers file so the collector refuses the `started` event it sends before that. Loki then holds nothing from it, so the dashboard and Endpoints page leave it out as never activated. Check with `docker exec telemetry-demo-ee supervisorctl status`, where it runs like the others. A silent Atsign cannot be an app's `atsign`.
+- `offline_atsigns`: a dormant application. Provisioned and onboarded, its atServer runs and sends heartbeats (it is in the producers file), but no app uses it, so the dashboard shows it grey (offline, "Application dormant"). Changing this list restarts the EE.
+- `dead_atsigns`: an atServer hit by an infrastructure hiccup. Each must be the `atsign` of an app: it is provisioned and onboarded and its app runs, but once its heartbeat has reached Loki, `demo_up.sh` stops its supervisord program (`ee_running` skips it), so the dashboard shows it grey with a red "!" beside it, and its drawer shows the atServer OFFLINE in red. Its apps count as `telemetry: false`. `supervisorctl status` lists it as STOPPED and exits non-zero, which the scripts allow. Changing this list restarts the EE.
+- `unprovisioned_atsigns`: only in the registrar answer, never created in the EE, so its atServer never sends a heartbeat and the dashboard and Endpoints page leave it out. The registrar rereads its file on every request, so changing this list needs no restart.
+
+The web service lists an Atsign the registrar returns only once its atServer has sent a signed heartbeat in the last 30 days (never seen means never activated). The dashboard is a live view of the last 5 minutes, which is also the offline threshold. There is no error state: a node is green (online) only when the endpoint sent a message and its atServer sent a heartbeat in the last 5 minutes, and grey (offline) otherwise. A small red "!" beside the node marks an alert: its atServer sent no heartbeat for 5 minutes, its notifications failed, or its app logged a record of severity error or worse (`severity_number` 17 and up) in the last 5 minutes. Hovering a node says why; clicking it opens a drawer with an Endpoint section (status, last message, talking to, and the error messages its app sent) and an atServer section (status, red when offline, and last heartbeat).
 
 `demo_apps.example.json` runs `packages/monitoring/at_telemetry_service/example/at_telemetry_example.dart` as `@alice`, `@bob` and `@charlie` every 60 seconds; each run logs an app event batch to the collector Atsign and waits for its acknowledgement. A branch cut before the example moved there lacks it; point `dir` at a worktree that has it, in a local apps file.
 
@@ -109,34 +113,34 @@ At the top level, two optional lists add Atsigns that no app uses:
 
 `demo_apps.chat.example.json` runs `packages/monitoring/at_telemetry_service/example/at_message_relay_example.dart`, a long-running client that sends and receives plain notifications (`message.at_message_relay_example`) and logs each one as application telemetry:
 
-- `alice-phone` and `alice-laptop` are two APKAM enrollments of `@alice` (app `chat`, devices `phone` and `laptop`, namespaces `at_message_relay_example:rw` and `at_telemetry:rw`). Each sends `@bob` a message about every 10 and 15 seconds (`--send-to @bob --interval N --label phone`).
-- `alice-phone` holds exactly one connection: `--never-sync` (a `CLIBase` flag) drops the sync connection and `--no-listen` drops the monitor, so it only sends. `alice-laptop` keeps the defaults, a command connection plus a monitor, so the Connections page shows the two devices side by side.
-- `bob-chat` (`--reply --forward-to @charlie`) answers every message to its sender and forwards it to `@charlie`. A reply to `@alice` reaches every enrollment that listens, so the `alice-laptop` tab shows the replies to the phone too.
-- `charlie-chat` only listens.
+Every device is its own Atsign, which is what the dashboard calls an endpoint: the demo uses no APKAM enrollments and never puts two apps under one Atsign. Names follow person and device, like the Figma's `@sam_phone`.
 
-The relay's flags are `--send-to`, `--forward-to`, `--reply`, `--[no-]listen`, `--label` and `--interval` (average seconds, each wait picked from half to one and a half times it), plus `CLIBase`'s own such as `--never-sync`. When `enroll` runs, `at_activate` holds one more connection of the enrollment for a moment; it closes once the enrollment is approved. Because these clients hold their connections open, the dashboard's devices, Connections page and timeline show them as connected. After an EE restart the atServers log a burst of `auth.failed` (`enrollment_expired`) events from clients still holding the old keys and from `at_activate enroll` waiting for approval; that is expected and stops once the apps restart.
+- `alice-phone` (`@alice_phone`) and `alice-laptop` (`@alice_laptop`) each send `@bob_laptop` a message about every 10 and 15 seconds (`--send-to @bob_laptop --interval N --label phone`).
+- `alice-phone` holds exactly one connection: `--never-sync` (a `CLIBase` flag) drops the sync connection and `--no-listen` drops the monitor, so it only sends. `alice-laptop` keeps the defaults, a command connection plus a monitor, so it also receives the replies.
+- `bob-laptop` (`@bob_laptop`, `--reply --forward-to @charlie_tablet`) answers every message to its sender and forwards it to `@charlie_tablet`.
+- `charlie-tablet` (`@charlie_tablet`) only listens.
 
-The example also runs the management app, spares `@dave` and `@erin`, and the silent `@quiet`; drop those entries for a chat-only demo. For the user's own mix (for example the per-minute batch apps from another worktree plus the chat), copy it to `tools/deploy/local/demo_apps.<name>.local.json`.
+The relay's flags are `--send-to`, `--forward-to`, `--reply`, `--[no-]listen`, `--label` and `--interval` (average seconds, each wait picked from half to one and a half times it), plus `CLIBase`'s own such as `--never-sync`. The apps file format still accepts `enrollment` entries, but the demo no longer uses them.
+
+The example also lists `@offline` (grey), `@dead_atserver` with its batch app (grey with a red "!"), `@faulty_camera`, whose batch app runs with `--report-error 'Camera sensor not responding'` every 20 seconds so it logs a severity error each run (green with a red "!", its errors listed in the drawer), and `@unprovisioned` (left out); it has no management app, silent or spare Atsigns (add a `management` app, `silent_atsigns` or `spare_atsigns` back to an apps file to show those); drop those entries for a chat-only demo. The user's own mix is `tools/deploy/local/demo_apps.chat.local.json` in the worktree under test: the example's Atsigns plus `@alice_camera`, `@bob_camera` and `@charlie_camera`, which run the per-minute batch example, each on its own Atsign.
 
 ### Management
 
-The management backend (`packages/management/backend`) and frontend (`packages/management/frontend`) run as two apps sharing the vault Atsign, normally `@vault`:
+The management backend (`packages/management/backend`) runs as one app, as the vault Atsign, normally `@vault`. It builds the frontend (`packages/management/frontend`) first and serves the build itself with `--static-dir`, so the UI and its `/v1` API share http://localhost:8090. The demo changes nothing under `packages/management/`: that code belongs to trunk, not to monitoring branches.
 
 ```json
-{"name": "management-backend", "atsign": "@vault", "dir": "packages/management/backend",
- "command": "dart run bin/management_backend.dart -a $AT_SIGN -k $AT_KEYS_FILE --root-domain $AT_ROOT_SERVER --port 8090 --company-name 'Demo Company'",
- "every": 5, "telemetry": false},
-{"name": "management-frontend", "atsign": "@vault", "dir": "packages/management/frontend",
- "command": "test -d node_modules || npm ci --no-audit --no-fund; MANAGEMENT_BACKEND_ORIGIN=http://localhost:8090 exec npm run dev -- --port 5173 --strictPort",
+{"name": "management", "atsign": "@vault", "dir": "packages/management/backend",
+ "command": "test -d ../frontend/node_modules || npm --prefix ../frontend ci --no-audit --no-fund; npm --prefix ../frontend run build && REGISTRAR_SUPER_API_KEY=demo-only exec dart run bin/management_backend.dart -a $AT_SIGN -k $AT_KEYS_FILE --root-domain $AT_ROOT_SERVER --port 8090 --company-name 'Demo Company' --registrar-url registrar.invalid --static-dir ../frontend/build",
  "every": 5, "telemetry": false}
 ```
 
-- The backend listens on 8090, because the dashboard has 8080. The frontend at http://localhost:5173 proxies `/v1` to `MANAGEMENT_BACKEND_ORIGIN` (`vite.config.ts` reads it; without it the proxy goes to 8080). Check the pair with `curl -s http://localhost:5173/v1/audit`, which prints `[]` on a fresh vault.
-- `--root-domain vip.ve.atsign.zone:2700` needs the backend's `AtClientPool` to parse the port (`AtRootDomain.parse`); a branch without that fix connects to port 64 and fails.
+- It listens on 8090, because the dashboard has 8080. Check it with `curl -s http://localhost:8090/v1/audit`, which prints `[]` on a fresh vault, and open http://localhost:8090 for the UI.
+- The backend refuses to start without `REGISTRAR_SUPER_API_KEY`, which it uses to delete dead Atsigns through the registrar's `manage-atsigns` API over https. The mock registrar does not implement that API, so the demo passes a throwaway key and `--registrar-url registrar.invalid`, a name that never resolves, so a purge fails locally instead of reaching the real registrar.
+- The frontend build lands in `packages/management/frontend/build/`, which git ignores, and is rebuilt every time the app's tab restarts.
 - There is no sign-in; the frontend asks for a name and records it with every change. The list of managed Atsigns comes from the audit log.
 - To spawn an Atsign, the user needs a spare one (from `spare_atsigns`) and its CRAM secret. The EE's secrets are throwaway test values; read one with `docker exec telemetry-demo-ee awk '$1 == "dave" {print $2}' /tmp/CRAM_Keys` and give it to the user for the Spawn dialog. Never use a spare Atsign as an app's `atsign`, since the demo would onboard it first.
 - A freshly spawned atServer was started before it had keys. If its heartbeats do not reach the dashboard, restart it: find its program with `docker exec telemetry-demo-ee supervisorctl status`, then `docker exec telemetry-demo-ee supervisorctl restart <program>`.
-- Backend code changes need its tab restarted (see [After changing code](#after-changing-code)); the frontend's Vite server reloads `src/` changes by itself.
+- Backend or frontend code changes need its tab restarted (see [After changing code](#after-changing-code)).
 
 For another app, such as a chat app on a local branch, write an apps file with that app's checkout as `dir` and its own command line. Keep it outside `.work/demo`; `tools/deploy/local/demo_apps.<anything>.local.json` is ignored by git. The app must take an Atsign, a key file and a root server (`at_cli_commons` `CLIBase` apps take `-a`, `-k`, `-r`, `-s`). For its telemetry to reach the dashboard it must send `at_telemetry` notifications to `$AT_COLLECTOR`; atServer telemetry (heartbeats, connection events and the rest) arrives whatever the app sends. The EE's certificate for `vip.ve.atsign.zone` is publicly trusted, so apps need no extra CA settings. Run `dart pub get` in the app's checkout first if it has never been resolved.
 
@@ -163,9 +167,10 @@ It then runs `demo_up.sh` in the `setup` tab and prints the workspace and setup 
 1. Checks the prerequisites and writes `.work/demo/config` from the apps file: the EE's Atsign list (apps, silent, spares, then collector), the Atsigns to onboard, the silent ones, `producers.json`, `registrar_atsigns.json`, `apps.tsv`, `enrollments.tsv` and `quiet_apps`. Files are rewritten in place, so running containers keep seeing them.
 2. Rebuilds the images of the selected components, tagged with git hashes (see [Image tags](#image-tags)): the EE from `--at-server-dir`, the collector and web service from the worktree. Docker's cache makes unchanged builds fast; never skip this, because stale images are the usual reason a code change does not show up.
 3. Compares each container's `telemetry-demo.spec` label, a hash of its image ID, its config files and the worktree path, with what it should be. A component is restarted when the hash differs, its container is not running, its tab is not running it, or it is named in `--restart`. Restarting stops the process in the existing tab with Ctrl+C and reruns the command there; a tab is created only when its label is missing, and closed only when the Atsign or app it served is gone.
-4. When the EE restarts, every Atsign except the spare and silent ones is onboarded again with `at_activate`, the keys and EE certificates are copied to `.work/demo`, the silent Atsigns' telemetry is turned off, and the atServers are restarted to sign telemetry with the new keys. New keys mean the collector, the `atserver @<name>` log tails and the apps restart too, whatever `--only` says. Changing which Atsigns are onboarded or silent also restarts the EE.
+4. When the EE restarts, every Atsign except the spare and silent ones is onboarded again with `at_activate`, the keys and EE certificates are copied to `.work/demo`, the silent Atsigns' telemetry is turned off, and the atServers are restarted to sign telemetry with the new keys. New keys mean the collector, the web service, the `atserver @<name>` log tails and the apps restart too, whatever `--only` says. Changing which Atsigns are onboarded, silent or dead also restarts the EE. The dead Atsigns' atServers are stopped at the end, after their heartbeats reached Loki.
 5. Apps with an `enrollment` are enrolled (or found already enrolled for this EE) just before their tab is checked. Apps restart when their apps-file entry or enrollment changed, the EE restarted, or (for apps with `every` above 0) their tab stopped.
-6. Waits for heartbeats when the EE, collector or Loki restarted, and for application telemetry from restarted apps other than `telemetry: false` ones, then prints each image (`Images`), what restarted and what was up to date, and ends with `DEMO READY: http://localhost:8080`.
+6. Waits for heartbeats (from the app and offline Atsigns) when the EE, collector or Loki restarted, and for application telemetry from restarted apps other than `telemetry: false` ones. Then it stops the dead atServers and waits until they have sent no heartbeat for 5 minutes, so a bootstrap with a dead atServer takes about 5 minutes longer.
+7. Starts the web service last, so `localhost:8080` only comes up once everything reports and shows its settled state (a dead atServer already offline with its alert). When the EE restarts, the web service is taken down first and comes back at this step. Then it prints each image (`Images`), what restarted and what was up to date, and ends with `DEMO READY: http://localhost:8080`.
 
 The registrar rereads `.work/demo/config/registrar_atsigns.json` on every request, so changing `--email` needs no restart.
 
@@ -194,8 +199,7 @@ When a `telemetry demo` workspace is running (`herdr workspace list`) and you ha
 | `packages/monitoring/at_telemetry_service/` other than `example/` | `demo_start.sh --only collector` | `collector` |
 | `tools/deploy/local/mock_registrar.dart` | `demo_start.sh --only registrar` | `registrar` |
 | An app's code, such as `at_telemetry_service/example/` or `packages/management/backend/` | `demo_start.sh --only apps --restart apps` | every `app` tab |
-| `packages/management/frontend/src/` | nothing; Vite reloads it | |
-| `packages/management/frontend/vite.config.ts` or `package.json` | `demo_start.sh --only apps --restart apps` | every `app` tab |
+| `packages/management/frontend/` | `demo_start.sh --only apps --restart apps` | every `app` tab; the management one rebuilds the frontend |
 | The at_server worktree the demo builds from | `demo_start.sh` | EE, then collector, log tails and apps (new keys); Loki is kept |
 | The apps file, `demo_*.sh`, or not sure | `demo_start.sh` | whatever changed |
 | Docs or tests only | nothing | |
