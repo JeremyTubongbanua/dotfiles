@@ -35,7 +35,7 @@
     "-builtin:mcp"
   ],
   "extensionChangelogVersions": {
-    "{\"source\":\"npm:pi-lens\",\"scope\":\"user\"}": "4.4.8",
+    "{\"source\":\"npm:pi-lens\",\"scope\":\"user\"}": "4.4.9",
     "{\"source\":\"npm:pi-mcp-adapter\",\"scope\":\"user\"}": "7.0.1",
     "{\"source\":\"npm:pi-multi-account\",\"scope\":\"user\"}": "1.28.1",
     "{\"source\":\"npm:pi-web-access@0.29.0\",\"scope\":\"user\"}": "0.29.0",
