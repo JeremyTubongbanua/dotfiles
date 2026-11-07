@@ -1,4 +1,8 @@
 {
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
   "permissions": {
     "allow": [
       "Grep",
@@ -127,11 +131,7 @@
       "/Users/jeremytubongbanua"
     ]
   },
-  "model": "opus",
-  "attribution": {
-    "commit": "",
-    "pr": ""
-  },
+  "model": "claude-opus-5-5",
   "hooks": {
     "SessionStart": [
       {
@@ -181,6 +181,9 @@
       "effortLevel": "high"
     },
     "claude-opus-5-5": {
+      "effortLevel": "xhigh"
+    },
+    "claude-sonnet-5-5": {
       "effortLevel": "xhigh"
     }
   },
