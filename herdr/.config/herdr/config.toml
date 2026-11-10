@@ -23,6 +23,6 @@ auto_switch = true
 [[keys.command]]
 key = "prefix+shift+m"
 type = "popup"
-command = "/Users/jeremytubongbanua/.config/herdr/new-workspace.zsh"
+command = "$HOME/.config/herdr/new-workspace.zsh"
 width = "80%"
 height = "40%"
