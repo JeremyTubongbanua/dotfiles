@@ -1,11 +1,10 @@
 #!/usr/bin/env zsh
 #
-# Prompt for a directory and a workspace name, then build a 4-tab workspace:
+# Prompt for a directory and a workspace name, then build a 3-tab workspace:
 #
-#   tab 1  "zsh"          shell in <dir>
-#   tab 2  "nvim"         shell in <dir>, runs nvim
-#   tab 3  "pi"           shell in <dir>, runs pi
-#   tab 4  "claude-work"  shell in <dir>, runs claude-work
+#   tab 1  "zsh"     shell in <dir>
+#   tab 2  "nvim"    shell in <dir>, runs nvim
+#   tab 3  "claude"  shell in <dir>, runs claude
 #
 # If <dir> already exists, no git work happens at all -- the tabs are just
 # opened there. Otherwise <dir> is created, and if it lands inside a worktree
@@ -22,27 +21,27 @@
 # Ctrl+C cancels.
 #
 # Agents open the same workspace without prompts, either focused like the
-# popup, or unfocused with a task handed to an agent tab:
+# popup, or unfocused with a task handed to the claude tab:
 #
 #   new-workspace.zsh --open <dir> [<name>]
-#   new-workspace.zsh --agent <pi|claude-work> <dir> [<name>] < prompt
+#   new-workspace.zsh --agent <dir> [<name>] < prompt
 #
 # Both refuse to reset a trunk with uncommitted changes. --agent starts the
-# chosen agent's tab with the prompt.
+# claude tab with the prompt.
 
 emulate -L zsh
 setopt err_exit pipe_fail
 
-usage='usage: new-workspace.zsh [--open <dir> [<name>] | --agent <pi|claude-work> <dir> [<name>] < prompt]'
+usage='usage: new-workspace.zsh [--open <dir> [<name>] | --agent <dir> [<name>] < prompt]'
 
-agent=
+agent=0
 interactive=1
 if [[ $1 == --agent ]]; then
   interactive=0
-  agent="$2"
-  [[ $agent == (pi|claude-work) && -n $3 ]] || { print -u2 -- "$usage"; exit 1 }
-  dir="$3"
-  label="$4"
+  agent=1
+  [[ -n $2 ]] || { print -u2 -- "$usage"; exit 1 }
+  dir="$2"
+  label="$3"
   prompt="$(cat)"
   [[ -n $prompt ]] || { print -u2 -- 'no prompt on stdin'; exit 1 }
 elif [[ $1 == --open ]]; then
@@ -139,7 +138,7 @@ fi
 
 # --- tabs ------------------------------------------------------------------
 
-if [[ -n $agent ]]; then
+if (( agent )); then
   prompt_file="$(mktemp -t herdr-prompt)"
   print -r -- "$prompt" >| "$prompt_file"
   focus=--no-focus
@@ -155,19 +154,14 @@ herdr tab rename "$sh_tab" zsh >/dev/null
 
 herdr tab create --workspace "$ws_id" --cwd "$dir" --label nvim --no-focus >/dev/null
 
-agent_tab() {
-  local -a env
-  if [[ $1 == $agent ]]; then
-    env=(--env "HERDR_AGENT_PROMPT_FILE=$prompt_file")
-  fi
-  herdr tab create --workspace "$ws_id" --cwd "$dir" --label "$1" --no-focus "${env[@]}" \
-    | jq -r '.result.tab.tab_id'
-}
+tab_env=()
+if (( agent )); then
+  tab_env=(--env "HERDR_AGENT_PROMPT_FILE=$prompt_file")
+fi
+claude_tab="$(herdr tab create --workspace "$ws_id" --cwd "$dir" --label claude --no-focus "${tab_env[@]}" \
+  | jq -r '.result.tab.tab_id')"
 
-pi_tab="$(agent_tab pi)"
-claude_tab="$(agent_tab claude-work)"
-
-if [[ -z $agent ]]; then
+if (( ! agent )); then
   herdr tab focus "$sh_tab" >/dev/null
   if (( ! interactive )); then
     print -r -- "opened workspace \"$label\" ($ws_id) in $dir"
@@ -175,9 +169,4 @@ if [[ -z $agent ]]; then
   exit 0
 fi
 
-if [[ $agent == pi ]]; then
-  tab="$pi_tab"
-else
-  tab="$claude_tab"
-fi
-print -r -- "dispatched to workspace \"$label\" ($ws_id), tab $tab running $agent in $dir"
+print -r -- "dispatched to workspace \"$label\" ($ws_id), tab $claude_tab running claude in $dir"

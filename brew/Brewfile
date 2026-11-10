@@ -64,8 +64,6 @@ brew "tree-sitter"
 brew "neovim"
 # Port scanning utility for large networks
 brew "nmap"
-# AI agent toolkit
-brew "pi-coding-agent"
 # Paste PNG into files
 brew "pngpaste"
 # Persistent key-value database, with built-in net interface

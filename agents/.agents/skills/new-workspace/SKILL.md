@@ -1,6 +1,6 @@
 ---
 name: new-workspace
-description: Open a new herdr workspace the way herdr's prefix+shift+m new-workspace popup does, from a directory or branch name, creating the git worktree from a freshly reset trunk when needed, then opening and focusing its zsh, nvim, pi, and claude-work tabs. Use when the user runs /new-workspace or asks to open, create, or spin up a herdr workspace, worktree, or branch without handing it a task.
+description: Open a new herdr workspace the way herdr's prefix+shift+m new-workspace popup does, from a directory or branch name, creating the git worktree from a freshly reset trunk when needed, then opening and focusing its zsh, nvim, and claude tabs. Use when the user runs /new-workspace or asks to open, create, or spin up a herdr workspace, worktree, or branch without handing it a task.
 argument-hint: <dir | branch> [workspace name]
 ---
 
@@ -34,10 +34,10 @@ It behaves like the popup:
 - An existing directory opens as is, with no git work.
 - A new directory inside a worktree collection gets a worktree. The launcher prunes and fetches `trunk`, hard-resets it to `upstream/trunk` or `origin/trunk`, then checks out the branch: the local branch if it exists, the remote branch if only that exists, or a new branch from trunk.
 - Any other new directory is created empty.
-- The workspace gets `zsh`, `nvim`, `pi`, and `claude-work` tabs and takes focus on its `zsh` tab.
+- The workspace gets `zsh`, `nvim`, and `claude` tabs and takes focus on its `zsh` tab.
 
 Unlike the popup, it refuses to reset a `trunk` with uncommitted changes. If that or anything else fails, report the error and stop. Never stash, discard, or commit changes in `trunk` to get past it.
 
 ## Report
 
-Give the workspace name, directory, and branch in one or two lines, and mention that the new workspace now has focus. A folder Claude has never opened may show its trust prompt in the `claude-work` tab.
+Give the workspace name, directory, and branch in one or two lines, and mention that the new workspace now has focus. A folder Claude has never opened may show its trust prompt in the `claude` tab.

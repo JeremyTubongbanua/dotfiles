@@ -15,12 +15,12 @@ effort=$(echo "$input" | jq -r '.effort.level // ""')
 # 5-hour rate-limit reset timestamp (Unix epoch), for the countdown.
 resets_at=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty')
 
-# Resolve active config dir (set by claude/claude-work shell functions)
+# Resolve active config dir (set by the claude shell function)
 config_dir="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 email=$(jq -r '.oauthAccount.emailAddress // ""' "$config_dir/.claude.json" 2>/dev/null)
 
 # Snapshot rate limits for the `limits` command (~/.scripts/limits), one file
-# per account dir, e.g. ~/.cache/limits/claude-work.json.
+# per account dir, e.g. ~/.cache/limits/claude.json.
 rate_limits_json=$(echo "$input" | jq -c '.rate_limits // empty' 2>/dev/null)
 if [ -n "$rate_limits_json" ]; then
   limits_dir="$HOME/.cache/limits"
@@ -33,9 +33,7 @@ fi
 # Daily cost via ccusage, scoped to the ACTIVE account dir ($config_dir).
 # ccusage is slow (cold Node + log parsing), so we never call it inline: a
 # cached number is read instantly and refreshed in the background when stale
-# (stale-while-revalidate). The cache is keyed per account dir so claude and
-# claude-work never mix. We deliberately pass CLAUDE_CONFIG_DIR as a single
-# path here, overriding any comma-joined shell alias, to isolate one account.
+# (stale-while-revalidate). The cache is keyed per account dir.
 cost_today=""
 today=$(date +%Y-%m-%d)
 cache_dir="$HOME/.claude/ccusage-cache"

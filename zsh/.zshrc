@@ -31,15 +31,9 @@ darkmode() { osascript -e 'tell app "System Events" to tell appearance preferenc
 lightmode() { osascript -e 'tell app "System Events" to tell appearance preferences to set dark mode to false'; }
 togglemode() { osascript -e 'tell app "System Events" to tell appearance preferences to set dark mode to not dark mode'; }
 claude() { CLAUDE_CONFIG_DIR="$HOME/.claude" command claude "$@"; }
-claude-work() { CLAUDE_CONFIG_DIR="$HOME/.claude-work" command claude "$@"; }
-claude-work-x() { claude-work --model claude-opus-4-6[1m] --reasoning-effort high "$@"; }
 ssh() {
     TERM=xterm-256color command ssh "$@"
 }
-
-# Aliases
-alias pi='CLAUDE_CONFIG_DIR="$HOME/.claude-work" pi'
-alias ccusage='CLAUDE_CONFIG_DIR="$HOME/.claude,$HOME/.claude-work" ccusage' # tracks all claude and codex accounts
 
 bindkey -M viins '^[b' backward-word
 bindkey -M viins '^[f' forward-word
@@ -48,7 +42,7 @@ bindkey -M viins '^E' end-of-line
 
 [ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
 
-# Herdr: auto-start an agent in the first pane of a new tab labelled "pi" or "claude-work"
+# Herdr: auto-start an agent in the first pane of a new tab labelled "nvim" or "claude"
 if [[ -o interactive && -n $HERDR_TAB_ID && -z $HERDR_AGENT_AUTOSTARTED ]] && (( $+commands[jq] )); then
   export HERDR_AGENT_AUTOSTARTED=1
   herdr_agent_prompt=()
@@ -58,8 +52,7 @@ if [[ -o interactive && -n $HERDR_TAB_ID && -z $HERDR_AGENT_AUTOSTARTED ]] && ((
   unset HERDR_AGENT_PROMPT_FILE
   case "$(herdr tab get "$HERDR_TAB_ID" 2>/dev/null | jq -r '.result.tab | "\(.label) \(.pane_count)"')" in
     'nvim 1') nvim ;;
-    'pi 1') pi "${herdr_agent_prompt[@]}" ;;
-    'claude-work 1') claude-work "${herdr_agent_prompt[@]}" ;;
+    'claude 1') claude "${herdr_agent_prompt[@]}" ;;
   esac
   unset herdr_agent_prompt
 fi
