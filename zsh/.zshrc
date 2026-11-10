@@ -19,7 +19,7 @@ export PATH=/opt/homebrew/share/google-cloud-sdk/bin:"$PATH"
 export PATH="$PATH":"$HOME/.pub-cache/bin"
 
 # pnpm
-export PNPM_HOME="/Users/jeremytubongbanua/Library/pnpm"
+export PNPM_HOME="$HOME/Library/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME/bin:"*) ;;
   *) export PATH="$PNPM_HOME/bin:$PATH" ;;
@@ -30,7 +30,6 @@ esac
 darkmode() { osascript -e 'tell app "System Events" to tell appearance preferences to set dark mode to true'; }
 lightmode() { osascript -e 'tell app "System Events" to tell appearance preferences to set dark mode to false'; }
 togglemode() { osascript -e 'tell app "System Events" to tell appearance preferences to set dark mode to not dark mode'; }
-claude() { CLAUDE_CONFIG_DIR="$HOME/.claude" command claude "$@"; }
 ssh() {
     TERM=xterm-256color command ssh "$@"
 }
