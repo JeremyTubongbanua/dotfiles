@@ -60,6 +60,8 @@ brew "maven"
 brew "ncdu"
 # Incremental parsing library
 brew "tree-sitter"
+# Parser generator tool
+brew "tree-sitter-cli"
 # Ambitious Vim-fork focused on extensibility and agility
 brew "neovim"
 # Port scanning utility for large networks
