@@ -18,8 +18,6 @@ brew "harfbuzz"
 brew "imagemagick"
 # Automation for Apps
 brew "appium"
-# Memory upgrade for your coding agent
-brew "beads"
 # Incredibly fast JavaScript runtime, bundler, test runner, and package manager
 brew "bun"
 # CLI tool for analyzing Claude Code usage from local JSONL files

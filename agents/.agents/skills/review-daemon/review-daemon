@@ -8,6 +8,8 @@ prs=$state/prs
 seen=$state/seen
 benched=$state/benched
 lock=$state/watch.pid
+events_file=$state/events
+watch_label='review daemon'
 
 interval=120
 cwd=$PWD
@@ -16,6 +18,7 @@ teams=false
 max_active=3
 me=
 events=
+watch_mode=false
 held=
 failures=0
 dispatch_error=
@@ -33,7 +36,10 @@ trap 'exit 143' TERM INT HUP
 
 usage() {
   cat >&2 <<EOF
-usage: $name watch [--interval SECONDS] [--cwd DIR] [--workspace ID] [--teams] [--max-active N]
+usage: $name start [--interval SECONDS] [--cwd DIR] [--workspace ID] [--teams] [--max-active N]
+       $name events
+       $name stop
+       $name watch [--interval SECONDS] [--cwd DIR] [--workspace ID] [--teams] [--max-active N]
        $name dispatch <pr url> [--cwd DIR] [--workspace ID]
        $name list
        $name post <pr url> [--as-review]
@@ -50,6 +56,9 @@ log() {
 
 die() {
   printf 'ERROR: %s\n' "$*"
+  if $watch_mode; then
+    printf 'ERROR: %s\n' "$*" >>"$events_file"
+  fi
   exit 2
 }
 
@@ -166,7 +175,7 @@ write_prompt() {
   cat >"$dir/prompt.md" <<EOF
 /code-review $url
 
-The review daemon started this session to review $url, at head commit $head. Do not comment, submit a review, push, rerun CI, file beads issues, or change any other GitHub state, except to post the review below once the user says to.
+The review daemon started this session to review $url, at head commit $head. Do not comment, submit a review, push, rerun CI, or change any other GitHub state, except to post the review below once the user says to.
 
 When the review is complete, save it as the comment to post. Write GitHub-flavored Markdown addressed to the pull request author: the findings ordered by severity, each under a heading of exactly the form \`### P<n>: <title>\` with n from 0 to 3, each pointing at the changed line with a link of the form https://$host/$owner/$repo/blob/$head/<path>#L<line>, then a short note on what was reviewed, the check status, and any limitations. If there are no actionable findings, say so plainly. Write only the comment body, with no preamble to the user.
 
@@ -341,13 +350,19 @@ check_reviews() {
   done
 }
 
+watcher_pid() {
+  local pid
+  [[ -f $lock ]] || return 1
+  pid=$(<"$lock")
+  [[ -n $pid ]] || return 1
+  kill -0 "$pid" 2>/dev/null || return 1
+  printf '%s\n' "$pid"
+}
+
 take_lock() {
   local pid
-  if [[ -f $lock ]]; then
-    pid=$(<"$lock")
-    if [[ -n $pid ]] && kill -0 "$pid" 2>/dev/null; then
-      die "another watcher is already running as pid $pid"
-    fi
+  if pid=$(watcher_pid); then
+    die "another watcher is already running as pid $pid"
   fi
   printf '%s\n' "$$" >"$lock"
 }
@@ -378,8 +393,9 @@ cmd_watch() {
   [[ -d $cwd ]] || die "no such directory: $cwd"
   cwd=$(cd "$cwd" && pwd)
   mkdir -p "$prs"
-  touch "$seen"
+  touch "$seen" "$events_file"
   take_lock
+  watch_mode=true
   whoami_gh
   log "watching review requests for $me every ${interval}s, at most $max_active reviews at once, opening review tabs in workspace $workspace at $cwd"
 
@@ -388,10 +404,108 @@ cmd_watch() {
     poll_queue
     check_reviews
     if [[ -n $events ]]; then
-      printf '%s' "$events"
-      exit 0
+      printf '%s' "$events" | tee -a "$events_file"
     fi
     sleep "$interval" &
+    wait $!
+  done
+}
+
+watch_tab_usable() {
+  local tab=$1 pane=$2
+  [[ -n $tab && -n $pane ]] || return 1
+  [[ $(herdr pane get "$pane" 2>/dev/null | jq -r '.result.pane.tab_id // ""') == "$tab" ]] || return 1
+  [[ $(herdr tab get "$tab" 2>/dev/null | jq -r '.result.tab.label // ""') == "$watch_label" ]]
+}
+
+cmd_start() {
+  local opts= pid tab pane tab_json i=0
+  while (($#)); do
+    case $1 in
+      --interval | --max-active)
+        [[ $# -ge 2 && $2 =~ ^[1-9][0-9]*$ ]] || usage
+        opts+=" $1 $2"
+        shift 2
+        ;;
+      --cwd | --workspace)
+        [[ $# -ge 2 ]] || usage
+        if [[ $1 == --cwd ]]; then cwd=$2; else workspace=$2; fi
+        shift 2
+        ;;
+      --teams)
+        opts+=" --teams"
+        shift
+        ;;
+      *)
+        usage
+        ;;
+    esac
+  done
+  require_herdr
+  [[ -d $cwd ]] || die "no such directory: $cwd"
+  cwd=$(cd "$cwd" && pwd)
+  mkdir -p "$prs"
+  touch "$events_file"
+  put "$state" events.cursor "$(wc -l <"$events_file" | tr -d ' ')"
+
+  if pid=$(watcher_pid); then
+    printf 'watcher already running as pid %s in tab "%s" (%s)\n' "$pid" "$watch_label" "$(field "$state" watch.tab)"
+    return 0
+  fi
+
+  tab=$(field "$state" watch.tab)
+  pane=$(field "$state" watch.pane)
+  if ! watch_tab_usable "$tab" "$pane"; then
+    tab_json=$(herdr tab create --workspace "$workspace" --cwd "$cwd" --label "$watch_label" --no-focus 2>"$err") || die "herdr could not create the $watch_label tab: $(errtext)"
+    tab=$(jq -r '.result.tab.tab_id' <<<"$tab_json")
+    pane=$(jq -r '.result.root_pane.pane_id' <<<"$tab_json")
+    put "$state" watch.tab "$tab"
+    put "$state" watch.pane "$pane"
+  fi
+  herdr pane run "$pane" "$(printf '%q' "$script") watch --workspace $(printf '%q' "$workspace") --cwd $(printf '%q' "$cwd")$opts" >/dev/null 2>"$err" || die "herdr could not start the watcher in pane $pane: $(errtext)"
+
+  while ((i < 40)); do
+    if pid=$(watcher_pid); then
+      printf 'watcher running as pid %s in tab "%s" (%s), pane %s\n' "$pid" "$watch_label" "$tab" "$pane"
+      return 0
+    fi
+    sleep 0.5
+    i=$((i + 1))
+  done
+  die "the watcher did not start in tab $tab, look at that tab"
+}
+
+cmd_stop() {
+  local pid
+  if pid=$(watcher_pid); then
+    kill "$pid"
+    printf 'stopped the watcher (pid %s)\n' "$pid"
+  else
+    printf 'the watcher is not running\n'
+  fi
+}
+
+cmd_events() {
+  local cursor total
+  mkdir -p "$state"
+  touch "$events_file"
+  while :; do
+    total=$(wc -l <"$events_file" | tr -d ' ')
+    cursor=$(field "$state" events.cursor)
+    cursor=${cursor:-0}
+    if ((total < cursor)); then
+      cursor=0
+    fi
+    if ((total > cursor)); then
+      sed -n "$((cursor + 1)),${total}p" "$events_file"
+      put "$state" events.cursor "$total"
+      return 0
+    fi
+    if ! watcher_pid >/dev/null; then
+      printf 'STOPPED: the watcher is not running\n'
+      exit 3
+    fi
+    sleep 5 &
     wait $!
   done
 }
@@ -448,7 +562,12 @@ live() {
 }
 
 cmd_list() {
-  local d status line findings found=false
+  local d status line findings pid found=false
+  if pid=$(watcher_pid); then
+    printf 'watcher: running as pid %s in tab "%s" (%s)\n' "$pid" "$watch_label" "$(field "$state" watch.tab)"
+  else
+    printf 'watcher: not running\n'
+  fi
   for d in "$prs"/*/*/*/*; do
     [[ -f $d/status ]] || continue
     found=true
@@ -594,6 +713,9 @@ cmd_skip() {
 command=$1
 shift
 case $command in
+  start) cmd_start "$@" ;;
+  stop) cmd_stop "$@" ;;
+  events) cmd_events "$@" ;;
   watch) cmd_watch "$@" ;;
   dispatch) cmd_dispatch "$@" ;;
   list) cmd_list "$@" ;;
