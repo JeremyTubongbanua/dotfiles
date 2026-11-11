@@ -27,6 +27,8 @@ Agents use the same launcher through the `herdr-delegate` skill to hand a task t
 
 The `new-workspace` skill lets an agent open a workspace the way the popup does, with no task attached. `new-workspace.zsh --open <dir> [<name>]` skips the prompts, focuses the new workspace, and also refuses to reset a `trunk` with uncommitted changes.
 
+The `review-daemon` skill keeps a Claude session watching GitHub for pull requests that request my review or are assigned to me. Each new one gets its own tab in the watching session's workspace, named after the project, such as `atsign claude` or `align claude`, where Claude runs `/code-review` and then asks in that tab whether to post the review. The watching session only orchestrates and summarises what each review tab is doing. Its state lives in `~/.local/state/review-daemon/`.
+
 Relevant files:
 
 | File | Purpose |
