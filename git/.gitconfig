@@ -6,6 +6,8 @@
 	gpgsign = true
 [init]
 	defaultBranch = trunk
+[clone]
+	defaultRemoteName = upstream
 [gpg]
 	format = ssh
 [url "git@github.com:"]
