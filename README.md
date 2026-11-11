@@ -53,6 +53,12 @@ Install the tracked Homebrew formulae and applications:
 brew bundle --file brew/Brewfile
 ```
 
+Install oh-my-zsh, which `zsh/.zshrc` loads, without letting it replace `.zshrc`:
+
+```sh
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended --keep-zshrc
+```
+
 Install or repair every dotfiles package:
 
 ```sh
@@ -70,6 +76,29 @@ Stow refuses to overwrite a real file or an unexpected symlink. Preview changes 
 ```sh
 stow --target "$HOME" --simulate --verbose --restow ghostty herdr nvim claude zsh
 ```
+
+Install the tools that live outside Homebrew. uv lands in `~/.local/bin`, and `at_activate_web` lands in `~/.pub-cache/bin`, both of which `zsh/.zshrc` adds to `PATH`:
+
+```sh
+curl -LsSf https://astral.sh/uv/install.sh | sh
+dart pub global activate at_activate_web
+```
+
+`claude/.claude/settings.json` enables the claude-mem plugin from the `thedotmack` marketplace. If Claude Code does not install it on its own, run `/plugin install claude-mem@thedotmack` inside Claude Code. The plugin puts its `claude-mem` worker in `~/.local/bin`.
+
+Add the Playwright MCP server, which Claude Code keeps in `~/.claude.json` rather than in a tracked file:
+
+```sh
+claude mcp add --scope user playwright -- npx @playwright/mcp@latest
+```
+
+Apply the macOS settings: fast key repeat, an auto-hiding Dock, hot corners, Finder list view with path and status bars, screenshots to the clipboard, and no edge-drag window tiling, since Rectangle handles that. Log out and back in for key repeat to take effect:
+
+```sh
+./macos-defaults.sh
+```
+
+LinearMouse reads `~/.config/linearmouse/linearmouse.json` directly, so it picks up the linked config on launch. Rectangle keeps its live settings in its own preferences instead, so load `rectangle/RectangleConfig.json` once: copy it to `~/Library/Application Support/Rectangle/RectangleConfig.json` before launching Rectangle, which imports it and renames the copy, or use Import in Rectangle's settings.
 
 ## Packages
 
@@ -98,6 +127,8 @@ Refresh `brew/Brewfile` from the currently installed Homebrew packages:
 ```sh
 ./update-brewfile.sh
 ```
+
+LinearMouse saves straight into `linearmouse/.config/linearmouse/linearmouse.json`, so its changes show up in `git status` on their own. After changing Rectangle settings, use Export in Rectangle's settings and save over `rectangle/RectangleConfig.json`.
 
 Preview every package:
 
