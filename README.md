@@ -77,6 +77,8 @@ Stow refuses to overwrite a real file or an unexpected symlink. Preview changes 
 stow --target "$HOME" --simulate --verbose --restow ghostty herdr nvim claude zsh
 ```
 
+`git/.gitconfig` signs every commit with `~/.ssh/id_ed25519`, so add that key's `.pub` to GitHub as a signing key as well as an authentication key, or commits show as unverified.
+
 Install the tools that live outside Homebrew. uv lands in `~/.local/bin`, and `at_activate_web` lands in `~/.pub-cache/bin`, both of which `zsh/.zshrc` adds to `PATH`:
 
 ```sh
@@ -92,6 +94,12 @@ Add the Playwright MCP server, which Claude Code keeps in `~/.claude.json` rathe
 claude mcp add --scope user playwright -- npx @playwright/mcp@latest
 ```
 
+Install the language servers that `nvim/.config/nvim/lua/plugins/nvim-lspconfig.lua` enables. `clangd` comes from Homebrew's `llvm` and `dartls` from the Dart SDK, so Mason covers the rest:
+
+```sh
+nvim --headless -c "MasonInstall astro-language-server bash-language-server css-lsp docker-compose-language-service dockerfile-language-server gopls html-lsp json-lsp lua-language-server marksman neocmakelsp postgres-language-server tailwindcss-language-server tombi vtsls yaml-language-server" -c qall
+```
+
 Apply the macOS settings: fast key repeat, an auto-hiding Dock, hot corners, Finder list view with path and status bars, screenshots to the clipboard, and no edge-drag window tiling, since Rectangle handles that. Log out and back in for key repeat to take effect:
 
 ```sh
@@ -99,6 +107,12 @@ Apply the macOS settings: fast key repeat, an auto-hiding Dock, hot corners, Fin
 ```
 
 LinearMouse reads `~/.config/linearmouse/linearmouse.json` directly, so it picks up the linked config on launch. Rectangle keeps its live settings in its own preferences instead, so load `rectangle/RectangleConfig.json` once: copy it to `~/Library/Application Support/Rectangle/RectangleConfig.json` before launching Rectangle, which imports it and renames the copy, or use Import in Rectangle's settings.
+
+Restore Vorssaint's settings from its backup. Quit Vorssaint first, because it only imports while closed:
+
+```sh
+/Applications/Vorssaint.app/Contents/MacOS/Vorssaint --import-settings "vorssaint/Vorssaint Settings.plist"
+```
 
 ## Packages
 
@@ -129,6 +143,12 @@ Refresh `brew/Brewfile` from the currently installed Homebrew packages:
 ```
 
 LinearMouse saves straight into `linearmouse/.config/linearmouse/linearmouse.json`, so its changes show up in `git status` on their own. After changing Rectangle settings, use Export in Rectangle's settings and save over `rectangle/RectangleConfig.json`.
+
+After changing Vorssaint settings, export a fresh backup. Vorssaint can stay open:
+
+```sh
+/Applications/Vorssaint.app/Contents/MacOS/Vorssaint --export-settings "vorssaint/Vorssaint Settings.plist"
+```
 
 Preview every package:
 
