@@ -1,0 +1,605 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+name=${0##*/}
+script=$(cd "${0%/*}" && pwd)/$name
+state=${REVIEW_DAEMON_STATE:-${XDG_STATE_HOME:-$HOME/.local/state}/review-daemon}
+prs=$state/prs
+seen=$state/seen
+benched=$state/benched
+lock=$state/watch.pid
+
+interval=120
+cwd=$PWD
+workspace=${HERDR_WORKSPACE_ID:-}
+teams=false
+max_active=3
+me=
+events=
+held=
+failures=0
+dispatch_error=
+host= owner= repo= number= url= dir=
+
+err=$(mktemp)
+cleanup() {
+  rm -f "$err"
+  if [[ -f $lock && $(<"$lock") == "$$" ]]; then
+    rm -f "$lock"
+  fi
+}
+trap cleanup EXIT
+trap 'exit 143' TERM INT HUP
+
+usage() {
+  cat >&2 <<EOF
+usage: $name watch [--interval SECONDS] [--cwd DIR] [--workspace ID] [--teams] [--max-active N]
+       $name dispatch <pr url> [--cwd DIR] [--workspace ID]
+       $name list
+       $name post <pr url> [--as-review]
+       $name skip <pr url>
+       $name bench <pr url>...
+       $name unbench <pr url>...
+EOF
+  exit 2
+}
+
+log() {
+  printf '[%s] %s\n' "$(date +%H:%M:%S)" "$*" >&2
+}
+
+die() {
+  printf 'ERROR: %s\n' "$*"
+  exit 2
+}
+
+emit() {
+  events+="$*"$'\n'
+}
+
+field() {
+  if [[ -f $1/$2 ]]; then
+    cat "$1/$2"
+  fi
+}
+
+put() {
+  printf '%s\n' "$3" >"$1/$2"
+}
+
+errtext() {
+  tr '\n' ' ' <"$err"
+}
+
+is_benched() {
+  [[ -f $benched ]] && grep -qxF "$1" "$benched"
+}
+
+parse_url() {
+  local pattern='^https://([^/]+)/([^/]+)/([^/]+)/pull/([0-9]+)'
+  [[ $1 =~ $pattern ]] || die "not a pull request URL: $1"
+  host=${BASH_REMATCH[1]}
+  owner=${BASH_REMATCH[2]}
+  repo=${BASH_REMATCH[3]}
+  number=${BASH_REMATCH[4]}
+  url=https://$host/$owner/$repo/pull/$number
+  dir=$prs/$host/$owner/$repo/$number
+}
+
+require_herdr() {
+  [[ ${HERDR_ENV:-} == 1 ]] || die "not running inside a herdr pane"
+  command -v herdr >/dev/null || die "herdr is not on PATH"
+  [[ -n $workspace ]] || die "no herdr workspace to open review tabs in, pass --workspace"
+  herdr workspace get "$workspace" >/dev/null 2>"$err" || die "no herdr workspace $workspace: $(errtext)"
+}
+
+whoami_gh() {
+  if [[ -z $me ]]; then
+    me=$(gh api user --jq .login 2>"$err") || die "could not read the GitHub user, check gh auth status: $(errtext)"
+  fi
+}
+
+project() {
+  local o m
+  o=$(tr '[:upper:]' '[:lower:]' <<<"$owner")
+  m=$(tr '[:upper:]' '[:lower:]' <<<"$me")
+  if [[ -n $m && $o == "$m" ]]; then
+    printf 'personal\n'
+  else
+    printf '%s\n' "${o%%-*}"
+  fi
+}
+
+queries() {
+  local base='is:pr is:open draft:false archived:false'
+  printf '%s\n' "$base user-review-requested:@me" "$base assignee:@me -author:@me"
+  if $teams; then
+    printf '%s\n' "$base review-requested:@me"
+  fi
+}
+
+fetch_queue() {
+  local q
+  {
+    while read -r q; do
+      gh api -X GET search/issues -f q="$q" -f per_page=100 --jq '.items[].html_url' 2>"$err" || return 1
+    done < <(queries)
+  } | sort -u
+}
+
+still_wanted() {
+  local info status
+  parse_url "$1"
+  status=$(field "$dir" status)
+  if [[ $status == reviewing || $status == ready ]]; then
+    return 0
+  fi
+  info=$(gh pr view "$url" --json state,isDraft,reviewRequests,assignees 2>/dev/null) || return 0
+  jq -e --arg me "$me" '.state == "OPEN" and (.isDraft | not) and (((.reviewRequests | map(.login) | index($me)) != null) or ((.assignees | map(.login) | index($me)) != null))' >/dev/null <<<"$info"
+}
+
+prune() {
+  local queue=$1 keep line
+  [[ -s $seen ]] || return 0
+  keep=$(mktemp)
+  while read -r line; do
+    [[ -n $line ]] || continue
+    if grep -qxF "$line" <<<"$queue" || still_wanted "$line"; then
+      printf '%s\n' "$line" >>"$keep"
+    fi
+  done <"$seen"
+  mv "$keep" "$seen"
+}
+
+active_count() {
+  local d n=0
+  for d in "$prs"/*/*/*/*; do
+    if [[ -f $d/status && $(<"$d/status") == reviewing ]]; then
+      n=$((n + 1))
+    fi
+  done
+  printf '%s\n' "$n"
+}
+
+write_prompt() {
+  local head=$1
+  cat >"$dir/prompt.md" <<EOF
+/code-review $url
+
+The review daemon started this session to review $url, at head commit $head. Do not comment, submit a review, push, rerun CI, file beads issues, or change any other GitHub state, except to post the review below once the user says to.
+
+When the review is complete, save it as the comment to post. Write GitHub-flavored Markdown addressed to the pull request author: the findings ordered by severity, each under a heading of exactly the form \`### P<n>: <title>\` with n from 0 to 3, each pointing at the changed line with a link of the form https://$host/$owner/$repo/blob/$head/<path>#L<line>, then a short note on what was reviewed, the check status, and any limitations. If there are no actionable findings, say so plainly. Write only the comment body, with no preamble to the user.
+
+Write it to $dir/review.md.tmp first, then rename that file to $dir/review.md. The daemon treats review.md appearing as the review being finished, so create it only once the comment is final.
+
+Then show the review in full and ask the user with AskUserQuestion whether to post it. Run \`gh pr view $url --json state,headRefOid\` first, and say in the question if the pull request was closed or has new commits since $head. Name the repository, number, and title in the question, and put the review text in the preview of both posting options:
+
+- Post as comment: run \`$script post $url\`, which posts it with gh pr comment.
+- Post as review: run \`$script post $url --as-review\`, which submits it as a comment review and clears the review request.
+- Skip: run \`$script skip $url\`.
+- Bench: for an old or irrelevant pull request, run \`$script bench $url\`, so it is never reviewed again, even if review is requested again. It also skips this review and closes this tab, which ends this session, so run it last.
+
+If the user answers with changes instead, edit $dir/review.md, show it again, and ask again. After posting, give the link gh printed.
+EOF
+}
+
+dispatch_one() {
+  local status meta head title tab_json tab pane label
+  parse_url "$1"
+  status=$(field "$dir" status)
+  if [[ $status == reviewing || $status == ready ]]; then
+    log "already $status: $url"
+    return 0
+  fi
+  mkdir -p "$dir"
+  if [[ -f $dir/review.md ]]; then
+    mv "$dir/review.md" "$dir/review.$(field "$dir" dispatched).md"
+  fi
+  rm -f "$dir/review.md.tmp" "$dir/started" "$dir/idle_since" "$dir/attention"
+
+  if ! meta=$(gh pr view "$url" --json headRefOid,title --jq '"\(.headRefOid) \(.title)"' 2>"$err"); then
+    dispatch_error="could not read the pull request: $(errtext)"
+    return 1
+  fi
+  read -r head title <<<"$meta"
+  write_prompt "$head"
+
+  label="$(project) claude"
+  if ! tab_json=$(herdr tab create --workspace "$workspace" --cwd "$cwd" --label "$label" --no-focus 2>"$err"); then
+    dispatch_error="herdr could not create a tab in workspace $workspace: $(errtext)"
+    return 1
+  fi
+  tab=$(jq -r '.result.tab.tab_id' <<<"$tab_json")
+  pane=$(jq -r '.result.root_pane.pane_id' <<<"$tab_json")
+  if ! herdr pane run "$pane" "claude \"\$(<'$dir/prompt.md')\"" >/dev/null 2>"$err"; then
+    dispatch_error="herdr could not start claude in pane $pane: $(errtext)"
+    return 1
+  fi
+
+  put "$dir" url "$url"
+  put "$dir" title "$title"
+  put "$dir" head "$head"
+  put "$dir" tab "$tab"
+  put "$dir" pane "$pane"
+  rm -f "$dir/workspace"
+  put "$dir" dispatched "$(date +%s)"
+  put "$dir" status reviewing
+  log "reviewing $url in tab \"$label\" ($tab), pane $pane"
+}
+
+poll_queue() {
+  local queue line active queued=
+  if ! queue=$(fetch_queue); then
+    failures=$((failures + 1))
+    if ((failures == 1)); then
+      log "could not read the review queue, retrying: $(errtext)"
+    fi
+    if ((failures >= 30)); then
+      die "could not read the review queue $failures times in a row: $(errtext)"
+    fi
+    return 0
+  fi
+  if ((failures)); then
+    log "review queue readable again"
+  fi
+  failures=0
+
+  while read -r line; do
+    [[ -n $line ]] || continue
+    parse_url "$line"
+    if is_benched "$url"; then
+      continue
+    fi
+    if [[ -d $dir ]] && grep -qxF "$url" "$seen"; then
+      continue
+    fi
+    active=$(active_count)
+    if ((active >= max_active)); then
+      queued+="$url"$'\n'
+      if ! grep -qxF "$url" <<<"$held"; then
+        held+="$url"$'\n'
+        log "$active reviews running, holding $url until one finishes"
+      fi
+      continue
+    fi
+    grep -qxF "$url" "$seen" || printf '%s\n' "$url" >>"$seen"
+    if ! dispatch_one "$url"; then
+      put "$dir" url "$url"
+      put "$dir" status failed
+      emit "FAILED $url $dispatch_error"
+    fi
+  done <<<"$queue"
+  printf '%s' "$queued" >"$state/queued"
+
+  prune "$queue"
+}
+
+check_reviews() {
+  local d now status u pane info agent st reason
+  now=$(date +%s)
+  for d in "$prs"/*/*/*/*; do
+    [[ -f $d/status ]] || continue
+    status=$(<"$d/status")
+    [[ $status == reviewing ]] || continue
+    u=$(<"$d/url")
+    if is_benched "$u"; then
+      continue
+    fi
+    if [[ -s $d/review.md ]]; then
+      put "$d" status ready
+      emit "READY $u $d/review.md"
+      continue
+    fi
+
+    pane=$(<"$d/pane")
+    if ! info=$(herdr pane get "$pane" 2>/dev/null); then
+      if [[ -s $d/review.md ]]; then
+        put "$d" status ready
+        emit "READY $u $d/review.md"
+      else
+        put "$d" status failed
+        emit "FAILED $u pane $pane closed before the review was written"
+      fi
+      continue
+    fi
+
+    agent=$(jq -r '.result.pane.agent // ""' <<<"$info")
+    st=$(jq -r '.result.pane.agent_status // ""' <<<"$info")
+    reason=
+    if [[ -z $agent ]]; then
+      if [[ -f $d/started ]] || ((now - $(<"$d/dispatched") >= 300)); then
+        reason="claude is not running in pane $pane"
+      fi
+    else
+      touch "$d/started"
+      case $st in
+        working)
+          rm -f "$d/idle_since"
+          ;;
+        blocked)
+          rm -f "$d/idle_since"
+          reason="the session in pane $pane is waiting on a permission prompt or question"
+          ;;
+        idle | done)
+          [[ -f $d/idle_since ]] || put "$d" idle_since "$now"
+          if ((now - $(<"$d/idle_since") >= 600)); then
+            reason="the session in pane $pane has been idle for 10 minutes without writing a review"
+          fi
+          ;;
+      esac
+    fi
+
+    if [[ -s $d/review.md ]]; then
+      put "$d" status ready
+      emit "READY $u $d/review.md"
+    elif [[ -z $reason ]]; then
+      rm -f "$d/attention"
+    elif [[ $reason != "$(field "$d" attention)" ]]; then
+      put "$d" attention "$reason"
+      emit "ATTENTION $u $reason"
+    fi
+  done
+}
+
+take_lock() {
+  local pid
+  if [[ -f $lock ]]; then
+    pid=$(<"$lock")
+    if [[ -n $pid ]] && kill -0 "$pid" 2>/dev/null; then
+      die "another watcher is already running as pid $pid"
+    fi
+  fi
+  printf '%s\n' "$$" >"$lock"
+}
+
+cmd_watch() {
+  while (($#)); do
+    case $1 in
+      --interval | --max-active)
+        [[ $# -ge 2 && $2 =~ ^[1-9][0-9]*$ ]] || usage
+        if [[ $1 == --interval ]]; then interval=$2; else max_active=$2; fi
+        shift 2
+        ;;
+      --cwd | --workspace)
+        [[ $# -ge 2 ]] || usage
+        if [[ $1 == --cwd ]]; then cwd=$2; else workspace=$2; fi
+        shift 2
+        ;;
+      --teams)
+        teams=true
+        shift
+        ;;
+      *)
+        usage
+        ;;
+    esac
+  done
+  require_herdr
+  [[ -d $cwd ]] || die "no such directory: $cwd"
+  cwd=$(cd "$cwd" && pwd)
+  mkdir -p "$prs"
+  touch "$seen"
+  take_lock
+  whoami_gh
+  log "watching review requests for $me every ${interval}s, at most $max_active reviews at once, opening review tabs in workspace $workspace at $cwd"
+
+  while :; do
+    events=
+    poll_queue
+    check_reviews
+    if [[ -n $events ]]; then
+      printf '%s' "$events"
+      exit 0
+    fi
+    sleep "$interval" &
+    wait $!
+  done
+}
+
+cmd_dispatch() {
+  local target=
+  while (($#)); do
+    case $1 in
+      --cwd | --workspace)
+        [[ $# -ge 2 ]] || usage
+        if [[ $1 == --cwd ]]; then cwd=$2; else workspace=$2; fi
+        shift 2
+        ;;
+      -*)
+        usage
+        ;;
+      *)
+        [[ -z $target ]] || usage
+        target=$1
+        shift
+        ;;
+    esac
+  done
+  [[ -n $target ]] || usage
+  require_herdr
+  [[ -d $cwd ]] || die "no such directory: $cwd"
+  cwd=$(cd "$cwd" && pwd)
+  mkdir -p "$prs"
+  whoami_gh
+  parse_url "$target"
+  if is_benched "$url"; then
+    unbench_one "$url"
+    log "unbenched $url"
+  fi
+  touch "$seen"
+  grep -qxF "$url" "$seen" || printf '%s\n' "$url" >>"$seen"
+  if ! dispatch_one "$url"; then
+    put "$dir" url "$url"
+    put "$dir" status failed
+    die "$dispatch_error"
+  fi
+}
+
+live() {
+  local d=$1 tab pane label info
+  tab=$(field "$d" tab)
+  pane=$(field "$d" pane)
+  label=$(herdr tab get "$tab" 2>/dev/null | jq -r '.result.tab.label // ""') || label=
+  if ! info=$(herdr pane get "$pane" 2>/dev/null); then
+    printf '  tab: %s (%s)  claude: pane closed\n' "${label:-closed}" "$tab"
+    return 0
+  fi
+  jq -r --arg label "$label" --arg tab "$tab" '.result.pane | "  tab: \($label) (\($tab))  claude: \(if .agent then .agent_status else "not running" end)  doing: \(.terminal_title_stripped // "")"' <<<"$info"
+}
+
+cmd_list() {
+  local d status line findings found=false
+  for d in "$prs"/*/*/*/*; do
+    [[ -f $d/status ]] || continue
+    found=true
+    status=$(<"$d/status")
+    printf '%s %s\n' "$status" "$(field "$d" url)"
+    printf '  title: %s\n' "$(field "$d" title)"
+    if is_benched "$(field "$d" url)"; then
+      printf '  benched: yes\n'
+    fi
+    if [[ $status == reviewing || $status == ready ]]; then
+      live "$d"
+    else
+      printf '  tab: %s\n' "$(field "$d" tab)"
+    fi
+    printf '  head: %s\n' "$(field "$d" head)"
+    if [[ -s $d/review.md ]]; then
+      printf '  review: %s\n' "$d/review.md"
+      findings=$(sed -nE 's/^#{2,4}[[:space:]]+(P[0-3][^:.]*)[:.][[:space:]]*(.*)$/    \1: \2/p' "$d/review.md")
+      if [[ -n $findings ]]; then
+        printf '  findings:\n%s\n' "$findings"
+      else
+        printf '  findings: none\n'
+      fi
+    fi
+    if [[ -s $d/attention ]]; then
+      printf '  attention: %s\n' "$(<"$d/attention")"
+    fi
+  done
+  if [[ -s $state/queued ]]; then
+    while read -r line; do
+      [[ -n $line ]] || continue
+      found=true
+      printf 'queued %s\n' "$line"
+    done <"$state/queued"
+  fi
+  if [[ -s $benched ]]; then
+    while read -r line; do
+      [[ -n $line ]] || continue
+      parse_url "$line"
+      [[ -f $dir/status ]] && continue
+      found=true
+      printf 'benched %s\n' "$url"
+    done <"$benched"
+  fi
+  if ! $found; then
+    printf 'no reviews yet\n'
+  fi
+}
+
+cmd_post() {
+  local target= as_review=false pr_state
+  while (($#)); do
+    case $1 in
+      --as-review)
+        as_review=true
+        shift
+        ;;
+      -*)
+        usage
+        ;;
+      *)
+        [[ -z $target ]] || usage
+        target=$1
+        shift
+        ;;
+    esac
+  done
+  [[ -n $target ]] || usage
+  parse_url "$target"
+  [[ -s $dir/review.md ]] || die "no review saved for $url"
+  pr_state=$(gh pr view "$url" --json state --jq .state 2>"$err") || die "could not read $url: $(errtext)"
+  [[ $pr_state == OPEN ]] || die "$url is $pr_state, not posting"
+  if $as_review; then
+    gh pr review "$url" --comment --body-file "$dir/review.md"
+  else
+    gh pr comment "$url" --body-file "$dir/review.md"
+  fi
+  put "$dir" status posted
+  printf 'posted the review of %s\n' "$url"
+}
+
+unbench_one() {
+  local keep
+  [[ -f $benched ]] || return 0
+  keep=$(mktemp)
+  grep -vxF "$1" "$benched" >"$keep" || true
+  mv "$keep" "$benched"
+}
+
+close_tab() {
+  local tab pane in_tab
+  tab=$(field "$1" tab)
+  pane=$(field "$1" pane)
+  [[ -n $tab && -n $pane ]] || return 0
+  in_tab=$(herdr pane get "$pane" 2>/dev/null | jq -r '.result.pane.tab_id // ""') || return 0
+  [[ $in_tab == "$tab" ]] || return 0
+  if herdr tab close "$tab" >/dev/null 2>"$err"; then
+    printf 'closed tab %s\n' "$tab"
+  else
+    printf 'could not close tab %s: %s\n' "$tab" "$(errtext)"
+  fi
+}
+
+cmd_bench() {
+  local target status closing=()
+  [[ $# -ge 1 ]] || usage
+  mkdir -p "$state"
+  touch "$benched"
+  for target in "$@"; do
+    parse_url "$target"
+    grep -qxF "$url" "$benched" || printf '%s\n' "$url" >>"$benched"
+    status=$(field "$dir" status)
+    if [[ $status == reviewing || $status == ready ]]; then
+      put "$dir" status skipped
+    fi
+    printf 'benched %s\n' "$url"
+    closing+=("$dir")
+  done
+  for target in "${closing[@]}"; do
+    close_tab "$target"
+  done
+}
+
+cmd_unbench() {
+  local target
+  [[ $# -ge 1 ]] || usage
+  for target in "$@"; do
+    parse_url "$target"
+    unbench_one "$url"
+    printf 'unbenched %s\n' "$url"
+  done
+}
+
+cmd_skip() {
+  [[ $# -eq 1 ]] || usage
+  parse_url "$1"
+  [[ -f $dir/status ]] || die "no review tracked for $url"
+  put "$dir" status skipped
+  printf 'skipped %s\n' "$url"
+}
+
+[[ $# -ge 1 ]] || usage
+command=$1
+shift
+case $command in
+  watch) cmd_watch "$@" ;;
+  dispatch) cmd_dispatch "$@" ;;
+  list) cmd_list "$@" ;;
+  post) cmd_post "$@" ;;
+  skip) cmd_skip "$@" ;;
+  bench) cmd_bench "$@" ;;
+  unbench) cmd_unbench "$@" ;;
+  *) usage ;;
+esac
