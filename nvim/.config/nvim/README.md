@@ -30,15 +30,17 @@ end
 ### List of brew formulaes needed
 
 ```
-imagemagick
-ghostscript
-fd
 node
 ripgrep
-pngpaste
 tree-sitter
 go
 ```
+
+Optional, and not installed on my MacBook Pro:
+
+- `pngpaste` for img-clip's `<leader>p` image paste
+- `imagemagick` and `ghostscript` for snacks image previews
+- `fd` for faster snacks file search, which otherwise falls back to ripgrep
 
 ## vim notes
 
