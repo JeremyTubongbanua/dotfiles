@@ -2,6 +2,8 @@
 
 My macOS development environment, managed with [GNU Stow](https://www.gnu.org/software/stow/). The main workflow is Ghostty, Herdr, Neovim, and Claude Code.
 
+It mirrors my 14-inch MacBook Pro (2026, `Mac18,1`) with an Apple M6 chip, 32 GB of memory, and a 1 TB SSD.
+
 ## Daily Workflow
 
 | Tool | Role | Configuration |
