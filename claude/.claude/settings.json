@@ -122,29 +122,12 @@
       "Edit(~/.aws/**)"
     ],
     "ask": [],
-    "defaultMode": "auto",
-    "additionalDirectories": [
-      "/Users/jeremytubongbanua"
-    ]
+    "defaultMode": "auto"
   },
   "model": "claude-opus-5-5",
   "attribution": {
     "commit": "",
     "pr": ""
-  },
-  "hooks": {
-    "SessionStart": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash '/Users/jeremytubongbanua/.claude/hooks/herdr-agent-state.sh' session",
-            "timeout": 10
-          }
-        ]
-      }
-    ]
   },
   "statusLine": {
     "type": "command",
