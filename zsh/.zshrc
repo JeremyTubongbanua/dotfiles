@@ -17,6 +17,10 @@ export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.scripts:$PATH"
 export PATH=/opt/homebrew/share/google-cloud-sdk/bin:"$PATH"
 export PATH="$PATH":"$HOME/.pub-cache/bin"
+export JAVA_HOME="/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home"
+export ANDROID_HOME="$HOME/Library/Android/sdk"
+export PATH="$PATH:$ANDROID_HOME/emulator"
+export PATH="$PATH:$ANDROID_HOME/platform-tools"
 
 # pnpm
 export PNPM_HOME="$HOME/Library/pnpm"
