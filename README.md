@@ -10,7 +10,6 @@ My macOS development environment, managed with [GNU Stow](https://www.gnu.org/so
 | [Herdr](https://herdr.dev/) | Workspace and agent multiplexer | Vim-style workspace navigation, agent labels, and a custom project launcher |
 | [Neovim](https://neovim.io/) | Editor | Native LSP, Treesitter, Snacks picker, Oil, Harpoon, Fugitive, and mini.diff |
 | [Claude Code](https://claude.com/product/claude-code) | AI coding agent | Shared skills, status line, and Catppuccin themes |
-| [Codex](https://github.com/openai/codex) | AI coding agent | Sandboxed permission profile, network allowlist, and Figma MCP |
 
 Ghostty hosts Herdr, and Herdr organizes each project into three tabs:
 
@@ -38,7 +37,7 @@ Relevant files:
 | `nvim/.config/nvim/` | Editor configuration and plugin definitions |
 | `nvim/.config/nvim/README.md` | Neovim notes, keymaps, and plugin usage |
 | `claude/.claude/settings.json` | Claude Code permissions, hooks, plugins, and model |
-| `agents/.agents/AGENTS.md` | Shared agent instructions, linked as Claude Code's `CLAUDE.md` and Codex's `AGENTS.md` |
+| `agents/.agents/AGENTS.md` | Shared agent instructions, linked as Claude Code's `CLAUDE.md` |
 | `agents/.agents/skills/` | Shared agent skills |
 | `zsh/.zshrc` | Agent shell functions and Herdr tab autostart |
 
@@ -55,7 +54,7 @@ brew bundle --file brew/Brewfile
 Install or repair every dotfiles package:
 
 ```sh
-stow --target "$HOME" --restow agents brew claude codex docker dockerfiles gh ghostty git herdr linearmouse nvim rectangle scripts vorssaint zsh
+stow --target "$HOME" --restow agents brew claude gh ghostty git herdr linearmouse nvim rectangle scripts vorssaint zsh
 ```
 
 To restow only the core terminal workflow:
@@ -79,9 +78,6 @@ Each top-level package mirrors the path it owns under `$HOME`.
 | `agents` | `~/.agents/` |
 | `brew` | `~/Brewfile` |
 | `claude` | `~/.claude/` |
-| `codex` | `~/.codex/` |
-| `docker` | `~/.docker/daemon.json` |
-| `dockerfiles` | `~/.dockerfiles/` |
 | `gh` | `~/.config/gh/config.yml` |
 | `ghostty` | `~/.config/ghostty/` |
 | `git` | `~/.gitconfig` |
@@ -104,7 +100,7 @@ Refresh `brew/Brewfile` from the currently installed Homebrew packages:
 Preview every package:
 
 ```sh
-stow --target "$HOME" --simulate --verbose --restow agents brew claude codex docker dockerfiles gh ghostty git herdr linearmouse nvim rectangle scripts vorssaint zsh
+stow --target "$HOME" --simulate --verbose --restow agents brew claude gh ghostty git herdr linearmouse nvim rectangle scripts vorssaint zsh
 ```
 
 Remove one package's managed links:
