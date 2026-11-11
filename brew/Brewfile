@@ -1,115 +1,85 @@
 tap "atsign-foundation/tap"
-tap "dart-lang/dart"
-tap "stripe/stripe-cli"
-tap "supabase/tap"
-# Open-source, cross-platform JavaScript runtime environment
-brew "node"
-# Browser automation CLI for AI agents
-brew "agent-browser"
-# Core application library for C
-brew "glib"
-# TIFF library and utilities
-brew "libtiff"
-# GNU Transport Layer Security (TLS) Library
-brew "gnutls"
-# OpenType text shaping engine
-brew "harfbuzz"
-# Tools and libraries to manipulate images in select formats
-brew "imagemagick"
-# Automation for Apps
-brew "appium"
 # Incredibly fast JavaScript runtime, bundler, test runner, and package manager
 brew "bun"
 # CLI tool for analyzing Claude Code usage from local JSONL files
 brew "ccusage"
+# Open-source, cross-platform JavaScript runtime environment
+brew "node"
 # CLI tool for Cloudflare Workers
 brew "cloudflare-wrangler"
 # Cross-platform make
 brew "cmake"
-# Powerful, clean, object-oriented scripting language
-brew "ruby"
 # Dependency manager for Cocoa projects
 brew "cocoapods"
-# GNU File, Shell, and Text utilities
-brew "coreutils"
-# Simple, fast and user-friendly alternative to find
-brew "fd"
 # Play, record, convert, and stream select audio and video codecs
 brew "ffmpeg"
 # GitHub command-line tool
 brew "gh"
-# Interpreter for PostScript and PDF
-brew "ghostscript"
-# Quickly rewrite git repository history
-brew "git-filter-repo"
+# Distributed revision control system
+brew "git"
 # Open source programming language to build simple/reliable/efficient software
 brew "go"
 # Agent multiplexer that lives in your terminal
 brew "herdr"
 # Terminal Markdown previewer with a GUI-like experience
 brew "leaf-markdown-viewer"
-# Library for quantum-safe cryptography
-brew "liboqs"
 # Next-gen compiler infrastructure
 brew "llvm"
+# Mac App Store command-line interface
+brew "mas"
 # Java-based project management
 brew "maven"
 # NCurses Disk Usage
 brew "ncdu"
 # Incremental parsing library
 brew "tree-sitter"
-# Parser generator tool
-brew "tree-sitter-cli"
 # Ambitious Vim-fork focused on extensibility and agility
 brew "neovim"
 # Port scanning utility for large networks
 brew "nmap"
-# Paste PNG into files
-brew "pngpaste"
 # Persistent key-value database, with built-in net interface
 brew "redis"
 # Search tool like grep and The Silver Searcher
 brew "ripgrep"
 # Organize software neatly under a single directory tree (e.g. /usr/local)
 brew "stow"
-# Terminal multiplexer
-brew "tmux"
-# Stripe CLI utility
-brew "stripe/stripe-cli/stripe", trusted: true
-# Supabase CLI
-brew "supabase/tap/supabase", trusted: true
-# Integrated CAD, CAM, CAE, and PCB software
-cask "autodesk-fusion"
-# Tool to flash OS images to SD cards & USB drives
-cask "balenaetcher"
-# 3D model slicing software for 3D printers, maintained by Bambu Lab
-cask "bambu-studio"
+# Postgres development platform
+brew "supabase"
+# Parser generator tool
+brew "tree-sitter-cli"
+# Tools for building Android applications
+cask "android-studio"
 # Anthropic's official Claude AI desktop app
 cask "claude"
 # Terminal-based AI coding assistant
 cask "claude-code@latest"
-# OpenAI's coding agent that runs in your terminal
-cask "codex"
 # Voice and text chat software
 cask "discord"
 # UI toolkit for building applications for mobile, web and desktop
 cask "flutter"
-# Set of tools to manage resources and applications hosted on Google Cloud
-cask "gcloud-cli"
+cask "font-fira-code"
+cask "font-jetbrains-mono-nerd-font"
 # Terminal emulator that uses platform-native UI and GPU acceleration
 cask "ghostty"
+# Web browser
+cask "google-chrome"
 # Customise mouse behavior
 cask "linearmouse"
-cask "noports"
-# Imaging utility to install operating systems to a microSD card
-cask "raspberry-pi-imager"
+# Make your devices invisible (https://noports.com)
+cask "atsign-foundation/tap/noports", trusted: true
+# Replacement for Docker Desktop
+cask "orbstack"
 # Move and resize windows using keyboard shortcuts or snap areas
 cask "rectangle"
 # Music streaming service
 cask "spotify"
-# Temperature monitoring, fan control and diagnostics
-cask "tg-pro"
 # Menu bar toolkit with keep-awake, system monitor and volume mixer
 cask "vorssaint"
+# Video communication and virtual meeting platform
+cask "zoom"
+# OpenJDK distribution from Azul
+cask "zulu@17"
+mas "TestFlight", id: 899247664
+mas "Xcode", id: 497799835
 npm "pnpm"
 npm "typescript"
